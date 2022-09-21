@@ -33,7 +33,7 @@ export default (...args) => Promise.all(args.map(object => new Promise(ready => 
     async $render() {
       const time = Date.now()
       if (typeof before === 'function') await before.call(this)
-      if (typeof render === 'function') this.$root.innerHTML = await render.call(this.$data)
+      if (typeof render === 'function') this.$root.innerHTML = await render.call(this.$data || this)
       if (typeof after === 'function') await after.call(this)
       return Date.now() - time
     }
@@ -58,7 +58,7 @@ export default (...args) => Promise.all(args.map(object => new Promise(ready => 
       }
       await this.$render()
       if (typeof connected === 'function') await connected.call(this)
-      ready()
+      ready(this)
     }
 
     async disconnectedCallback() {
