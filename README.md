@@ -4,9 +4,7 @@
 
 <br>
 
-Creaton - это модуль JavaScript для быстрого создания [Веб-компонентов](https://learn.javascript.ru/web-components). Модуль Creaton поддерживает все технологии, методы и свойства, предоставляемые стандартными Веб-компонентами.
-
-Поскольку Creaton является модулем JavaScript, перед его использованием необходимо установить любой разработочный сервер, такой, например, как [lite-server](https://www.npmjs.com/package/lite-server), с помощью команды:
+Creaton - это модуль JavaScript для быстрого создания [Веб-компонентов](https://learn.javascript.ru/web-components). Модуль Creaton поддерживает все технологии, методы и свойства, предоставляемые стандартными Веб-компонентами. Поскольку Creaton является модулем JavaScript, перед его использованием необходимо установить любой разработочный сервер, такой, например, как [lite-server](https://www.npmjs.com/package/lite-server), с помощью команды:
 
 ```
 npm install --global lite-server
@@ -210,7 +208,7 @@ export default {
   import Hello from './Hello.js'
   ```
 
-  Или добавить в свой рабочий каталог *app* файл конфигурации *bs-config.js* со следующим содержимым:
+  Или добавить в свой рабочий каталог *app*, файл конфигурации *bs-config.js* со следующим содержимым:
 
   ```js
   module.exports = {
