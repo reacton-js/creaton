@@ -88,6 +88,7 @@ lite-server
   // создать объект компонента Hello
   const Hello = {
     name: 'my-hello',
+    mode: 'closed',
     data() {
       return {
         message: 'Creaton',
@@ -169,6 +170,7 @@ lite-server
 // экспортировать объект компонента Hello
 export default {
   name: 'my-hello',
+  mode: 'closed',
   data() {
     return {
       message: 'Creaton',
