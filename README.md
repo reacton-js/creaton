@@ -90,12 +90,18 @@ lite-server
     name: 'my-hello',
     data() {
       return {
-        message: 'Creaton'
+        message: 'Creaton',
+        color: 'red'
       }
     },
     render() {
       return `
         <h1>Привет, ${ this.message }!</h1>
+        <style>
+          h1 {
+            color: ${ this.color }
+          }
+        </style>
       `
     }
   }
@@ -165,12 +171,18 @@ export default {
   name: 'my-hello',
   data() {
     return {
-      message: 'Creaton'
+      message: 'Creaton',
+      color: 'red'
     }
   },
   render() {
     return `
       <h1>Привет, ${ this.message }!</h1>
+      <style>
+        h1 {
+          color: ${ this.color }
+        }
+      </style>
     `
   }
 }
@@ -234,7 +246,8 @@ export default {
   // данные компонента
   data() {
     return {
-      message: 'Creaton'
+      message: 'Creaton',
+      color: 'red'
     }
   },
 
@@ -242,6 +255,11 @@ export default {
   render() {
     return `
       <h1>Привет, ${ this.message }!</h1>
+      <style>
+        h1 {
+          color: ${ this.color }
+        }
+      </style>
     `
   }
 }
@@ -259,6 +277,11 @@ export default {
 render() {
   return `
     <h1>Привет, ${ this.message }!</h1>
+    <style>
+      h1 {
+        color: ${ this.color }
+      }
+    </style>
   `
 }
 ```
