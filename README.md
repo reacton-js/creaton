@@ -271,9 +271,60 @@ export default {
 
 Метод **data()** возвращает объект, который содержит пользовательские данные и методы компонента. В примере выше, метод возвращает объект содержащий одно единственное пользовательское свойство **message**.
 
-Метод **render()** возвращает представление компонента в виде строки. На основе этого текстового содержимого, будет создано *HTML*-содержимое компонента.
+Метод **render()** возвращает представление компонента в виде строки. На основе этого текстового содержимого, будет создано *HTML*-содержимое компонента. Вместо функции возвращающей строковое представление, можно передать свойству **render** элемент [*Template*](https://learn.javascript.ru/template-element), как показано ниже:
 
-Данный метод выполняется в контексте объекта данных компонента, который возвращается методом **data()**, что позволяет обращаться к свойствам этого объекта данных в [шаблонных строках](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Template_literals), используя ключевое слово *this*, например:
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент Hello в приложение -->
+  <my-hello id="hello"></my-hello>
+
+  <!-- создать шаблон компонента Hello -->
+  <template id="tmpl-hello">
+    <h1>Привет, ${ this.message }!</h1>
+    <style>
+      h1 {
+        color: ${ this.color };
+      }
+    </style>
+  </template>
+  
+  <script type="module">
+    // импортировать модуль Creaton
+    import creaton from './creaton.mjs'
+
+    // получить шаблон компонента Hello
+    const tmplHello = document.querySelector('#tmpl-hello')
+
+    // создать объект компонента Hello
+    const Hello = {
+      name: 'my-hello',
+      mode: 'closed',
+      data() {
+        return {
+          message: 'Creaton',
+          color: 'red'
+        }
+      },
+      // передать в представление шаблон компонента Hello
+      render: tmplHello
+    }
+
+    // передать компонент Hello в модуль Creaton
+    creaton(Hello)
+  </script>
+</body>
+</html>
+```
+
+Данный метод (независимо от способа передачи представления) выполняется в контексте объекта данных компонента, который возвращается методом **data()**, что позволяет обращаться к свойствам этого объекта данных в [шаблонных строках](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Template_literals) или внутри элемента *Template*, используя ключевое слово *this*, например:
 
 ```js
 render() {
@@ -286,6 +337,19 @@ render() {
     </style>
   `
 }
+```
+
+или так:
+
+```html
+<template id="tmpl-hello">
+  <h1>Привет, ${ this.message }!</h1>
+  <style>
+    h1 {
+      color: ${ this.color };
+    }
+  </style>
+</template>
 ```
 
 Все перечисленные выше и рассмотренные далее методы могут быть асинхронными. Внесите изменения в файл модуля компонента:

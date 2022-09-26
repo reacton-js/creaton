@@ -3,10 +3,14 @@ export function event(...args) {
 }
 
 export default (...args) => Promise.all(args.map(object => new Promise(ready => {
-  const { name, extends:extend, mode, data, render,
+  let { name, extends:extend, mode, data, render,
     attributes, changed, before, after, connected, disconnected, adopted } = object,
     SUPERElement = extend ? Object.getPrototypeOf(document.createElement(extend)).constructor : HTMLElement
   
+  if (render instanceof HTMLTemplateElement) {
+    render = new Function(`return \`${render.innerHTML}\``)
+  }
+
   customElements.define(name, class extends SUPERElement {
     constructor() {
       super()
@@ -17,9 +21,11 @@ export default (...args) => Promise.all(args.map(object => new Promise(ready => 
     }
 
     async $render() {
-      const time = Date.now()
+      let time = Date.now()
       if (typeof before === 'function') await before.call(this)
-      if (typeof render === 'function') this.$root.innerHTML = await render.call(this.$data || this)
+      if (typeof render === 'function') {
+        this.$root.innerHTML = await render.call(this.$data || this)
+      }
       if (typeof after === 'function') await after.call(this)
       return Date.now() - time
     }
