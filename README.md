@@ -44,7 +44,7 @@ npm install --global lite-server
           <h1>Привет, ${ this.message }!</h1>
           <style>
             h1 {
-              color: ${ this.color }
+              color: ${ this.color };
             }
           </style>
         `
@@ -100,7 +100,7 @@ lite-server
         <h1>Привет, ${ this.message }!</h1>
         <style>
           h1 {
-            color: ${ this.color }
+            color: ${ this.color };
           }
         </style>
       `
@@ -182,7 +182,7 @@ export default {
       <h1>Привет, ${ this.message }!</h1>
       <style>
         h1 {
-          color: ${ this.color }
+          color: ${ this.color };
         }
       </style>
     `
@@ -259,7 +259,7 @@ export default {
       <h1>Привет, ${ this.message }!</h1>
       <style>
         h1 {
-          color: ${ this.color }
+          color: ${ this.color };
         }
       </style>
     `
@@ -281,7 +281,7 @@ render() {
     <h1>Привет, ${ this.message }!</h1>
     <style>
       h1 {
-        color: ${ this.color }
+        color: ${ this.color };
       }
     </style>
   `
