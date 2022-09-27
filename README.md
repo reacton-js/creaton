@@ -339,7 +339,7 @@ render() {
 }
 ```
 
-или так:
+Или так:
 
 ```html
 <template id="tmpl-hello">
