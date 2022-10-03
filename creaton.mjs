@@ -2,14 +2,10 @@ export function event(...args) {
   (this || document).dispatchEvent(new CustomEvent(...args))
 }
 
-export default (...args) => Promise.all(args.map(object => new Promise(ready => {
-  let { name, extends:extend, mode, data, render,
-    attributes, changed, before, after, connected, disconnected, adopted } = object,
-    SUPERElement = extend ? Object.getPrototypeOf(document.createElement(extend)).constructor : HTMLElement
-  
-  if (render instanceof HTMLTemplateElement) {
-    render = new Function(`return \`${render.innerHTML}\``)
-  }
+export default (...args) => Promise.all(args.map(config => new Promise(ready => {
+  const { name, extends:extend, mode, data, attributes, changed, before, after, connected, disconnected, adopted } = config,
+    render = config.render instanceof HTMLTemplateElement ? Function(`return\`${config.render.innerHTML}\``) : config.render,
+      SUPERElement = extend ? Object.getPrototypeOf(document.createElement(extend)).constructor : HTMLElement
 
   customElements.define(name, class extends SUPERElement {
     constructor() {
@@ -21,7 +17,7 @@ export default (...args) => Promise.all(args.map(object => new Promise(ready => 
     }
 
     async $render() {
-      let time = Date.now()
+      const time = Date.now()
       if (typeof before === 'function') await before.call(this)
       if (typeof render === 'function') {
         this.$root.innerHTML = await render.call(this.$data || this)
