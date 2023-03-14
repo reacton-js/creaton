@@ -1,6 +1,6 @@
 ![rigl](https://raw.githubusercontent.com/reacton-js/creaton/main/logo.png)
 
-[github](https://github.com/reacton-js/creaton) | [npmjs](https://www.npmjs.com/package/creaton-js) | [module](https://raw.githubusercontent.com/reacton-js/creaton/main/creaton.mjs)
+[GitHub](https://github.com/reacton-js/creaton) | [NpmJS](https://www.npmjs.com/package/creaton-js) | [Creaton⤵️](https://raw.githubusercontent.com/reacton-js/creaton/main/creaton.mjs)
 
 <br>
 
