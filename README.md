@@ -38,10 +38,10 @@ export default {
 <br>
 
 1. [Quick start](#quick-start)
-2. ~~[Component object](#component-object)~~
-3. ~~[Expressions](#expressions)~~
-4. ~~[Cycles](#cycles)~~
-5. ~~[Custom events](#custom-events)~~
+2. [Component object](#component-object)
+3. ~~[Cycles](#cycles)~~
+4. ~~[Custom events](#custom-events)~~
+5. ~~[Features work](#features-work)~~
 
 <br>
 <hr>
@@ -181,6 +181,263 @@ lite-server
 ```
 
 This will open a default browser window displaying the welcome message shown above.
+
+<br>
+<br>
+<h2 id="component-object">Component object</h2>
+
+<br>
+
+Each Embedded and Modular component object must contain a required name property that defines the **name** of the component, as shown below:
+
+```js
+const Hello = {
+  name: 'r-hello'
+}
+```
+
+<br>
+
+The **data()** method must return an object with user data (properties and methods) of the component:
+
+```js
+data() {
+  return {
+    message: 'Creaton',
+    printHello() {
+      return 'Hello, World!'
+    }
+  }
+}
+```
+
+This method can be asynchronous. In the example below, the **message** custom property simulates receiving data from the server:
+
+```js
+async data() {
+  const message = await new Promise(ok => setTimeout(() => ok('Creaton'), 1000))
+
+  return {
+    message
+  }
+}
+```
+
+<br>
+
+For Embedded and Modular components, the **render()** method returns the component's HTML content as a [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals):
+
+```js
+render() {
+  return `
+    <h1>Hello, ${ this.message }!</h1>
+    
+    <style>
+      h1 {
+        color: ${ this.mainColor };
+      }
+    </style>
+  `
+}
+```
+
+Inside template literals, you can use [substitutions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#string_interpolation) to expose expressions:
+
+```js
+${ 5 + 6 }
+```
+
+and user data by adding the *this* keyword before their name:
+
+```js
+${ this.message }
+```
+
+<br>
+
+By default, all components are created without [Shadow DOM](https://javascript.info/shadow-dom). The mode property determines the [level of encapsulation](https://javascript.info/shadow-dom#shadow-tree) for the component to use [local styles](https://javascript.info/shadow-dom-style) and can be either "open" or "closed":
+
+```js
+mode: 'open'
+```
+
+<br>
+
+The **extends** property allows you to [mount the component](https://javascript.info/custom-elements#customized-built-in-elements) into a standard HTML element:
+
+```js
+extends: 'header'
+```
+
+The element into which the component is mounted must contain the ***is*** attribute with a value corresponding to the name of the component that is mounted into it:
+
+```html
+<header is="r-hello"></header>
+```
+
+<br>
+
+The **attributes** property contains an array with attribute names, when changed, the **changed()** method will be called, for example:
+
+```js
+attributes: ['title'],
+
+changed(name, oldValue, newValue) {
+  console.log(name, oldValue, newValue)
+}
+```
+
+Tracked attributes are a Web Component technology, and the **changed()** method is a shorthand for the [attributeChangedCallback()](https://javascript.info/custom-elements) method.
+
+Add the ***id*** and ***title*** attributes to the Hello component's mount element in the *index.html* file as shown below:
+
+```html
+<r-hello id="hello" title="Hello"></r-hello>
+```
+
+The ***id*** attribute is used for quick access to the component in the browser console. Now open this console and enter the command:
+
+```
+hello.title = 'Bye'
+```
+
+After pressing the Enter key, the **changed()** method will print the following line to the console:
+
+```
+title Hello Bye
+```
+
+<br>
+
+The **connected()**, **disconnected()** and **adopted()** methods are shorthand analogs of the [connectedCallback(), disconnectedCallback() and adoptedCallback()](https://javascript.info/custom-elements) methods.
+
+They are called when a component is added to the document - the **connected()** method; removing a component from a document - the **disconnected()** method; and when moving the component to a new document, the **adopted()** method.
+
+The most commonly used methods include the **connected()** method, which allows you to access the HTML content of the component after it has been added to the [DOM](https://javascript.info/dom-nodes):
+
+```js
+connected() {
+  console.log(this.$('h1'))
+}
+```
+
+In this example, the selected H1 element is displayed on the browser console using the **$()** helper method, which is available in the **connected()** method through the *this* keyword. This method is a shorthand analog of the [querySelector()](https://javascript.info/searching-elements-dom#querySelector) method.
+
+The second helper method is called **$$()** and is shorthand for the [querySelectorAll()](https://javascript.info/searching-elements-dom#querySelectorAll) method, as shown below:
+
+```js
+connected() {
+  console.log(this.$$('h1')[0])
+}
+```
+
+To access user data, the *this* keyword is used within the methods of the component object, since all of these methods are executed in the context of the component's data object:
+
+```js
+connected() {
+  console.log(this.message)
+}
+```
+
+If you need to access the component itself, then the special **$host** property is used, which refers to the component's mount element:
+
+```js
+connected() {
+  console.log(this.$host)
+}
+```
+
+In addition, all the methods discussed above can be asynchronous.
+
+In the example below, the **message** custom property is set to a new value one second after the component is added to the document:
+
+```js
+async connected() {
+  // assign a new value to a property
+  this.message = await new Promise(ok => setTimeout(() => ok('Quick Components'), 1000))
+
+  // update component DOM
+  this.$render()
+}
+```
+
+In this example, after assigning a new value to the **message** property, a special method **$render()** is called, which completely rewrites the DOM of the component. That is, at the internal level, it calls the previously discussed **render()** method.
+
+This means that any events prescribed in the **connected()** elements of the events:
+
+```js
+connected() {
+  this.$$('h1')[0].addEventListener('click', () => console.log('Hello'))
+}
+```
+
+completely disappear, since the marking of the component rewrites.
+
+The special method **$render()** is most useful when components acting as loops and user events work together, as will be demonstrated later.
+
+<br>
+
+The **before()** and **after()** methods are called *Before* and *After* updating the DOM component, i.e. calling a special method **$render()**, for example:
+
+```js
+before() {
+  console.time('Update')
+},
+
+after() {
+  console.timeEnd('Update')
+}
+```
+
+This example shows how much time the component is updated.
+
+<br>
+
+The last property that can be defined in the object of any component is called **mixins** and allows you to create properties and methods common to all components of the same name:
+
+```js
+mixins: {
+  printMessage() {
+    return this.message
+  }
+}
+```
+
+Now the **printMessage()** method will be available to all Hello components. To access the properties and methods of a mixin, a special **$mixins** property is used inside the component markup, after which, through a dot, the name of the requested method or property is indicated:
+
+```js
+render() {
+  return `
+    <h1>Hello, ${ this.$mixins.printMessage() }!</h1>
+  `
+}
+```
+
+Impurities work in the following way. First, the properties are queried on the local **mixins** object we created above, then the property is queried on the global mixins object that we will create next, and finally, the property is queried on the component's data object.
+
+For this reason, inside the **printMessage()** method, we were able to access the **message** custom property via the *this* keyword, as shown below:
+
+```js
+printMessage() {
+  return this.message
+}
+```
+
+In order for the created methods and properties to be available to all the component, and not just the ones of the same name, it is necessary to define a global mixin for them through the Creaton function and its **mixins** property.
+
+This must be done before components are passed to this function to define them in the application:
+
+```js
+// global admixture
+Creaton.mixins = {
+  printMessage() {
+    return this.message
+  }
+}
+
+// pass Hello and Bye components to Creaton library
+Creaton(Hello, Bye)
+```
 
 <br>
 <br>

@@ -45,7 +45,7 @@
       async $render() {
         // если в объекте компонента была определена функция "before"
         if (typeof before === 'function') {
-          await before.call(this) // вызвать эту функцию
+          await before.call(this.$data) // вызвать эту функцию
         }
 
         // если в объекте компонента была определена функция "render"
@@ -56,7 +56,7 @@
 
         // если в объекте компонента была определена функция "after"
         if (typeof after === 'function') {
-          await after.call(this) // вызвать эту функцию
+          await after.call(this.$data) // вызвать эту функцию
         }
       }
 
@@ -108,7 +108,7 @@
 
         // если в объекте компонента была определена функция "connected"
         if (typeof connected === 'function') {
-          await connected.call(this) // вызвать эту функцию
+          await connected.call(this.$data) // вызвать эту функцию
         }
       }
 
