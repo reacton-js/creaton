@@ -8,7 +8,7 @@
 
 <br>
 
-Creaton is a JavaScript plugin for quickly creating [Web Components](https://javascript.info/web-components). The plugin supports all technologies, methods and properties that are provided by standard Web Components.
+Creaton is a JavaScript plugin for quickly creating [Web Components](https://javascript.info/web-components). The plugin supports all technologies, methods and properties such as [slots](https://javascript.info/slots-composition) and [Shadow DOM](https://javascript.info/shadow-dom) that are provided by standard Web Components.
 
 Below is an example of a simple modular component:
 
@@ -39,7 +39,7 @@ export default {
 
 1. [Quick start](#quick-start)
 2. [Component object](#component-object)
-3. ~~[Cycles](#cycles)~~
+3. [Cycles](#cycles)
 4. ~~[Custom events](#custom-events)~~
 5. ~~[Features work](#features-work)~~
 
@@ -253,7 +253,7 @@ and user data by adding the *this* keyword before their name:
 ${ this.message }
 ```
 
-In addition to a template literal, you can pass a reference to a [TEMPLATE](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) element to the **render()** method, as shown below:
+In addition to the method that returns a template literal, you can pass a reference to the [TEMPLATE](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) element to the **render** property, as shown below:
 
 ```html
 <!DOCTYPE html>
@@ -501,6 +501,59 @@ Creaton.mixins = {
 
 // pass Hello and Bye components to Creaton library
 Creaton(Hello, Bye)
+```
+
+<br>
+<br>
+<h2 id="cycles">Cycles</h2>
+
+<br>
+
+To output arrays in [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), use the [map()](https://javascript.info/array-methods#map) and [join()](https://javascript.info/array-methods#split-and-join) methods, as shown below:
+
+```js
+const Hello = {
+  name: 'r-hello',
+  data() {
+    return {
+      colors: ['red', 'green', 'blue']
+    }
+  },
+  render() {
+    return `
+      <ul>
+        ${ this.colors.map(col => `<li>${ col }</li>`).join('') }
+      </ul>
+    `
+  }
+}
+```
+
+The **join()** method is passed an empty string to remove commas between the elements of the array to be displayed.
+
+<br>
+
+Similarly, you can display objects by wrapping them first in an array:
+
+```js
+const Hello = {
+  name: 'r-hello',
+  data() {
+    return {
+      user: {
+        name: 'Leanne Graham',
+        age: 28
+      }
+    }
+  },
+  render() {
+    return `
+      <ul>
+        ${ [this.user].map(prop => `<li>Name: ${ prop.name } <br> Age: ${ prop.age }</li>`).join('') }
+      </ul>
+    `
+  }
+}
 ```
 
 <br>

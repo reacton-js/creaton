@@ -8,7 +8,7 @@
 
 <br>
 
-Creaton - это плагин JavaScript для быстрого создания [Веб-компонентов](https://learn.javascript.ru/web-components). Плагин поддерживает все технологии, методы и свойства, которые предоставляются стандартными Веб-компонентами.
+Creaton - это плагин JavaScript для быстрого создания [Веб-компонентов](https://learn.javascript.ru/web-components). Плагин поддерживает все технологии, методы и свойства, такие, например, как [слоты](https://learn.javascript.ru/slots-composition) и [Теневой DOM](https://learn.javascript.ru/shadow-dom), которые предоставляются стандартными Веб-компонентами.
 
 Ниже представлен пример простого модульного компонента:
 
@@ -39,7 +39,7 @@ export default {
 
 1. [Быстрый старт](#quick-start)
 2. [Объект компонента](#component-object)
-3. ~~[Циклы](#cycles)~~
+3. [Циклы](#cycles)
 4. ~~[Пользовательские события](#custom-events)~~
 5. ~~[Особенности работы](#features-work)~~
 
@@ -253,7 +253,7 @@ ${ 5 + 6 }
 ${ this.message }
 ```
 
-Кроме шаблонной строки, методу **render()** можно передать ссылку на элемент [TEMPLATE](https://developer.mozilla.org/ru/docs/Web/HTML/Element/template), как показано ниже:
+Кроме метода возвращающего шаблонную строку, свойству **render** можно передать ссылку на элемент [TEMPLATE](https://developer.mozilla.org/ru/docs/Web/HTML/Element/template), как показано ниже:
 
 ```html
 <!DOCTYPE html>
@@ -501,6 +501,59 @@ Creaton.mixins = {
 
 // передать компоненты Hello и Bye в библиотеку Creaton
 Creaton(Hello, Bye)
+```
+
+<br>
+<br>
+<h2 id="cycles">Циклы</h2>
+
+<br>
+
+Для вывода массивов в [шаблонных строках](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Template_literals), применяются методы [map()](https://learn.javascript.ru/array-methods#map) и [join()](https://learn.javascript.ru/array-methods#split-i-join), как показано ниже:
+
+```js
+const Hello = {
+  name: 'r-hello',
+  data() {
+    return {
+      colors: ['красный', 'зелёный', 'синий']
+    }
+  },
+  render() {
+    return `
+      <ul>
+        ${ this.colors.map(col => `<li>${ col }</li>`).join('') }
+      </ul>
+    `
+  }
+}
+```
+
+Методу **join()** передаётся пустая строка для удаления запятых между элементами отображаемого массива.
+
+<br>
+
+Аналогичным образом можно выводить и объекты, обернув их предварительно в массив:
+
+```js
+const Hello = {
+  name: 'r-hello',
+  data() {
+    return {
+      user: {
+        name: 'Дмитрий Петров',
+        age: 28
+      }
+    }
+  },
+  render() {
+    return `
+      <ul>
+        ${ [this.user].map(prop => `<li>Имя: ${ prop.name } <br> Возраст: ${ prop.age }</li>`).join('') }
+      </ul>
+    `
+  }
+}
 ```
 
 <br>
