@@ -40,8 +40,9 @@ export default {
 1. [Быстрый старт](#quick-start)
 2. [Объект компонента](#component-object)
 3. [Циклы](#cycles)
-4. ~~[Пользовательские события](#custom-events)~~
-5. ~~[Особенности работы](#features-work)~~
+4. [Слоты](#slots)
+5. ~~[Пользовательские события](#custom-events)~~
+6. ~~[Особенности работы](#features-work)~~
 
 <br>
 <hr>
@@ -554,6 +555,63 @@ const Hello = {
     `
   }
 }
+```
+
+<br>
+<br>
+<h2 id="slots">Слоты</h2>
+
+<br>
+
+Для работы со [слотами](https://learn.javascript.ru/slots-composition), компоненту необходимо добавить [Теневой DOM](https://learn.javascript.ru/shadow-dom) с помощью свойства **mode**, как показано ниже:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент Hello -->
+  <r-hello>
+    <span slot="username">Дмитрий Петров</span>
+    <span slot="age">28</span>
+    <span>Трудолюбивый</span>
+  </r-hello>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // создать объект компонента Hello
+    const Hello = {
+      name: 'r-hello',
+      mode: 'open', // добавить компоненту открытый Теневой DOM
+      render() {
+        return `
+          <div>
+            Имя: <slot name="username"></slot>
+          </div>
+          
+          <div>
+            Возраст: <slot name="age"></slot>
+          </div>
+
+          <div>
+            Характер: <slot><slot>
+          </div>
+        `
+      }
+    }
+
+    // передать объект компонента Hello в плагин Creaton
+    Creaton(Hello)
+  </script>
+</body>
+</html>
 ```
 
 <br>

@@ -40,8 +40,9 @@ export default {
 1. [Quick start](#quick-start)
 2. [Component object](#component-object)
 3. [Cycles](#cycles)
-4. ~~[Custom events](#custom-events)~~
-5. ~~[Features work](#features-work)~~
+4. [Slots](#slots)
+5. ~~[Custom events](#custom-events)~~
+6. ~~[Features work](#features-work)~~
 
 <br>
 <hr>
@@ -554,6 +555,63 @@ const Hello = {
     `
   }
 }
+```
+
+<br>
+<br>
+<h2 id="slots">Slots</h2>
+
+<br>
+
+To work with [slots](https://javascript.info/slots-composition), the component needs to add a [Shadow DOM](https://javascript.info/shadow-dom) using the **mode** property, as shown below:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the Hello component -->
+  <r-hello>
+    <span slot="username">Leanne Graham</span>
+    <span slot="age">28</span>
+    <span>Hardworking</span>
+  </r-hello>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create a Hello component object
+    const Hello = {
+      name: 'r-hello',
+      mode: 'open', // add an open Shadow DOM for the component
+      render() {
+        return `
+          <div>
+            Name: <slot name="username"></slot>
+          </div>
+          
+          <div>
+            Age: <slot name="age"></slot>
+          </div>
+
+          <div>
+            Character: <slot><slot>
+          </div>
+        `
+      }
+    }
+
+    // pass Hello component object to Creaton plugin
+    Creaton(Hello)
+  </script>
+</body>
+</html>
 ```
 
 <br>
