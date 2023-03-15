@@ -253,6 +253,70 @@ and user data by adding the *this* keyword before their name:
 ${ this.message }
 ```
 
+In addition to a template literal, you can pass a reference to a [TEMPLATE](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) element to the **render()** method, as shown below:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the Hello component -->
+  <r-hello></r-hello>
+
+  <!-- Hello component template -->
+  <template id="template-hello">
+    <h1>Hello, ${ this.message }!</h1>
+          
+    <style>
+      h1 {
+        color: ${ this.mainColor };
+      }
+    </style>
+  </template>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create a Hello component object
+    const Hello = {
+      name: 'r-hello',
+      data() {
+        return {
+          message: 'Creaton',
+          mainColor: 'red'
+        }
+      },
+      // pass a reference to the component template
+      render: document.querySelector('#template-hello')
+    }
+
+    // pass Hello component object to Creaton plugin
+    Creaton(Hello)
+  </script>
+</body>
+</html>
+```
+
+All HTML content of the TEMPLATE element will be wrapped in a template literal. This means that the backticks «`» must be escaped inside this element, for example:
+
+```html
+<template id="template-hello">
+  <h1>Hello, \`${ this.message }\`!</h1>
+        
+  <style>
+    h1 {
+      color: ${ this.mainColor };
+    }
+  </style>
+</template>
+```
+
 <br>
 
 By default, all components are created without [Shadow DOM](https://javascript.info/shadow-dom). The mode property determines the [level of encapsulation](https://javascript.info/shadow-dom#shadow-tree) for the component to use [local styles](https://javascript.info/shadow-dom-style) and can be either "open" or "closed":

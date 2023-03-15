@@ -253,6 +253,70 @@ ${ 5 + 6 }
 ${ this.message }
 ```
 
+Кроме шаблонной строки, методу **render()** можно передать ссылку на элемент [TEMPLATE](https://developer.mozilla.org/ru/docs/Web/HTML/Element/template), как показано ниже:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент Hello -->
+  <r-hello></r-hello>
+
+  <!-- шаблон компонента Hello -->
+  <template id="template-hello">
+    <h1>Привет, ${ this.message }!</h1>
+          
+    <style>
+      h1 {
+        color: ${ this.mainColor };
+      }
+    </style>
+  </template>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // создать объект компонента Hello
+    const Hello = {
+      name: 'r-hello',
+      data() {
+        return {
+          message: 'Creaton',
+          mainColor: 'red'
+        }
+      },
+      // передать ссылку на шаблон компонента
+      render: document.querySelector('#template-hello')
+    }
+
+    // передать объект компонента Hello в плагин Creaton
+    Creaton(Hello)
+  </script>
+</body>
+</html>
+```
+
+Всё HTML-содержимое элемента TEMPLATE будет обёрнуто в шаблонную строку. Это означает, что внутри данного элемента необходимо экранировать символы обратных кавычек «`», например:
+
+```html
+<template id="template-hello">
+  <h1>Привет, \`${ this.message }\`!</h1>
+        
+  <style>
+    h1 {
+      color: ${ this.mainColor };
+    }
+  </style>
+</template>
+```
+
 <br>
 
 По умолчанию, все компоненты создаются без [Теневого DOM](https://learn.javascript.ru/shadow-dom). Свойство **mode** определяет [уровень инкапсуляции](https://learn.javascript.ru/shadow-dom#tenevoe-derevo) компонента для использования [локальных стилей](https://learn.javascript.ru/shadow-dom-style) и может иметь значение либо "open", либо значение "closed":
