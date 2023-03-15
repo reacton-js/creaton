@@ -534,7 +534,7 @@ const Hello = {
 
 <br>
 
-Аналогичным образом можно выводить и объекты, обернув их предварительно в массив:
+Аналогичным образом можно выводить и объекты, используя для этого метод [Object.keys()](https://learn.javascript.ru/keys-values-entries), например:
 
 ```js
 const Hello = {
@@ -550,7 +550,7 @@ const Hello = {
   render() {
     return `
       <ul>
-        ${ [this.user].map(prop => `<li>Имя: ${ prop.name } <br> Возраст: ${ prop.age }</li>`).join('') }
+        ${ Object.keys(this.user).map(key => `<li>${ key }: ${ this.user[key] }</li>`).join('') }
       </ul>
     `
   }

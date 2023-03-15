@@ -534,7 +534,7 @@ The **join()** method is passed an empty string to remove commas between the ele
 
 <br>
 
-Similarly, you can display objects by wrapping them first in an array:
+Similarly, you can display objects using the [Object.keys()](https://javascript.info/keys-values-entries) method, for example:
 
 ```js
 const Hello = {
@@ -550,7 +550,7 @@ const Hello = {
   render() {
     return `
       <ul>
-        ${ [this.user].map(prop => `<li>Name: ${ prop.name } <br> Age: ${ prop.age }</li>`).join('') }
+        ${ Object.keys(this.user).map(key => `<li>${ key }: ${ this.user[key] }</li>`).join('') }
       </ul>
     `
   }
