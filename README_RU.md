@@ -500,7 +500,7 @@ Creaton.mixins = {
   }
 }
 
-// передать компоненты Hello и Bye в библиотеку Creaton
+// передать компоненты Hello и Bye в плагин Creaton
 Creaton(Hello, Bye)
 ```
 

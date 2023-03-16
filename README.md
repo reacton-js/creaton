@@ -500,7 +500,7 @@ Creaton.mixins = {
   }
 }
 
-// pass Hello and Bye components to Creaton library
+// pass Hello and Bye components to Creaton plugin
 Creaton(Hello, Bye)
 ```
 
