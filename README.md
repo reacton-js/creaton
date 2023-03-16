@@ -42,7 +42,7 @@ export default {
 3. [Cycles](#cycles)
 4. [Slots](#slots)
 5. [Custom events](#custom-events)
-6. ~~[Features work](#features-work)~~
+6. [Features work](#features-work)
 
 <br>
 <hr>
@@ -854,6 +854,180 @@ you need to get the event element from the global mixin:
 // get event element eventReverse
 const eventReverse = this.$mixins.eventReverse
 ```
+
+<br>
+<br>
+<h2 id="features-work">Features work</h2>
+
+<br>
+
+All methods of a component object  are executed in the context of its data object. Make changes to the index.html file, as shown below:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the Hello component -->
+  <r-hello id="hello" data-title="Hello"></r-hello>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create a Hello component object
+    const Hello = {
+      name: 'r-hello',
+      data() {
+        console.log('data: ', this)
+
+        return {
+          id: 'ok',
+          printIdData() {
+            console.log('printIdData: ', this)
+            return this.id
+          },
+          printIdAttr() {
+            console.log('printIdAttr: ', this)
+            return this.$host.id
+          },
+          printTitle() {
+            console.log('printTitle: ', this)
+            return this.dataset.title
+          }
+        }
+      },
+      render() {
+        return `
+          <h1>${ this.id }</h1>
+          <h1>${ this.$host.id }</h1>
+          <h1>${ this.$host.dataset.title }</h1>
+
+          <h2>${ this.printIdData() }</h2>
+          <h2>${ this.printIdAttr() }</h2>
+          <h2>${ this.printTitle() }</h2>
+        `
+      },
+      connected() {
+        console.log('connected: ', this)
+      }
+    }
+
+    // pass Hello component object to Creaton plugin
+    Creaton(Hello)
+  </script>
+</body>
+</html>
+```
+
+As you can see from this example, the **$host** special property is used in the substitutions to get the value of the ***id*** and ***data-title*** attributes of the component's mount element:
+
+```html
+<h1>${ this.$host.id }</h1>
+<h1>${ this.$host.dataset.title }</h1>
+```
+
+However, accessing the value of the ***data-title*** attribute in the **printTitle()** method occurs without using the **$host** special property. Instead, the standard property of HTML [dataset](https://javascript.info/dom-attributes-and-properties#non-standard-attributes-dataset) elements is applied:
+
+```js
+printTitle() {
+  console.log('printTitle: ', this)
+  return this.dataset.title
+}
+```
+
+But the **dataset** property is not in the custom properties definition of the component's data object. The data object has only one **id** property and three methods:
+
+```js
+return {
+  id: 'ok',
+  printIdData() {
+    console.log('printIdData: ', this)
+    return this.id
+  },
+  printIdAttr() {
+    console.log('printIdAttr: ', this)
+    return this.$host.id
+  },
+  printTitle() {
+    console.log('printTitle: ', this)
+    return this.dataset.title
+  }
+}
+```
+
+The component's data object is a [proxy](https://javascript.info/proxy) and works as follows: first, the property is looked up in the component's data object, and if there is no such property, then the search continues in the component itself.
+
+For this reason, the method:
+
+```js
+printIdData() {
+  console.log('printIdData: ', this)
+  return this.id
+}
+```
+
+and substitution:
+
+```html
+<h1>${ this.id }</h1>
+```
+
+will return the value "ok" of the custom **id** property.
+
+To access the ***id*** attribute of a component's mount element, use the special **$host** property, which always refers to the component:
+
+```js
+printIdAttr() {
+  console.log('printIdAttr: ', this)
+  return this.$host.id
+}
+```
+
+```html
+<h1>${ this.$host.id }</h1>
+```
+
+If the component did not have a custom **id** property that matches the name of the attribute, then to get the value of this attribute, one could do without the special **$host** property:
+
+```js
+printIdAttr() {
+  console.log('printIdAttr: ', this)
+  return this.id
+}
+```
+
+This is exactly what happens in the method:
+
+```js
+printTitle() {
+  console.log('printTitle: ', this)
+  return this.dataset.title
+}
+```
+
+Since the component data object does not have a custom **dataset** property, the search occurs in the component itself, which has such a property.
+
+However, in the substitution:
+
+```html
+<h1>${ this.$host.dataset.title }</h1>
+```
+
+the **$host** property still applies.
+
+It can be simply removed:
+
+```html
+<h1>${ this.dataset.title }</h1>
+```
+
+and the result will not change.
 
 <br>
 <br>

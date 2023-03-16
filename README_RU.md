@@ -42,7 +42,7 @@ export default {
 3. [Циклы](#cycles)
 4. [Слоты](#slots)
 5. [Пользовательские события](#custom-events)
-6. ~~[Особенности работы](#features-work)~~
+6. [Особенности работы](#features-work)
 
 <br>
 <hr>
@@ -854,6 +854,180 @@ const { eventReverse } = await import('./Events.js')
 // получить элемент события eventReverse
 const eventReverse = this.$mixins.eventReverse
 ```
+
+<br>
+<br>
+<h2 id="features-work">Особенности работы</h2>
+
+<br>
+
+Все методы объекта компонента, выполняются в контексте его объекта данных. Внесите изменения в файл *index.html*, как показано ниже:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент Hello -->
+  <r-hello id="hello" data-title="Hello"></r-hello>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // создать объект компонента Hello
+    const Hello = {
+      name: 'r-hello',
+      data() {
+        console.log('data: ', this)
+
+        return {
+          id: 'ok',
+          printIdData() {
+            console.log('printIdData: ', this)
+            return this.id
+          },
+          printIdAttr() {
+            console.log('printIdAttr: ', this)
+            return this.$host.id
+          },
+          printTitle() {
+            console.log('printTitle: ', this)
+            return this.dataset.title
+          }
+        }
+      },
+      render() {
+        return `
+          <h1>${ this.id }</h1>
+          <h1>${ this.$host.id }</h1>
+          <h1>${ this.$host.dataset.title }</h1>
+
+          <h2>${ this.printIdData() }</h2>
+          <h2>${ this.printIdAttr() }</h2>
+          <h2>${ this.printTitle() }</h2>
+        `
+      },
+      connected() {
+        console.log('connected: ', this)
+      }
+    }
+
+    // передать объект компонента Hello в плагин Creaton
+    Creaton(Hello)
+  </script>
+</body>
+</html>
+```
+
+Как видно из этого примера, что для получения значения атрибутов ***id*** и ***data-title*** элемента монтирования компонента, в подстановках применяется специальное свойство **$host**:
+
+```html
+<h1>${ this.$host.id }</h1>
+<h1>${ this.$host.dataset.title }</h1>
+```
+
+Однако, доступ к значению атрибута ***data-title*** в методе **printTitle()**, происходит без использования специального свойства **$host**. Вместо этого, применяется стандартное свойство HTML-элементов [dataset](https://learn.javascript.ru/dom-attributes-and-properties#nestandartnye-atributy-dataset):
+
+```js
+printTitle() {
+  console.log('printTitle: ', this)
+  return this.dataset.title
+}
+```
+
+Но свойства **dataset** нет в определении пользовательских свойств объекта данных компонента. У объекта данных имеется всего одно свойство **id** и три метода:
+
+```js
+return {
+  id: 'ok',
+  printIdData() {
+    console.log('printIdData: ', this)
+    return this.id
+  },
+  printIdAttr() {
+    console.log('printIdAttr: ', this)
+    return this.$host.id
+  },
+  printTitle() {
+    console.log('printTitle: ', this)
+    return this.dataset.title
+  }
+}
+```
+
+Объект данных компонента является [прокси](https://learn.javascript.ru/proxy) и работает следующим образом: сначала свойство ищется в объекте данных компонента и если такого свойства там нет, то поиск продолжается в самом компоненте.
+
+По этой причине, метод:
+
+```js
+printIdData() {
+  console.log('printIdData: ', this)
+  return this.id
+}
+```
+
+и подстановка:
+
+```html
+<h1>${ this.id }</h1>
+```
+
+вернут значение "ok" пользовательского свойства **id**.
+
+Для получения доступа к атрибуту ***id*** элемента монтирования компонента, применяется специальное свойство **$host**, которое всегда ссылается на компонент:
+
+```js
+printIdAttr() {
+  console.log('printIdAttr: ', this)
+  return this.$host.id
+}
+```
+
+```html
+<h1>${ this.$host.id }</h1>
+```
+
+Если бы у компонента не было пользовательского свойства **id**, совпадающего с названием атрибута, то для получения значения этого атрибута, можно было бы обойтесь без специального свойства **$host**:
+
+```js
+printIdAttr() {
+  console.log('printIdAttr: ', this)
+  return this.id
+}
+```
+
+Именно это и происходит в методе:
+
+```js
+printTitle() {
+  console.log('printTitle: ', this)
+  return this.dataset.title
+}
+```
+
+Поскольку у объекта данных компонента отсутствует пользовательское свойство **dataset**, то поиск происходит в самом компоненте, у которого такое свойство имеется.
+
+Однако, в подстановке:
+
+```html
+<h1>${ this.$host.dataset.title }</h1>
+```
+
+свойство **$host** по-прежнему применяется.
+
+Его можно просто удалить:
+
+```html
+<h1>${ this.dataset.title }</h1>
+```
+
+и результат не изменится.
 
 <br>
 <br>
