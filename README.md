@@ -41,7 +41,7 @@ export default {
 2. [Component object](#component-object)
 3. [Cycles](#cycles)
 4. [Slots](#slots)
-5. ~~[Custom events](#custom-events)~~
+5. [Custom events](#custom-events)
 6. ~~[Features work](#features-work)~~
 
 <br>
@@ -612,6 +612,247 @@ To work with [slots](https://javascript.info/slots-composition), the component n
   </script>
 </body>
 </html>
+```
+
+<br>
+<br>
+<h2 id="custom-events">Custom events</h2>
+
+<br>
+
+For interaction between different components, an improved mechanism of [custom events](https://javascript.info/dispatch-events) is used. This mechanism involves the use of the **event()** method of the Creaton plugin and the special **$event()** method that is available in every component.
+
+Create an *Events.js* file in the *app* directory with the following content:
+
+```js
+// export event element eventReverse
+export const eventReverse = new Creaton.event()
+```
+
+When the Creaton plugin's **event()** method is called as a constructor, it returns a new [document fragment](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment) that is the source and receiver of custom events.
+
+Now make changes to the *index.html* file, as shown below:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the Hello component -->
+  <r-hello></r-hello>
+
+  <!-- mount the Colors component -->
+  <r-colors></r-colors>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create a Hello component object
+    const Hello = {
+      name: 'r-hello',
+      render() {
+        return `
+          <button id="button-reverse">Reverse array</button>
+        `
+      },
+      async connected() {
+        // import event element eventReverse
+        const { eventReverse } = await import('./Events.js')
+
+        // add a "click" event handler for the button
+        this.$('#button-reverse').addEventListener('click', () => {
+          // trigger "reverse-colors" event on element eventReverse
+          this.$event(eventReverse, 'reverse-colors')
+        })
+      }
+    }
+
+    // create a Colors component object
+    const Colors = {
+      name: 'r-colors',
+      data() {
+        return {
+          arr: ['red', 'green', 'blue']
+        }
+      },
+      render() {
+        return `
+          <ul>
+            ${ this.arr.map(item => `<li>${ item }</li>`).join('') }
+          </ul>
+        `
+      },
+      async connected() {
+        // import event element eventReverse
+        const { eventReverse } = await import('./Events.js')
+
+        // add the "reverse-colors" event handler to the eventReverse element
+        eventReverse.addEventListener('reverse-colors', () => {
+          this.arr.reverse() // reverse array
+
+          // update component DOM
+          this.$render()
+        })
+      }
+    }
+
+    // pass Hello and Colors component objects to Creaton plugin
+    Creaton(Hello, Colors)
+  </script>
+</body>
+</html>
+```
+
+In this example, an asynchronous **connected()** method is created in the Colors component object. Inside this method, the event element created at the previous step is imported from an external file and a handler is assigned to it:
+
+```js
+async connected() {
+  // import event element eventReverse
+  const { eventReverse } = await import('./Events.js')
+
+  // add the "reverse-colors" event handler to the eventReverse element
+  eventReverse.addEventListener('reverse-colors', () => {
+    this.arr.reverse() // reverse array
+
+    // update component DOM
+    this.$render()
+  })
+}
+```
+
+<br>
+
+Inside the Hello component object, the **connected()** method is also asynchronous so that the outer event element can be imported:
+
+```js
+async connected() {
+  // import event element eventReverse
+  const { eventReverse } = await import('./Events.js')
+
+  // add a "click" event handler for the button
+  this.$('#button-reverse').addEventListener('click', () => {
+    // trigger "reverse-colors" event on element eventReverse
+    this.$event(eventReverse, 'reverse-colors')
+  })
+}
+```
+
+In addition, the *"click"* event handler has been added to the button, inside which, using the special **$event()** method, the *"reverse-colors"* event is called for the imported element when the button is clicked, as shown below:
+
+```js
+// add a "click" event handler for the button
+this.$('#button-reverse').addEventListener('click', () => {
+  // trigger "reverse-colors" event on element eventReverse
+  this.$event(eventReverse, 'reverse-colors')
+})
+```
+
+The first argument of the special **$event()** method is the event element eventReverse, and the second argument is the name of the event to be called:
+
+```js
+this.$event(eventReverse, 'reverse-colors')
+```
+
+The **$event()** method can also receive a third argument, in which you can pass parameters that fully correspond to the parameters of the [CustomEvent](https://javascript.info/dispatch-events#custom-events) constructor. For example, you can pass the **detail** property, which allows you to share data between components.
+
+When the **event()** method of the Creaton plugin is called not as a constructor, it works similarly to the special **$event()** method.
+
+<br>
+
+Add a new *"new-colors"* event handler to the **connected()** method of the Colors component, as shown below:
+
+```js
+async connected() {
+  // import event element eventReverse
+  const { eventReverse } = await import('./Events.js')
+
+  // add the "reverse-colors" event handler to the eventReverse element
+  eventReverse.addEventListener('reverse-colors', () => {
+    this.arr.reverse() // reverse array
+
+    // update component DOM
+    this.$render()
+  })
+
+  // add the "new-colors" event handler to the eventReverse element
+  eventReverse.addEventListener('new-colors', event => {
+    this.arr = event.detail // new array
+
+    // update component DOM
+    this.$render()
+  })
+}
+```
+
+Note that the event handler now has an **event** parameter through which you can access the **detail** property.
+
+Now modify the contents of the Hello component object by adding a new button and a *"click"* event handler, inside which a new array of colors is passed to the *"new-colors"* event handler:
+
+```js
+const Hello = {
+  name: 'r-hello',
+  render() {
+    return `
+      <button id="button-reverse">Reverse array</button>
+      <button id="button-new">New array</button>
+    `
+  },
+  async connected() {
+    // import event element eventReverse
+    const { eventReverse } = await import('./Events.js')
+
+    // add a "click" event handler for the button
+    this.$('#button-reverse').addEventListener('click', () => {
+      // trigger "reverse-colors" event on element eventReverse
+      this.$event(eventReverse, 'reverse-colors')
+    })
+
+    // add a "click" event handler for the button
+    this.$('#button-new').addEventListener('click', () => {
+      // trigger "new-colors" event on element eventReverse
+      this.$event(eventReverse, 'new-colors', {
+        // pass a new array to the event handler
+        detail: ['blue', 'orange', 'purple', 'gold']
+      })
+    })
+  }
+}
+```
+
+Thus, data can be easily exchanged between different components.
+
+<br>
+
+To avoid having to import the event element into each individual component, you can resort to creating the event element in a global mixin before passing the components to the Creaton plugin:
+
+```js
+Creaton.mixins = {
+  // create event element eventReverse
+  eventReverse: new Creaton.event()
+}
+
+// pass Hello and Colors component objects to Creaton plugin
+Creaton(Hello, Colors)
+```
+
+Then instead of importing the event element from an external file:
+
+```js
+// import event element eventReverse
+const { eventReverse } = await import('./Events.js')
+```
+
+you need to get the event element from the global mixin:
+
+```js
+// get event element eventReverse
+const eventReverse = this.$mixins.eventReverse
 ```
 
 <br>

@@ -41,7 +41,7 @@ export default {
 2. [Объект компонента](#component-object)
 3. [Циклы](#cycles)
 4. [Слоты](#slots)
-5. ~~[Пользовательские события](#custom-events)~~
+5. [Пользовательские события](#custom-events)
 6. ~~[Особенности работы](#features-work)~~
 
 <br>
@@ -612,6 +612,247 @@ const Hello = {
   </script>
 </body>
 </html>
+```
+
+<br>
+<br>
+<h2 id="custom-events">Пользовательские события</h2>
+
+<br>
+
+Для взаимодействия между различными компонентами, применяется усовершенствованный механизм [пользовательских событий](https://learn.javascript.ru/dispatch-events). Этот механизм подразумевает использование метода **event()** плагина Creaton и специального метода **$event()**, который доступен в каждом компоненте.
+
+Создайте в каталоге *app* файл *Events.js*, со следующим содержимым:
+
+```js
+// экспортировать элемент события eventReverse
+export const eventReverse = new Creaton.event()
+```
+
+Когда метод **event()** плагина Creaton вызывается как конструктор, то он возвращает новый [фрагмент документа](https://developer.mozilla.org/ru/docs/Web/API/DocumentFragment), который является источником и получателем пользовательских событий.
+
+Теперь внесите изменения в файл *index.html*, как показано ниже:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент Hello -->
+  <r-hello></r-hello>
+
+  <!-- монтировать компонент Colors -->
+  <r-colors></r-colors>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // создать объект компонента Hello
+    const Hello = {
+      name: 'r-hello',
+      render() {
+        return `
+          <button id="button-reverse">Обратить массив</button>
+        `
+      },
+      async connected() {
+        // импортировать элемент события eventReverse
+        const { eventReverse } = await import('./Events.js')
+
+        // добавить для кнопки обработчик события "click"
+        this.$('#button-reverse').addEventListener('click', () => {
+          // вызвать событие "reverse-colors" для элемента eventReverse
+          this.$event(eventReverse, 'reverse-colors')
+        })
+      }
+    }
+
+    // создать объект компонента Colors
+    const Colors = {
+      name: 'r-colors',
+      data() {
+        return {
+          arr: ['красный', 'зелёный', 'синий']
+        }
+      },
+      render() {
+        return `
+          <ul>
+            ${ this.arr.map(item => `<li>${ item }</li>`).join('') }
+          </ul>
+        `
+      },
+      async connected() {
+        // импортировать элемент события eventReverse
+        const { eventReverse } = await import('./Events.js')
+
+        // добавить элементу eventReverse обработчик события "reverse-colors"
+        eventReverse.addEventListener('reverse-colors', () => {
+          this.arr.reverse() // обратить массив
+
+          // обновить DOM компонента
+          this.$render()
+        })
+      }
+    }
+
+    // передать объекты компонентов Hello и Colors в плагин Creaton
+    Creaton(Hello, Colors)
+  </script>
+</body>
+</html>
+```
+
+В данном примере, в объекте компонента Colors создаётся асинхронный метод **connected()**. Внутри этого метода происходит импортирование созданного на прошлом шаге элемента события из внешнего файла и назначение ему обработчика:
+
+```js
+async connected() {
+  // импортировать элемент события eventReverse
+  const { eventReverse } = await import('./Events.js')
+
+  // добавить элементу eventReverse обработчик события "reverse-colors"
+  eventReverse.addEventListener('reverse-colors', () => {
+    this.arr.reverse() // обратить массив
+
+    // обновить DOM компонента
+    this.$render()
+  })
+}
+```
+
+<br>
+
+Внутри объекта компонента Hello, метод **connected()** тоже является асинхронным, чтобы можно было импортировать внешний элемент события:
+
+```js
+async connected() {
+  // импортировать элемент события eventReverse
+  const { eventReverse } = await import('./Events.js')
+
+  // добавить для кнопки обработчик события "click"
+  this.$('#button-reverse').addEventListener('click', () => {
+    // вызвать событие "reverse-colors" для элемента eventReverse
+    this.$event(eventReverse, 'reverse-colors')
+  })
+}
+```
+
+Кроме этого, кнопке добавлен обработчик события *"click"*, внутри которого, с помощью специального метода **$event()** происходит вызов события *"reverse-colors"* для импортируемого элемента при нажатии на кнопку, как показано ниже:
+
+```js
+// добавить для кнопки обработчик события "click"
+this.$('#button-reverse').addEventListener('click', () => {
+  // вызвать событие "reverse-colors" для элемента eventReverse
+  this.$event(eventReverse, 'reverse-colors')
+})
+```
+
+В первом аргументе специального метода **$event()** передаётся элемент события eventReverse, а во втором, название вызываемого события:
+
+```js
+this.$event(eventReverse, 'reverse-colors')
+```
+
+Метод **$event()** может получать и третий аргумент, в котором можно передать параметры, полностью соответствующие параметрам конструктора [CustomEvent](https://learn.javascript.ru/dispatch-events#polzovatelskie-sobytiya). Например, можно передать свойство **detail**, которое позволяет обмениваться данными между компонентами.
+
+Когда метод **event()** плагина Creaton вызывается не как конструктор, то он работает аналогично специальному методу **$event()**.
+
+<br>
+
+Добавьте в метод **connected()** компонента Colors новый обработчик события *"new-colors"*, как показано ниже:
+
+```js
+async connected() {
+  // импортировать элемент события eventReverse
+  const { eventReverse } = await import('./Events.js')
+
+  // добавить элементу eventReverse обработчик события "reverse-colors"
+  eventReverse.addEventListener('reverse-colors', () => {
+    this.arr.reverse() // обратить массив
+
+    // обновить DOM компонента
+    this.$render()
+  })
+
+  // добавить элементу eventReverse обработчик события "new-colors"
+  eventReverse.addEventListener('new-colors', event => {
+    this.arr = event.detail // новый массив
+
+    // обновить DOM компонента
+    this.$render()
+  })
+}
+```
+
+Обратите внимание, что в обработчике этого события появился параметр **event**, через который можно получить доступ к свойству **detail**.
+
+Теперь внесите изменения в содержимое объекта компонента Hello, добавив ему новую кнопку и обработчик события *"click"*, внутри которого, в обработчик события *"new-colors"* передаётся новый массив цветов:
+
+```js
+const Hello = {
+  name: 'r-hello',
+  render() {
+    return `
+      <button id="button-reverse">Обратить массив</button>
+      <button id="button-new">Новый массив</button>
+    `
+  },
+  async connected() {
+    // импортировать элемент события eventReverse
+    const { eventReverse } = await import('./Events.js')
+
+    // добавить для кнопки обработчик события "click"
+    this.$('#button-reverse').addEventListener('click', () => {
+      // вызвать событие "reverse-colors" для элемента eventReverse
+      this.$event(eventReverse, 'reverse-colors')
+    })
+
+    // добавить для кнопки обработчик события "click"
+    this.$('#button-new').addEventListener('click', () => {
+      // вызвать событие "new-colors" для элемента eventReverse
+      this.$event(eventReverse, 'new-colors', {
+        // передать в обработчик события новый массив
+        detail: ['синий', 'оранжевый', 'фиолетовый', 'золотой']
+      })
+    })
+  }
+}
+```
+
+Таким образом, можно легко обмениваться данными между различными компонентами.
+
+<br>
+
+Чтобы не импортировать элемент события в каждый отдельный компонент, можно прибегнуть к созданию элемента события в глобальной примеси, перед передачей компонентов в плагин Creaton:
+
+```js
+Creaton.mixins = {
+  // создать элемент события eventReverse
+  eventReverse: new Creaton.event()
+}
+
+// передать объекты компонентов Hello и Colors в плагин Creaton
+Creaton(Hello, Colors)
+```
+
+Тогда вместо импорта элемента события из внешнего файла:
+
+```js
+// импортировать элемент события eventReverse
+const { eventReverse } = await import('./Events.js')
+```
+
+необходимо получить элемент события из глобальной примеси:
+
+```js
+// получить элемент события eventReverse
+const eventReverse = this.$mixins.eventReverse
 ```
 
 <br>
