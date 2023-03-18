@@ -15,6 +15,7 @@ Below is an example of a simple modular component:
 ```js
 export default {
   name: 'r-hello',
+  mode: 'open',
   data() {
     return {
       message: 'Creaton',
@@ -41,8 +42,9 @@ export default {
 2. [Component object](#component-object)
 3. [Cycles](#cycles)
 4. [Slots](#slots)
-5. [Custom events](#custom-events)
-6. [Features work](#features-work)
+5. [Styles](#styles)
+6. [Custom events](#custom-events)
+7. [Features work](#features-work)
 
 <br>
 <hr>
@@ -612,6 +614,38 @@ To work with [slots](https://javascript.info/slots-composition), the component n
   </script>
 </body>
 </html>
+```
+
+<br>
+<br>
+<h2 id="styles">Styles</h2>
+
+<br>
+
+To create [local styles](https://javascript.info/shadow-dom-style), the component needs to add a [Shadow DOM](https://javascript.info/shadow-dom) using the **mode** property, as shown below:
+
+```js
+const Hello = {
+  name: 'r-hello',
+  mode: 'open', // add an open Shadow DOM for the component
+  data() {
+    return {
+      message: 'Creaton',
+      mainColor: 'red'
+    }
+  },
+  render() {
+    return `
+      <h1>Hello, ${ this.message }!</h1>
+      
+      <style>
+        h1 {
+          color: ${ this.mainColor };
+        }
+      </style>
+    `
+  }
+}
 ```
 
 <br>

@@ -15,6 +15,7 @@ Creaton - это плагин JavaScript для быстрого создани�
 ```js
 export default {
   name: 'r-hello',
+  mode: 'open',
   data() {
     return {
       message: 'Creaton',
@@ -41,8 +42,9 @@ export default {
 2. [Объект компонента](#component-object)
 3. [Циклы](#cycles)
 4. [Слоты](#slots)
-5. [Пользовательские события](#custom-events)
-6. [Особенности работы](#features-work)
+5. [Стили](#styles)
+6. [Пользовательские события](#custom-events)
+7. [Особенности работы](#features-work)
 
 <br>
 <hr>
@@ -612,6 +614,38 @@ const Hello = {
   </script>
 </body>
 </html>
+```
+
+<br>
+<br>
+<h2 id="styles">Стили</h2>
+
+<br>
+
+Для создания [локальных стилей](https://learn.javascript.ru/shadow-dom-style), компоненту необходимо добавить [Теневой DOM](https://learn.javascript.ru/shadow-dom) с помощью свойства **mode**, как показано ниже:
+
+```js
+const Hello = {
+  name: 'r-hello',
+  mode: 'open', // добавить компоненту открытый Теневой DOM
+  data() {
+    return {
+      message: 'Creaton',
+      mainColor: 'red'
+    }
+  },
+  render() {
+    return `
+      <h1>Привет, ${ this.message }!</h1>
+      
+      <style>
+        h1 {
+          color: ${ this.mainColor };
+        }
+      </style>
+    `
+  }
+}
 ```
 
 <br>
