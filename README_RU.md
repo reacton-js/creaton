@@ -434,7 +434,7 @@ async connected() {
 
 ```js
 connected() {
-  this.$$('h1')[0].addEventListener('click', () => console.log('Привет'))
+  this.$('h1').addEventListener('click', () => console.log('Привет'))
 }
 ```
 

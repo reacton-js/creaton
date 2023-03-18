@@ -434,7 +434,7 @@ This means that any events prescribed in the **connected()** elements of the eve
 
 ```js
 connected() {
-  this.$$('h1')[0].addEventListener('click', () => console.log('Hello'))
+  this.$('h1').addEventListener('click', () => console.log('Hello'))
 }
 ```
 
