@@ -3,11 +3,6 @@
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
-/*!
- * Creaton.js v2.0.0
- * (c) 2022-2023 | github.com/reacton-js
- * Released under the MIT License.
- */
 'use strict'
 
 !function() {
