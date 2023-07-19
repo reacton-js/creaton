@@ -1,11 +1,206 @@
 /*!
- * Creaton.js v1.0.1
+ * Creaton.js v2.0.0
+ * (c) 2022-2023 | github.com/reacton-js
+ * Released under the MIT License.
+ */
+/*!
+ * Creaton.js v2.0.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
 'use strict'
 
 !function() {
+  // определить шаблон поиска заглавных букв
+  const regUpper = /[A-Z]/g
+
+  // определить хранилище для служебных свойств компонентов
+  const SERVICE = new WeakMap()
+
+  // определить документ для создания независимых элементов компонентов
+  const HTMLDocument = document.implementation.createHTMLDocument()
+
+  // определить ловушки для прокси атрибутов компонентов
+  const attrHooks = {
+    get(target, key) {
+      return target[key] ? target[key].value : undefined
+    },
+    set(target, key, val) {
+      target[key].value = val
+      return true
+    }
+  }
+
+
+  // определить функцию создания компонентов
+  function createComponent(INITClass) {
+    // определить уровень инкапсуляции компонента
+    const mode = (INITClass.mode || '').toLowerCase()
+
+    // определить для компонента название расширяемого элемента
+    const extend = (INITClass.extends || '').toLowerCase()
+
+    // определить имя компонента в шашлычной нотации
+    const name = INITClass.name.replace(regUpper, (str, pos) => (pos > 0 ? '-' : '') + str.toLowerCase())
+
+    // определить для компонента класс расширяемого элемента
+    const SUPERElement = extend ? Object.getPrototypeOf(document.createElement(extend)).constructor : HTMLElement
+
+    // выполнить определение нового компонента
+    customElements.define(name, class extends SUPERElement {
+      constructor() {
+        super()
+
+        // определить ссылку на теневой DOM или корневой элемент компонента
+        const root = mode ? this.attachShadow({ mode }) : this
+
+        let template // шаблон компонента
+
+        // если элемент не содержит теневой DOM
+        if (root === this) {
+          // определить независимый элемент компонента из стороннего документа
+          template = HTMLDocument.createElement(this.nodeName)
+        }
+        // иначе, определить обычный элемент для хранения содержимого
+        else {
+          template = document.createElement('template')
+        }
+
+        // определить объект с методом доступа к состоянию или свойству компонента
+        const state = new Proxy(new INITClass(), {
+          // вернуть значение свойства объекта состояния или компонента
+          get: (target, key, receiver) => key in target ? Reflect.get(target, key, receiver) : this[key]
+        })
+
+        // определить специальное свойство для доступа к объекту состояния компонента
+        Object.defineProperty(this, '$state', { value: state })
+
+        // определить прокси для атрибутов компонента
+        const attributes = new Proxy(this.attributes, attrHooks)
+
+        // добавить в хранилище служебные свойства компонента
+        SERVICE.set(this.$state, { root , template, attributes })
+      }
+
+
+      // обновляет состояние и выводит HTML-содержимое компонента
+      async $update(obj) {
+        const start = Date.now() // определить начало обновления
+
+        // получить корневой элемент и шаблон компонента
+        const { root, template } = SERVICE.get(this.$state)
+
+        // если был передан объект с новыми значениями
+        if (obj) {
+          // копировать новые значения состояния в его объект
+          Object.assign(this.$state, obj)
+        }
+
+        // если была определена статическая функция "before"
+        await (!INITClass.before || INITClass.before.call(this.$state))
+
+        // добавить сгенерированное HTML-содержимое в шаблон
+        template.innerHTML = await (INITClass.render ? INITClass.render.call(this.$state) : '')
+
+        // обновить HTML-содержимое компонента в соответствии с шаблоном
+        new updateDOM(root, template.content || template, root)
+
+        // очистить HTML-содержимое шаблона
+        template.innerHTML = ''
+
+        // если была определена статическая функция "after"
+        await (!INITClass.after || INITClass.after.call(this.$state))
+
+        return Date.now() - start + ' ms' // вернуть время обновления
+      }
+
+
+      // вызывается при добавлении компонента в документ
+      async connectedCallback() {
+        // обновить состояние компонента
+        await this.$update()
+
+        // если была определена статическая функция "connected"
+        await (!INITClass.connected || INITClass.connected.call(this.$state))
+      }
+
+      // вызывается при удалении компонента из документа
+      async disconnectedCallback() {
+        // если была определена статическая функция "disconnected"
+        await (!INITClass.disconnected || INITClass.disconnected.call(this.$state))
+      }
+
+      // вызывается при перемещении компонента в новый документ
+      async adoptedCallback() {
+        // если была определена статическая функция "adopted"
+        await (!INITClass.adopted || INITClass.adopted.call(this.$state))
+      }
+
+      // вызывается при изменении одного из отслеживаемых атрибутов
+      async attributeChangedCallback(...args) {
+        // если была определена статическая функция "changed"
+        await (!INITClass.changed || INITClass.changed.apply(this.$state, args))
+      }
+
+      // массив имён атрибутов для отслеживания их изменений
+      static get observedAttributes() {
+        // если был определён статический массив "attributes"
+        if (Array.isArray(INITClass.attributes)) {
+          return INITClass.attributes
+        }
+      }
+
+
+      // возвращает теневой DOM компонента
+      get $shadow() {
+        return this.shadowRoot
+      }
+
+      // возвращает хозяина теневого DOM компонента
+      get $host() {
+        return SERVICE.get(this.$state).root === this ? this : this.shadowRoot ? this.shadowRoot.host : undefined
+      }
+
+      // возвращает прокси атрибутов компонента
+      get $props() {
+        return SERVICE.get(this.$state).attributes
+      }
+
+      // возвращает функцию создания пользовательских событий
+      get $event() {
+        return customEvent
+      }
+
+      
+      // поиск элемента по заданному селектору
+      $(selector) {
+        // если метод вызывается в контексте объекта состояния или компонент не является закрытым
+        if (this === this.$state || mode !== 'closed') {
+          // выполнить поиск в корневом элементе компонента
+          return SERVICE.get(this.$state).root.querySelector(selector)
+        }
+
+        // выполнить поиск в элементе-хозяине компонента
+        return this.$host.querySelector(selector)
+      }
+
+      // поиск всех элементов по заданному селектору
+      $$(selector) {
+        // если метод вызывается в контексте объекта состояния или компонент не является закрытым
+        if (this === this.$state || mode !== 'closed') {
+          // выполнить поиск в корневом элементе компонента
+          return SERVICE.get(this.$state).root.querySelectorAll(selector)
+        }
+        
+        // выполнить поиск в элементе-хозяине компонента
+        return this.$host.querySelectorAll(selector)
+      }
+
+      // определить для компонента расширяемый элемент
+    }, extend ? { extends: extend } : null)
+  }
+
+
   // определить функцию для работы с пользовательскими событиями
   function customEvent (elem, ...args) {
     // если функция была вызвана как конструктор
@@ -17,133 +212,65 @@
     (elem || this).dispatchEvent(new CustomEvent(...args))
   }
 
-  // пустой объект для прокси примесей компонента
-  const emptyObject = {}
 
-
-  // определить функцию создания компонента
-  function defineComponent(obj) {
-    // определить переменные из свойств объекта компонента
-    const { name, extends:extend, mode, data, attributes, changed, mixins, before, after, connected, disconnected, adopted } = obj
-
-    // определить для компонента метод рендеринга
-    const render = obj.render instanceof HTMLTemplateElement ? Function(`return \`${obj.render.innerHTML}\``) : obj.render
-
-    // определить для компонента Суперэлемент
-    const SUPERElement = extend ? Object.getPrototypeOf(document.createElement(extend)).constructor : HTMLElement
-
-    customElements.define(name, class extends SUPERElement {
-      constructor() {
-        super()
-
-        // определить специальные свойства компонента
-        Object.defineProperties(this, {
-          $root: { value: mode ? this.attachShadow({ mode }) : this },
-          $host: { value: this },
-          $mixins: { value: new Proxy(emptyObject, {
-            get: (_, key) => mixins?.[key] ?? Creaton.mixins?.[key] ?? this.$data[key]
-          })},
-        })
+  // обновляет HTML-содержимое компонента
+  function updateDOM($parent, newNode, oldNode, index = 0) {
+    // если нет старой ноды
+    if (!oldNode) {
+      $parent.append(newNode.cloneNode(true)) // добавить ноду
+    }
+    // если нет новой ноды
+    else if (!newNode) {
+      return !$parent.removeChild($parent.childNodes[index]) // удалить ноду и вернуть Ложь
+    }
+    // если типы или названия нод не совпадают
+    else if (newNode.nodeType !== oldNode.nodeType || newNode.nodeName !== oldNode.nodeName) {
+      $parent.replaceChild(newNode.cloneNode(true), $parent.childNodes[index]) // заменить ноду
+    }
+    // если значения нод не совпадают
+    else if (newNode.nodeValue !== oldNode.nodeValue) {
+      oldNode.nodeValue = newNode.nodeValue // заменить значение
+    }
+    // если у ноды имеются дочерние элементы
+    else if (newNode.childNodes.length) {
+      // если у ноды имеются атрибуты
+      if (!new.target && newNode.attributes) {
+        updateAttr(newNode.attributes, oldNode) // обновить атрибуты
       }
 
-      // создаёт новую разметку для компонента
-      async $render() {
-        // если в объекте компонента была определена функция "before"
-        if (typeof before === 'function') {
-          await before.call(this.$data) // вызвать эту функцию
-        }
-
-        // если в объекте компонента была определена функция "render"
-        if (typeof render === 'function') {
-          // вывести значение этой функции в разметку компонента
-          this.$root.innerHTML = await render.call(this.$data)
-        }
-
-        // если в объекте компонента была определена функция "after"
-        if (typeof after === 'function') {
-          await after.call(this.$data) // вызвать эту функцию
-        }
+      // перебрать дочерние узлы новой и старой ноды
+      for (let i = 0; i < newNode.childNodes.length || i < oldNode.childNodes.length; i++) {
+        updateDOM(new.target ? $parent : $parent.childNodes[index], newNode.childNodes[i], oldNode.childNodes[i], i) || i--
       }
-
-      // поиск элемента по заданному селектору
-      $(sel) {
-        return this.$root.querySelector(sel)
-      }
-
-      // поиск всех элементов по заданному селектору
-      $$(sel) {
-        return this.$root.querySelectorAll(sel)
-      }
-
-      // возвращает функцию создания пользовательских событий
-      get $event() {
-        return customEvent
-      }
-
-      // массив имён атрибутов для отслеживания их изменений
-      static get observedAttributes() {
-        // если в объекте компонента был определён массив "attributes"
-        if (Array.isArray(attributes)) {
-          return attributes // вернуть этот массив
-        }
-      }
-
-      // вызывается при изменении одного из отслеживаемых атрибутов
-      async attributeChangedCallback(...args) {
-        // если в объекте компонента была определена функция "changed"
-        if (typeof changed === 'function') {
-          await changed.apply(this.$data, args) // вызвать эту функцию
-        }
-      }
-
-      // вызывается при добавлении компонента в документ
-      async connectedCallback() {
-        // определить объект данных компонента
-        Object.defineProperty(this, '$data', {
-          value: new Proxy(typeof data === 'function' ? await data.call(this) : {}, {
-            get: (target, key, receiver) => {
-              // вернуть значение свойства объекта данных или самого компонента
-              return target.hasOwnProperty(key) ? Reflect.get(target, key, receiver) : this[key]
-            }
-          })
-        })
-
-        // создать новую разметку для компонента
-        await this.$render()
-
-        // если в объекте компонента была определена функция "connected"
-        if (typeof connected === 'function') {
-          await connected.call(this.$data) // вызвать эту функцию
-        }
-      }
-
-      // вызывается при удалении компонента из документа
-      async disconnectedCallback() {
-        // если в объекте компонента была определена функция "disconnected"
-        if (typeof disconnected === 'function') {
-          await disconnected.call(this.$data) // вызвать эту функцию
-        }
-      }
-
-      // вызывается при перемещении компонента в новый документ
-      async adoptedCallback() {
-        // если в объекте компонента была определена функция "adopted"
-        if (typeof adopted === 'function') {
-          await adopted.call(this.$data) // вызвать эту функцию
-        }
-      }
-
-      // определить для компонента расширяемый элемент
-    }, extend ? { extends: extend } : null)
+    }
+    
+    return true // вернуть Истину
   }
 
 
-  // определить главную функцию плагина
-  const Creaton = (...args) => args.forEach(defineComponent)
+  // обновляет атрибуты элементов компонента
+  function updateAttr(newAttrs, oldNode, oldAttrs = oldNode.attributes) {
+    // перебрать дочерние атрибуты новой и старой ноды
+    for (let i = 0; i < newAttrs.length || i < oldAttrs.length; i++) {
+      // если нет старого атрибута
+      if (newAttrs[i] && !oldAttrs[newAttrs[i].name]) {
+        oldNode.setAttribute(newAttrs[i].name, newAttrs[i].value), i-- // добавить атрибут
+      }
+      // иначе, если нет нового атрибута
+      else if (oldAttrs[i] && !newAttrs[oldAttrs[i].name]) {
+        oldNode.removeAttribute(oldAttrs[i].name), i-- // удалить атрибут
+      }
+      // иначе, если значения атрибутов не совпадают
+      else if (oldAttrs[newAttrs[i].name].value !== newAttrs[i].value) {
+        oldAttrs[i].value = newAttrs[i].value // присвоить значение
+      }
+    }
+  }
+
+
+  // определить главную функцию в глобальной переменной
+  window.Creaton = (...args) => args.forEach(arg => typeof arg !== 'function' || createComponent(arg))
 
   // определить для главной функции метод "event"
-  Creaton.event = customEvent
-
-  // определить глобальную переменную главной функции
-  window.Creaton = Creaton
-}()
+  window.Creaton.event = customEvent
+}();

@@ -10,25 +10,22 @@
 
 Creaton is a JavaScript plugin for quickly creating [Web Components](https://javascript.info/web-components). The plugin supports all technologies, methods and properties such as [slots](https://javascript.info/slots-composition) and [Shadow DOM](https://javascript.info/shadow-dom) that are provided by standard Web Components.
 
-Below is an example of a simple modular component:
+> The second version of the plugin has been completely rewritten to optimize DOM redrawing and better organization of components. Components from the first version are not suitable for use in the second.
+
+Below is an example of a simple component:
 
 ```js
-export default {
-  name: 'r-hello',
-  mode: 'open',
-  data() {
-    return {
-      message: 'Creaton',
-      mainColor: 'red'
-    }
-  },
-  render() {
+class MyComponent {
+  message = 'Creaton'
+  color = 'red'
+
+  static render() {
     return `
       <h1>Hello, ${ this.message }!</h1>
       
       <style>
         h1 {
-          color: ${ this.mainColor };
+          color: ${ this.color };
         }
       </style>
     `
@@ -39,12 +36,13 @@ export default {
 <br>
 
 1. [Quick start](#quick-start)
-2. [Component object](#component-object)
-3. [Cycles](#cycles)
-4. [Slots](#slots)
-5. [Styles](#styles)
-6. [Custom events](#custom-events)
-7. [Features work](#features-work)
+2. [Component class](#component-class)
+3. [Special properties](#special-properties)
+4. [General methods](#general-methods)
+5. [Cycles](#cycles)
+6. [Styles](#styles)
+7. [Slots](#slots)
+8. [Events](#events)
 
 <br>
 <hr>
@@ -54,7 +52,7 @@ export default {
 
 <br>
 
-Creaton allows you to create several types of components: Embedded and Modular. We'll start with Embedded Components. Create a new working directory, for example named *app*, and download the [creaton.min.js](https://raw.githubusercontent.com/reacton-js/creaton/main/creaton.min.js) file into this directory.
+Classes are used to create components. Classes can be either built into the main script or imported from an external module. Create a new working directory, for example named *app*, and download the [creaton.min.js](https://raw.githubusercontent.com/reacton-js/creaton/main/creaton.min.js) file into this directory.
 
 Add an *index.html* file to the directory with the following content:
 
@@ -63,42 +61,37 @@ Add an *index.html* file to the directory with the following content:
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
 </head>
 <body>
-  <!-- mount the Hello component -->
-  <r-hello></r-hello>
+  <!-- mount the MyComponent component -->
+  <my-component></my-component>
 
   <!-- include Creaton plugin -->
   <script src="creaton.min.js"></script>
 
   <script>
-    // create a Hello component object
-    const Hello = {
-      name: 'r-hello',
-      data() {
-        return {
-          message: 'Creaton',
-          mainColor: 'red'
-        }
-      },
-      render() {
+    // create component class MyComponent
+    class MyComponent {
+      message = 'Creaton'
+      color = 'red'
+
+      static render() {
         return `
           <h1>Hello, ${ this.message }!</h1>
           
           <style>
             h1 {
-              color: ${ this.mainColor };
+              color: ${ this.color };
             }
           </style>
         `
       }
     }
 
-    // pass Hello component object to Creaton plugin
-    Creaton(Hello)
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
   </script>
 </body>
 </html>
@@ -114,25 +107,21 @@ When you open the *index.html* file in the browser, the screen will display the 
 
 In this example, a simple component has been created that is embedded in a common script. Let's now move this component into a separate module.
 
-Create a *Hello.js* file in the *app* directory with the following content:
+Create a *MyComponent.js* file in the *app* directory with the following content:
 
 ```js
-// export the Hello component object
-export default {
-  name: 'r-hello',
-  data() {
-    return {
-      message: 'Creaton',
-      mainColor: 'red'
-    }
-  },
-  render() {
+// export the MyComponent component class
+export default class MyComponent {
+  message = 'Creaton'
+  color = 'red'
+
+  static render() {
     return `
       <h1>Hello, ${ this.message }!</h1>
       
       <style>
         h1 {
-          color: ${ this.mainColor };
+          color: ${ this.color };
         }
       </style>
     `
@@ -147,29 +136,28 @@ Make changes to the *index.html* file, as shown below:
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
 </head>
 <body>
-  <!-- mount the Hello component -->
-  <r-hello></r-hello>
+  <!-- mount the MyComponent component -->
+  <my-component></my-component>
 
   <!-- include Creaton plugin -->
   <script src="creaton.min.js"></script>
 
   <script type="module">
-    // import Hello component object
-    import Hello from './Hello.js'
+    // import the MyComponent component class
+    import MyComponent from './MyComponent.js'
 
-    // pass Hello component object to Creaton plugin
-    Creaton(Hello)
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
   </script>
 </body>
 </html>
 ```
 
-To work with Modular components, we need any development server, such as, for example, [lite-server](https://www.npmjs.com/package/lite-server).
+To work with external components, we need any development server, such as, for example, [lite-server](https://www.npmjs.com/package/lite-server).
 
 Install this server using the command in the terminal:
 
@@ -186,324 +174,789 @@ lite-server
 This will open a default browser window displaying the welcome message shown above.
 
 <br>
-<br>
-<h2 id="component-object">Component object</h2>
 
-<br>
+To quickly access a component in the browser console, add the identifier "mycomp" to its mount element, as shown below:
 
-Each Embedded and Modular component object must contain a required name property that defines the **name** of the component, as shown below:
-
-```js
-const Hello = {
-  name: 'r-hello'
-}
+```html
+<!-- mount the MyComponent component -->
+<my-component id="mycomp"></my-component>
 ```
 
+Now open the browser console and enter the command:
+
+```
+mycomp.$update({ message: 'Web Components', color: 'green' })
+```
+
+The title color and message will change immediately:
+
+> <h1 style="color: green;">Hello, Web Components!</h1>
+
 <br>
-
-The **data()** method must return an object with user data (properties and methods) of the component:
-
-```js
-data() {
-  return {
-    message: 'Creaton',
-    printHello() {
-      return 'Hello, World!'
-    }
-  }
-}
-```
-
-This method can be asynchronous. In the example below, the **message** custom property simulates receiving data from the server:
-
-```js
-async data() {
-  const message = await new Promise(ok => setTimeout(() => ok('Creaton'), 1000))
-
-  return {
-    message
-  }
-}
-```
+<br>
+<h2 id="component-class">Component class</h2>
 
 <br>
 
-For Embedded and Modular components, the **render()** method returns the component's HTML content as a [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals):
+The name of the component class defines the name of the component in the DOM. For example, the class MyComponent or myComponent will match the name *my-component* in the DOM. Each component class may contain an optional static property **name** that defines the name of this class.
 
-```js
-render() {
-  return `
-    <h1>Hello, ${ this.message }!</h1>
-    
-    <style>
-      h1 {
-        color: ${ this.mainColor };
-      }
-    </style>
-  `
-}
-```
-
-Inside template literals, you can use [substitutions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#string_interpolation) to expose expressions:
-
-```js
-${ 5 + 6 }
-```
-
-and user data by adding the *this* keyword before their name:
-
-```js
-${ this.message }
-```
-
-In addition to the method that returns a template literal, you can pass a reference to the [TEMPLATE](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) element to the **render** property, as shown below:
+This property must be specified, for example, when passing an anonymous class directly to a plugin:
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
 </head>
 <body>
-  <!-- mount the Hello component -->
-  <r-hello></r-hello>
-
-  <!-- Hello component template -->
-  <template id="template-hello">
-    <h1>Hello, ${ this.message }!</h1>
-          
-    <style>
-      h1 {
-        color: ${ this.mainColor };
-      }
-    </style>
-  </template>
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp"></my-component>
 
   <!-- include Creaton plugin -->
   <script src="creaton.min.js"></script>
 
   <script>
-    // create a Hello component object
-    const Hello = {
-      name: 'r-hello',
-      data() {
-        return {
-          message: 'Creaton',
-          mainColor: 'red'
-        }
-      },
-      // pass a reference to the component template
-      render: document.querySelector('#template-hello')
-    }
+    // pass anonymous class to Creaton plugin
+    Creaton(class {
+      message = 'Creaton'
+      color = 'red'
 
-    // pass Hello component object to Creaton plugin
-    Creaton(Hello)
+      static name = 'MyComponent' // component name
+
+      static render() {
+        return `
+          <h1>Hello, ${ this.message }!</h1>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    })
   </script>
 </body>
 </html>
 ```
 
-All HTML content of the TEMPLATE element will be wrapped in a template literal. This means that the backticks «`» must be escaped inside this element, for example:
+The class name can be specified in camel case, as in the example above, or kebab notation:
+
+```js
+static name = 'my-component'
+```
+
+<br>
+
+The state of a component is defined as properties of an instance of the component's class. In the example above, there are two states:
+
+```js
+message = 'Creaton'
+color = 'red'
+```
+
+This is a new way of defining properties for objects. You can also use the old way, by specifying a constructor:
+
+```js
+constructor() {
+  this.message = 'Creaton'
+  this.color = 'red'
+}
+```
+
+<br>
+
+In addition to state, class objects can also have methods, for example:
+
+```js
+class MyComponent {
+  message = 'Creaton'
+  color = 'red'
+
+  // class object method
+  printHello() {
+    return `Hello, ${ this.message }!`
+  }
+
+  static render() {
+    return `
+      <h1>${ this.printHello() }</h1>
+      
+      <style>
+        h1 {
+          color: ${ this.color };
+        }
+      </style>
+    `
+  }
+}
+```
+
+In this example, the **printHello()** method of the MyComponent class object has been defined, which simply prints out a hello message.
+
+<br>
+
+To render the component's HTML content, the class must have a static **render()** method that returns a string. From this line, the HTML markup of the future component will be created.
+
+This method is executed in the context of the component's state object, which allows you to refer to the properties of this object using the *this* keyword and using template literals, for example:
+
+```js
+static render() {
+  return `
+    <h1>Hello, ${ this.message }!</h1>
+    
+    <style>
+      h1 {
+        color: ${ this.color };
+      }
+    </style>
+  `
+}
+```
+
+Inside template literals, you can use [substitutions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#string_interpolation) to expose any expressions:
+
+```js
+${ 5 + 6 }
+```
+
+The **render()** method, like all the static methods of the component class discussed below, can be asynchronous. The example below simulates downloading data from the server:
+
+```js
+static async render() {
+  // get data one second after method call
+  const message = await new Promise(ok => setTimeout(() => ok('Web components'), 1000))
+
+  return `
+    <h1>Hello, ${ message }!</h1>
+    
+    <style>
+      h1 {
+        color: ${ this.color };
+      }
+    </style>
+  `
+}
+```
+
+<br>
+
+By default, all components are created without [Shadow DOM](https://javascript.info/shadow-dom). This means that the styles they use affect the DOM of the entire [document](https://developer.mozilla.org/en-US/docs/Web/API/Document), not a specific component.
+
+The static **mode** property determines the [level of encapsulation](https://javascript.info/shadow-dom#shadow-tree) for the component to use [local styles](https://javascript.info/shadow-dom-style) and can be either "open" or "closed":
+
+```js
+static mode = 'open'
+```
+
+The example below creates a component with a closed Shadow DOM:
+
+```js
+class MyComponent {
+  message = 'Creaton'
+  color = 'red'
+
+  static mode = 'closed' // add closed Shadow DOM
+
+  static render() {
+    return `
+      <h1>Hello, ${ this.message }!</h1>
+      
+      <style>
+        h1 {
+          color: ${ this.color };
+        }
+      </style>
+    `
+  }
+}
+```
+
+This type of components is the most secure, since access to the DOM of such a component is possible only from static methods of the class.
+
+<br>
+
+The **extends** static property allows [mount the component](https://javascript.info/custom-elements#customized-built-in-elements) into a standard HTML element, for example:
+
+```js
+static extends = 'header'
+```
+
+The element into which the component is mounted must contain the [*is*](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/is) attribute with a value corresponding to the name of the component that is mounted into it:
 
 ```html
-<template id="template-hello">
-  <h1>Hello, \`${ this.message }\`!</h1>
-        
-  <style>
-    h1 {
-      color: ${ this.mainColor };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component to the Header element -->
+  <header is="my-component"></header>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create component class MyComponent
+    class MyComponent {
+      message = 'Creaton'
+      color = 'red'
+
+      static extends = 'header' // mount the component to the Header element
+
+      static render() {
+        return `
+          <h1>Hello, ${ this.message }!</h1>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
     }
-  </style>
-</template>
+
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
+  </script>
+</body>
+</html>
 ```
 
 <br>
 
-By default, all components are created without [Shadow DOM](https://javascript.info/shadow-dom). The mode property determines the [level of encapsulation](https://javascript.info/shadow-dom#shadow-tree) for the component to use [local styles](https://javascript.info/shadow-dom-style) and can be either "open" or "closed":
+The static property **attributes** contains an array with the names of attributes, when changing which, the static method **changed()** will be called, for example:
 
 ```js
-mode: 'open'
-```
+static attributes = ['title'] // tracked attributes
 
-<br>
-
-The **extends** property allows you to [mount the component](https://javascript.info/custom-elements#customized-built-in-elements) into a standard HTML element:
-
-```js
-extends: 'header'
-```
-
-The element into which the component is mounted must contain the ***is*** attribute with a value corresponding to the name of the component that is mounted into it:
-
-```html
-<header is="r-hello"></header>
-```
-
-<br>
-
-The **attributes** property contains an array with attribute names, when changed, the **changed()** method will be called, for example:
-
-```js
-attributes: ['title'],
-
-changed(name, oldValue, newValue) {
+// called when the tracked attribute changes
+static changed(name, oldValue, newValue) {
   console.log(name, oldValue, newValue)
 }
 ```
 
 Tracked attributes are a Web Component technology, and the **changed()** method is a shorthand for the [attributeChangedCallback()](https://javascript.info/custom-elements) method.
 
-Add the ***id*** and ***title*** attributes to the Hello component's mount element in the *index.html* file as shown below:
+Add the ***id*** and ***title*** attributes to the MyComponent component's mount element in the *index.html* file as shown below:
 
 ```html
-<r-hello id="hello" title="Hello"></r-hello>
+<!-- mount the MyComponent component -->
+<my-component id="mycomp" title="Creaton"></my-component>
 ```
 
 The ***id*** attribute is used for quick access to the component in the browser console. Now open this console and enter the command:
 
 ```
-hello.title = 'Bye'
+mycomp.title = 'Web Components'
 ```
 
 After pressing the Enter key, the **changed()** method will print the following line to the console:
 
 ```
-title Hello Bye
+title Creaton Web Components
 ```
 
 <br>
 
-The **connected()**, **disconnected()** and **adopted()** methods are shorthand analogs of the [connectedCallback(), disconnectedCallback() and adoptedCallback()](https://javascript.info/custom-elements) methods.
+Tracked attributes can be used to determine the state in a component, without having to define the state in a class, for example:
 
-They are called when a component is added to the document - the **connected()** method; removing a component from a document - the **disconnected()** method; and when moving the component to a new document, the **adopted()** method.
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp" message="Creaton" color="red"></my-component>
 
-The most commonly used methods include the **connected()** method, which allows you to access the HTML content of the component after it has been added to the [DOM](https://javascript.info/dom-nodes):
+  <!-- include Creaton plugin -->
+  <script src="creaton.js"></script>
+
+  <script>
+    // create component class MyComponent
+    class MyComponent {
+      static attributes = ['message', 'color'] // tracked attributes
+
+      // called when the tracked attribute changes
+      static changed(name, oldValue, newValue) {
+        // update the HTML content of the component based on the new state
+        this.$update( { [name]: newValue } )
+      }
+
+      static render() {
+        return `
+          <h1>Hello, ${ this.message }!</h1>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
+  </script>
+</body>
+</html>
+```
+
+As you can see from this example, there is no state definition in the class:
 
 ```js
-connected() {
-  console.log(this.$('h1'))
+message = 'Creaton'
+color = 'red'
+```
+
+The initial state values are defined in the tracked attributes ***message*** and ***color*** as shown below:
+
+```html
+<!-- mount the MyComponent component -->
+<my-component id="mycomp" message="Creaton" color="red"></my-component>
+```
+
+The assignment of these values to properties of the state object occurs in the **changed()** method, which is called every time values are assigned/changed to tracked attributes:
+
+```js
+// called when the tracked attribute changes
+static changed(name, oldValue, newValue) {
+  // update the HTML content of the component based on the new state
+  this.$update( { [name]: newValue } )
 }
 ```
 
-In this example, the selected H1 element is displayed on the browser console using the **$()** helper method, which is available in the **connected()** method through the *this* keyword. This method is a shorthand analog of the [querySelector()](https://javascript.info/searching-elements-dom#querySelector) method.
-
-The second helper method is called **$$()** and is shorthand for the [querySelectorAll()](https://javascript.info/searching-elements-dom#querySelectorAll) method, as shown below:
+Inside this method, the special method **$update()** is called, which takes an object in its first argument and combines all its properties with the properties of the state object:
 
 ```js
-connected() {
-  console.log(this.$$('h1')[0])
-}
+// update the HTML content of the component based on the new state
+this.$update( { [name]: newValue } )
 ```
 
-To access user data, the *this* keyword is used within the methods of the component object, since all of these methods are executed in the context of the component's data object:
+Now open the browser console and enter the command:
 
-```js
-connected() {
-  console.log(this.message)
-}
+```
+mycomp.$update({ message: 'Web Components', color: 'green' })
 ```
 
-If you need to access the component itself, then the special **$host** property is used, which refers to the component's mount element:
+The title color and message will change immediately:
 
-```js
-connected() {
-  console.log(this.$host)
-}
+> <h1 style="color: green;">Hello, Web Components!</h1>
+
+The second way to update the component's HTML content based on the new state value is to use the **$props** special property, which is used to quickly access all of the component's attributes.
+
+Enter the command in the browser console:
+
+```
+mycomp.$props.color = 'blue'
 ```
 
-In addition, all the methods discussed above can be asynchronous.
+The title color will change immediately:
 
-In the example below, the **message** custom property is set to a new value one second after the component is added to the document:
+> <h1 style="color: blue;">Hello, Web Components!</h1>
 
-```js
-async connected() {
-  // assign a new value to a property
-  this.message = await new Promise(ok => setTimeout(() => ok('Quick Components'), 1000))
-
-  // update component DOM
-  this.$render()
-}
-```
-
-In this example, after assigning a new value to the **message** property, a special method **$render()** is called, which completely rewrites the DOM of the component. That is, at the internal level, it calls the previously discussed **render()** method.
-
-This means that any events prescribed in the **connected()** elements of the events:
-
-```js
-connected() {
-  this.$('h1').addEventListener('click', () => console.log('Hello'))
-}
-```
-
-completely disappear, since the marking of the component rewrites.
-
-The special method **$render()** is most useful when components acting as loops and user events work together, as will be demonstrated later.
+Special methods and properties will be discussed in the next section. They all begin with a dollar sign and are defined internally by the component.
 
 <br>
 
-The **before()** and **after()** methods are called *Before* and *After* updating the DOM component, i.e. calling a special method **$render()**, for example:
+The static methods **connected()**, **disconnected()** and **adopted()** are shorthand analogs of the [connectedCallback(), disconnectedCallback() and adoptedCallback()](https://javascript.info/custom-elements) methods.
+
+They are called when a component is added to the document - the **connected()** method; removing a component from a document - the **disconnected()** method; and when moving the component to a new document - the **adopted()** method.
+
+The most commonly used methods include the **connected()** method, which allows you to access the HTML content of the component after it has been added to the [DOM](https://javascript.info/dom-nodes), for example , add an event to the element:
 
 ```js
-before() {
+// called when the component is added to the document
+static connected() {
+  // output the element that generated the event to the console
+  this.$('h1').addEventListener('click', event => console.log(event.target))
+}
+```
+
+<br>
+
+The static methods **before()** and **after()** are called *Before* and *After* updating the component's DOM, using the special **$update()** method, for example:
+
+```js
+static before() {
   console.time('Update')
-},
+}
 
-after() {
+static after() {
   console.timeEnd('Update')
 }
 ```
 
-This example shows how much time the component is updated.
+This example shows how long it takes for a component's DOM to update.
+
+Another good example is using the **before()** method to check the type of a new state value:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp"></my-component>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create component class MyComponent
+    class MyComponent {
+      name = 'John'
+      age = 32
+
+      // called before updating the component's DOM
+      static before() {
+        // if the value is not a number, then generate an error
+        if (typeof this.age !== 'number') {
+          throw new Error('Value must be a number...')
+        }
+      }
+
+      static render() {
+        return `
+          <p>Name: ${this.name}</p>
+          <p>Age: ${this.age}</p>
+        `
+      }
+    }
+
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
+  </script>
+</body>
+</html>
+```
+
+If you enter the command in the browser console:
+
+```
+mycomp.$update({ age: 'thirty five' })
+```
+
+then you will receive an error message:
+
+```
+Error: Value must be a number...
+```
+
+<br>
+<br>
+<h2 id="special-properties">Special properties</h2>
 
 <br>
 
-The last property that can be defined in the object of any component is called **mixins** and allows you to create properties and methods common to all components of the same name:
+Unlike methods and properties defined by the user in the component class, special methods and properties are defined at the internal level of the component and always start with a dollar sign.
+
+The **$shadow** property returns the [Shadow DOM](https://javascript.info/shadow-dom) of the component, which is created if the **mode** static property was defined in the component class:
 
 ```js
-mixins: {
-  printMessage() {
-    return this.message
-  }
+static mode = 'open' // add Shadow DOM
+```
+
+However, if the component has a closed Shadow DOM:
+
+```js
+static mode = 'closed' // add closed Shadow DOM
+```
+
+then the **$shadow** property returns «null», as shown below:
+
+```
+mycomp.$shadow
+null
+```
+
+<br>
+
+The **$host** property returns a reference to the component itself if the component has an open Shadow DOM or is created without it. If the component has a closed Shadow DOM, then this property returns «undefined», as shown below:
+
+```
+mycomp.$host
+undefined
+```
+
+<br>
+
+The **$props** property allows you to quickly set and get component attribute values. Add the ***title*** attribute to the component, as shown below:
+
+```html
+<!-- mount the MyComponent component -->
+<my-component id="mycomp" title="Creaton"></my-component>
+```
+
+To get the value of the ***title*** attribute, enter the command in the browser console:
+
+```
+mycomp.$props.title
+```
+
+To set a new value for this attribute, enter the command:
+
+```
+mycomp.$props.title = 'Web Components'
+```
+
+<br>
+
+The **$state** property allows you to get/set the value of any state directly. To get the state value of **message**, enter the command in the browser console:
+
+```
+mycomp.$state.message
+```
+
+To change this state, issue the command:
+
+```
+mycomp.$state.message = 'Web Components'
+```
+
+Updating the state does not automatically update the component's DOM. To update the DOM, you will need to call the special **$update()** method with no arguments:
+
+```
+mycomp.$update()
+```
+
+<br>
+
+All of the custom and static methods of the bean class discussed earlier are executed in the context of the state object referenced by the **$state** property. This object is a [proxy](https://javascript.info/proxy). This means that if the requested state does not exist in the given object, then the requested property is searched for in the component itself.
+
+Thanks to this, any property of the component can be accessed from the state object, such as the [attributes](https://developer.mozilla.org/en-US/docs/Web/API/Element/attributes) property:
+
+
+```
+mycomp.$state.attributes['id'].value
+```
+
+This applies to all methods that are executed in the context of a state object, such as the static **render()** method, as shown below:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp"></my-component>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create component class MyComponent
+    class MyComponent {
+      message = 'Creaton'
+      color = 'red'
+
+      static render() {
+        return `
+          <h1>Hello, ${ this.message } 
+            from the ${this.attributes['id'].value.toUpperCase()} component!</h1>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
+  </script>
+</body>
+</html>
+```
+
+<br>
+
+The **$update()** method is used to update the component's DOM. It can take one argument as an object. The property values of this object become new state values, for example:
+
+```
+mycomp.$update({ message: 'Web Components', color: 'green' })
+```
+
+When this method is called with no arguments, the state object is not changed and the component's DOM is simply redrawn:
+
+```
+mycomp.$update()
+```
+
+In the first version of the plugin, a simple replacement of the old DOM with a new one was used. The second version of Creaton uses a matching principle based on comparing the old DOM with the new one. If a mismatch is found, then the value in the old DOM is replaced by the new [node](https://javascript.info/dom-nodes#other-node-types).
+
+This avoids losing events assigned to elements using the [addEventListener()](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) method and does not overload the browser with unnecessary redrawing of the entire HTML content of the component.
+
+<br>
+
+The **$()** method is a shorthand analog of the [querySelector()](https://javascript.info/searching-elements-dom#querySelector) method and is used for quick access to a component's DOM element. For example, to assign an event listener:
+
+```js
+// called when the component is added to the document
+static connected() {
+  // output the element that generated the event to the console
+  this.$('h1').addEventListener('click', event => console.log(event.target))
 }
 ```
 
-Now the **printMessage()** method will be available to all Hello components. To access the properties and methods of a mixin, a special **$mixins** property is used inside the component markup, after which, through a dot, the name of the requested method or property is indicated:
+The **$$()** method is a shorthand analog of the [querySelectorAll()](https://javascript.info/searching-elements-dom#querySelectorAll) method and is used for quick access to a component's DOM element. For example, to iterate over a collection of elements:
 
 ```js
-render() {
-  return `
-    <h1>Hello, ${ this.$mixins.printMessage() }!</h1>
-  `
+// called when the component is added to the document
+static connected() {
+  // output all paragraph elements to the console
+  this.$$('p').forEach(elem => console.log(elem))
 }
 ```
 
-Impurities work in the following way. First, the properties are queried on the local **mixins** object we created above, then the property is queried on the global mixins object that we will create next, and finally, the property is queried on the component's data object.
+<br>
 
-For this reason, inside the **printMessage()** method, we were able to access the **message** custom property via the *this* keyword, as shown below:
+The **$event()** method is used to create custom events that allow different components to interact with each other. This method will be discussed later, as it requires a separate section for its explanation.
 
-```js
-printMessage() {
-  return this.message
-}
+<br>
+<br>
+<h2 id="general-methods">General methods</h2>
+
+<br>
+
+In addition to state, class objects can also have methods, for example:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp1"></my-component>
+
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp2"></my-component>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create component class MyComponent
+    class MyComponent {
+      message = 'Creaton'
+      color = 'red'
+
+      // class object method
+      printHello() {
+        return `Hello, ${ this.message }!`
+      }
+
+      static render() {
+        return `
+          <h1>${ this.printHello() }</h1>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
+  </script>
+</body>
+</html>
 ```
 
-In order for the created methods and properties to be available to all the component, and not just the ones of the same name, it is necessary to define a global mixin for them through the Creaton function and its **mixins** property.
+In this example, the **printHello()** method of the MyComponent class object has been defined, which simply prints out a hello message for all components of this type.
 
-This must be done before components are passed to this function to define them in the application:
+In order not to create the same methods for different types of components, you can create a separate class for common methods, and then, inherit component classes from this method class, as shown below:
 
-```js
-// global admixture
-Creaton.mixins = {
-  printMessage() {
-    return this.message
-  }
-}
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp"></my-component>
 
-// pass Hello and Bye components to Creaton plugin
-Creaton(Hello, Bye)
+  <!-- mount the NewComponent component -->
+  <new-component id="newcomp"></new-component>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create a Methods class to store common methods
+    class Methods {
+      printHello() {
+        return `Hello, ${ this.message }!`
+      }
+    }
+
+    // inherit the MyComponent class from the Methods class
+    class MyComponent extends Methods {
+      message = 'Creaton'
+      color = 'red'
+
+      static mode = 'open'
+
+      static render() {
+        return `
+          <h1>${ this.printHello() }</h1>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // inherit the NewComponent class from the Methods class
+    class NewComponent extends Methods {
+      message = 'NewComponent'
+
+      static render() {
+        return `
+          <h2>${ this.printHello() }</h2>
+        `
+      }
+    }
+
+    // pass component classes to Creaton plugin
+    Creaton(MyComponent, NewComponent)
+  </script>
+</body>
+</html>
 ```
 
 <br>
@@ -515,14 +968,10 @@ Creaton(Hello, Bye)
 To output arrays in [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), use the [map()](https://javascript.info/array-methods#map) and [join()](https://javascript.info/array-methods#split-and-join) methods, as shown below:
 
 ```js
-const Hello = {
-  name: 'r-hello',
-  data() {
-    return {
-      colors: ['red', 'green', 'blue']
-    }
-  },
-  render() {
+class MyComponent {
+  colors = ['red', 'green', 'blue']
+
+  static render() {
     return `
       <ul>
         ${ this.colors.map(col => `<li>${ col }</li>`).join('') }
@@ -539,17 +988,13 @@ The **join()** method is passed an empty string to remove commas between the ele
 Similarly, you can display objects using the [Object.keys()](https://javascript.info/keys-values-entries) method, for example:
 
 ```js
-const Hello = {
-  name: 'r-hello',
-  data() {
-    return {
-      user: {
-        name: 'Leanne Graham',
-        age: 28
-      }
-    }
-  },
-  render() {
+class MyComponent {
+  user = {
+    name: 'John',
+    age: 32
+  }
+
+  static render() {
     return `
       <ul>
         ${ Object.keys(this.user).map(key => `<li>${ key }: ${ this.user[key] }</li>`).join('') }
@@ -561,38 +1006,66 @@ const Hello = {
 
 <br>
 <br>
+<h2 id="styles">Styles</h2>
+
+<br>
+
+To create [local styles](https://javascript.info/shadow-dom-style), the component needs to add a [Shadow DOM](https://javascript.info/shadow-dom) using the static property **mode**, as shown below:
+
+```js
+class MyComponent {
+  message = 'Creaton'
+  color = 'red'
+
+  static mode = 'open' // add Shadow DOM
+
+  static render() {
+    return `
+      <h1>Hello, ${ this.message }!</h1>
+      
+      <style>
+        h1 {
+          color: ${ this.color };
+        }
+      </style>
+    `
+  }
+}
+```
+
+<br>
+<br>
 <h2 id="slots">Slots</h2>
 
 <br>
 
-To work with [slots](https://javascript.info/slots-composition), the component needs to add a [Shadow DOM](https://javascript.info/shadow-dom) using the **mode** property, as shown below:
+To work with [slots](https://javascript.info/slots-composition), the component needs to add a [Shadow DOM](https://javascript.info/shadow-dom) using the static property **mode**, as shown below:
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
 </head>
 <body>
-  <!-- mount the Hello component -->
-  <r-hello>
-    <span slot="username">Leanne Graham</span>
-    <span slot="age">28</span>
+  <!-- mount the MyComponent component -->
+  <my-component>
+    <span slot="username">John</span>
+    <span slot="age">32</span>
     <span>Hardworking</span>
-  </r-hello>
+  </my-component>
 
   <!-- include Creaton plugin -->
   <script src="creaton.min.js"></script>
 
   <script>
-    // create a Hello component object
-    const Hello = {
-      name: 'r-hello',
-      mode: 'open', // add an open Shadow DOM for the component
-      render() {
+    // create component class MyComponent
+    class MyComponent {
+      static mode = 'open' // add Shadow DOM
+
+      static render() {
         return `
           <div>
             Name: <slot name="username"></slot>
@@ -609,8 +1082,8 @@ To work with [slots](https://javascript.info/slots-composition), the component n
       }
     }
 
-    // pass Hello component object to Creaton plugin
-    Creaton(Hello)
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
   </script>
 </body>
 </html>
@@ -618,450 +1091,187 @@ To work with [slots](https://javascript.info/slots-composition), the component n
 
 <br>
 <br>
-<h2 id="styles">Styles</h2>
-
-<br>
-
-To create [local styles](https://javascript.info/shadow-dom-style), the component needs to add a [Shadow DOM](https://javascript.info/shadow-dom) using the **mode** property, as shown below:
-
-```js
-const Hello = {
-  name: 'r-hello',
-  mode: 'open', // add an open Shadow DOM for the component
-  data() {
-    return {
-      message: 'Creaton',
-      mainColor: 'red'
-    }
-  },
-  render() {
-    return `
-      <h1>Hello, ${ this.message }!</h1>
-      
-      <style>
-        h1 {
-          color: ${ this.mainColor };
-        }
-      </style>
-    `
-  }
-}
-```
-
-<br>
-<br>
-<h2 id="custom-events">Custom events</h2>
+<h2 id="events">Events</h2>
 
 <br>
 
 For interaction between different components, an improved mechanism of [custom events](https://javascript.info/dispatch-events) is used. This mechanism involves the use of the **event()** method of the Creaton plugin and the special **$event()** method that is available in every component.
 
-Create an *Events.js* file in the *app* directory with the following content:
+When the Creaton plugin's **event()** method is called as a constructor, it returns a new [document fragment](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment) that is the source and receiver of custom events. And when this method is not called as a constructor, it works similarly to the special method **$event()**. This allows you to link components not only to each other, but also to any external code.
 
-```js
-// export event element eventReverse
-export const eventReverse = new Creaton.event()
-```
-
-When the Creaton plugin's **event()** method is called as a constructor, it returns a new [document fragment](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment) that is the source and receiver of custom events.
-
-Now make changes to the *index.html* file, as shown below:
+Make changes to the *index.html* file as shown below:
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
 </head>
 <body>
-  <!-- mount the Hello component -->
-  <r-hello></r-hello>
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp"></my-component>
 
-  <!-- mount the Colors component -->
-  <r-colors></r-colors>
+  <!-- mount the NewComponent component -->
+  <new-component id="newcomp"></new-component>
 
   <!-- include Creaton plugin -->
   <script src="creaton.min.js"></script>
 
   <script>
-    // create a Hello component object
-    const Hello = {
-      name: 'r-hello',
-      render() {
-        return `
-          <button id="button-reverse">Reverse array</button>
-        `
-      },
-      async connected() {
-        // import event element eventReverse
-        const { eventReverse } = await import('./Events.js')
+    // create event element myEvent
+    const myEvent = new Creaton.event()
 
-        // add a "click" event handler for the button
-        this.$('#button-reverse').addEventListener('click', () => {
-          // trigger "reverse-colors" event on element eventReverse
-          this.$event(eventReverse, 'reverse-colors')
-        })
-      }
-    }
+    // create component class NewComponent
+    class NewComponent {
+      colors = ['red', 'green', 'blue']
 
-    // create a Colors component object
-    const Colors = {
-      name: 'r-colors',
-      data() {
-        return {
-          arr: ['red', 'green', 'blue']
-        }
-      },
-      render() {
+      static render() {
         return `
           <ul>
-            ${ this.arr.map(item => `<li>${ item }</li>`).join('') }
+            ${ this.colors.map(col => `<li>${ col }</li>`).join('') }
           </ul>
         `
-      },
-      async connected() {
-        // import event element eventReverse
-        const { eventReverse } = await import('./Events.js')
+      }
 
-        // add the "reverse-colors" event handler to the eventReverse element
-        eventReverse.addEventListener('reverse-colors', () => {
-          this.arr.reverse() // reverse array
+      static connected() {
+        // add a "reverse" event handler to the myEvent element
+        myEvent.addEventListener('reverse', () => {
+          this.colors.reverse() // reverse array
 
-          // update component DOM
-          this.$render()
+          // update the DOM of the component
+          this.$update()
         })
       }
     }
 
-    // pass Hello and Colors component objects to Creaton plugin
-    Creaton(Hello, Colors)
+    // create component class MyComponent
+    class MyComponent {
+      static render() {
+        return `
+          <button id="btn-reverse">Reverse array</button>
+        `
+      }
+
+      static connected() {
+        // add a "click" event handler for the button
+        this.$('#btn-reverse').addEventListener('click', () => {
+          // trigger "reverse" event on element myEvent
+          this.$event(myEvent, 'reverse')
+        })
+      }
+    }
+
+    // pass component classes to Creaton plugin
+    Creaton(MyComponent, NewComponent)
   </script>
 </body>
 </html>
 ```
 
-In this example, an asynchronous **connected()** method is created in the Colors component object. Inside this method, the event element created at the previous step is imported from an external file and a handler is assigned to it:
+In this example, a new event element myEvent is first created:
 
 ```js
-async connected() {
-  // import event element eventReverse
-  const { eventReverse } = await import('./Events.js')
+// create event element myEvent
+const myEvent = new Creaton.event()
+```
 
-  // add the "reverse-colors" event handler to the eventReverse element
-  eventReverse.addEventListener('reverse-colors', () => {
-    this.arr.reverse() // reverse array
+This element will be assigned custom event handlers in some components and invoked in others.
 
-    // update component DOM
-    this.$render()
+In the static method **connected()** of the NewComponent component class, the handler for the custom event *"reverse"* is assigned to the myEvent element. Inside this handler, the array is reverse and the DOM of the component is updated:
+
+```js
+static connected() {
+  // add a "reverse" event handler to the myEvent element
+  myEvent.addEventListener('reverse', () => {
+    this.colors.reverse() // reverse array
+
+    // update the DOM of the component
+    this.$update()
   })
 }
 ```
 
-<br>
-
-Inside the Hello component object, the **connected()** method is also asynchronous so that the outer event element can be imported:
+In the static method **connected()** of the MyComponent component class, a *"click"* event handler is added to the button, inside which the *"reverse"* event is called for the myEvent element, as shown below:
 
 ```js
-async connected() {
-  // import event element eventReverse
-  const { eventReverse } = await import('./Events.js')
-
+static connected() {
   // add a "click" event handler for the button
-  this.$('#button-reverse').addEventListener('click', () => {
-    // trigger "reverse-colors" event on element eventReverse
-    this.$event(eventReverse, 'reverse-colors')
+  this.$('#btn-reverse').addEventListener('click', () => {
+    // trigger "reverse" event on element myEvent
+    this.$event(myEvent, 'reverse')
   })
 }
 ```
 
-In addition, the *"click"* event handler has been added to the button, inside which, using the special **$event()** method, the *"reverse-colors"* event is called for the imported element when the button is clicked, as shown below:
+The first argument of the special **$event()** method is the event element myEvent, and the second argument is the name of the event to be called:
 
 ```js
-// add a "click" event handler for the button
-this.$('#button-reverse').addEventListener('click', () => {
-  // trigger "reverse-colors" event on element eventReverse
-  this.$event(eventReverse, 'reverse-colors')
-})
-```
-
-The first argument of the special **$event()** method is the event element eventReverse, and the second argument is the name of the event to be called:
-
-```js
-this.$event(eventReverse, 'reverse-colors')
+this.$event(myEvent, 'reverse')
 ```
 
 The **$event()** method can also receive a third argument, in which you can pass parameters that fully correspond to the parameters of the [CustomEvent](https://javascript.info/dispatch-events#custom-events) constructor. For example, you can pass the **detail** property, which allows you to share data between components.
 
-When the **event()** method of the Creaton plugin is called not as a constructor, it works similarly to the special **$event()** method.
-
 <br>
 
-Add a new *"new-colors"* event handler to the **connected()** method of the Colors component, as shown below:
+Add a new *"new-colors"* event handler to the static **connected()** method of the NewComponent component, as shown below:
 
 ```js
-async connected() {
-  // import event element eventReverse
-  const { eventReverse } = await import('./Events.js')
+static connected() {
+  // add a "reverse" event handler to the myEvent element
+  myEvent.addEventListener('reverse', () => {
+    this.colors.reverse() // reverse array
 
-  // add the "reverse-colors" event handler to the eventReverse element
-  eventReverse.addEventListener('reverse-colors', () => {
-    this.arr.reverse() // reverse array
-
-    // update component DOM
-    this.$render()
+    // update the DOM of the component
+    this.$update()
   })
 
-  // add the "new-colors" event handler to the eventReverse element
-  eventReverse.addEventListener('new-colors', event => {
-    this.arr = event.detail // new array
+  // add a "new-colors" event handler to the myEvent element
+  myEvent.addEventListener('new-colors', event => {
+    this.colors = event.detail // assign new array
 
-    // update component DOM
-    this.$render()
+    // update the DOM of the component
+    this.$update()
   })
 }
 ```
 
-Note that the event handler now has an **event** parameter through which you can access the **detail** property.
+Note that the event handler now has an **event** parameter through which you can access the **detail** property. In addition, it is recommended to add a hyphen to the names of custom events so that they do not overlap with the names of standard events.
 
-Now modify the contents of the Hello component object by adding a new button and a *"click"* event handler, inside which a new array of colors is passed to the *"new-colors"* event handler:
+Now modify the markup of the MyComponent component by adding a new button to it:
 
 ```js
-const Hello = {
-  name: 'r-hello',
-  render() {
-    return `
-      <button id="button-reverse">Reverse array</button>
-      <button id="button-new">New array</button>
-    `
-  },
-  async connected() {
-    // import event element eventReverse
-    const { eventReverse } = await import('./Events.js')
+static render() {
+  return `
+    <button id="btn-reverse">Reverse array</button>
+    <button id="btn-new">New array</button>
+  `
+}
+```
 
-    // add a "click" event handler for the button
-    this.$('#button-reverse').addEventListener('click', () => {
-      // trigger "reverse-colors" event on element eventReverse
-      this.$event(eventReverse, 'reverse-colors')
+and the *"click"* event handler, inside which a new array of colors is passed to the *"new-colors"* event handler:
+
+```js
+static connected() {
+  // add a "click" event handler for the button
+  this.$('#btn-reverse').addEventListener('click', () => {
+    // trigger "reverse" event on element myEvent
+    this.$event(myEvent, 'reverse')
+  })
+
+  // add a "click" event handler for the button
+  this.$('#btn-new').addEventListener('click', () => {
+    // trigger "new-colors" event on element myEvent
+    this.$event(myEvent, 'new-colors', {
+      // pass a new array to the event handler
+      detail: ['blue', 'orange', 'purple', 'gold']
     })
-
-    // add a "click" event handler for the button
-    this.$('#button-new').addEventListener('click', () => {
-      // trigger "new-colors" event on element eventReverse
-      this.$event(eventReverse, 'new-colors', {
-        // pass a new array to the event handler
-        detail: ['blue', 'orange', 'purple', 'gold']
-      })
-    })
-  }
+  })
 }
 ```
 
-Thus, data can be easily exchanged between different components.
-
-<br>
-
-To avoid having to import the event element into each individual component, you can resort to creating the event element in a global mixin before passing the components to the Creaton plugin:
-
-```js
-Creaton.mixins = {
-  // create event element eventReverse
-  eventReverse: new Creaton.event()
-}
-
-// pass Hello and Colors component objects to Creaton plugin
-Creaton(Hello, Colors)
-```
-
-Then instead of importing the event element from an external file:
-
-```js
-// import event element eventReverse
-const { eventReverse } = await import('./Events.js')
-```
-
-you need to get the event element from the global mixin:
-
-```js
-// get event element eventReverse
-const eventReverse = this.$mixins.eventReverse
-```
-
-<br>
-<br>
-<h2 id="features-work">Features work</h2>
-
-<br>
-
-All methods of a component object  are executed in the context of its data object. Make changes to the index.html file, as shown below:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creaton</title>
-</head>
-<body>
-  <!-- mount the Hello component -->
-  <r-hello id="hello" data-title="Hello"></r-hello>
-
-  <!-- include Creaton plugin -->
-  <script src="creaton.min.js"></script>
-
-  <script>
-    // create a Hello component object
-    const Hello = {
-      name: 'r-hello',
-      data() {
-        console.log('data: ', this)
-
-        return {
-          id: 'ok',
-          printIdData() {
-            console.log('printIdData: ', this)
-            return this.id
-          },
-          printIdAttr() {
-            console.log('printIdAttr: ', this)
-            return this.$host.id
-          },
-          printTitle() {
-            console.log('printTitle: ', this)
-            return this.dataset.title
-          }
-        }
-      },
-      render() {
-        return `
-          <h1>${ this.id }</h1>
-          <h1>${ this.$host.id }</h1>
-          <h1>${ this.$host.dataset.title }</h1>
-
-          <h2>${ this.printIdData() }</h2>
-          <h2>${ this.printIdAttr() }</h2>
-          <h2>${ this.printTitle() }</h2>
-        `
-      },
-      connected() {
-        console.log('connected: ', this)
-      }
-    }
-
-    // pass Hello component object to Creaton plugin
-    Creaton(Hello)
-  </script>
-</body>
-</html>
-```
-
-As you can see from this example, the **$host** special property is used in the substitutions to get the value of the ***id*** and ***data-title*** attributes of the component's mount element:
-
-```html
-<h1>${ this.$host.id }</h1>
-<h1>${ this.$host.dataset.title }</h1>
-```
-
-However, accessing the value of the ***data-title*** attribute in the **printTitle()** method occurs without using the **$host** special property. Instead, the standard property of HTML [dataset](https://javascript.info/dom-attributes-and-properties#non-standard-attributes-dataset) elements is applied:
-
-```js
-printTitle() {
-  console.log('printTitle: ', this)
-  return this.dataset.title
-}
-```
-
-But the **dataset** property is not in the custom properties definition of the component's data object. The data object has only one **id** property and three methods:
-
-```js
-return {
-  id: 'ok',
-  printIdData() {
-    console.log('printIdData: ', this)
-    return this.id
-  },
-  printIdAttr() {
-    console.log('printIdAttr: ', this)
-    return this.$host.id
-  },
-  printTitle() {
-    console.log('printTitle: ', this)
-    return this.dataset.title
-  }
-}
-```
-
-The component's data object is a [proxy](https://javascript.info/proxy) and works as follows: first, the property is looked up in the component's data object, and if there is no such property, then the search continues in the component itself.
-
-For this reason, the method:
-
-```js
-printIdData() {
-  console.log('printIdData: ', this)
-  return this.id
-}
-```
-
-and substitution:
-
-```html
-<h1>${ this.id }</h1>
-```
-
-will return the value "ok" of the custom **id** property.
-
-To access the ***id*** attribute of a component's mount element, use the special **$host** property, which always refers to the component:
-
-```js
-printIdAttr() {
-  console.log('printIdAttr: ', this)
-  return this.$host.id
-}
-```
-
-```html
-<h1>${ this.$host.id }</h1>
-```
-
-If the component did not have a custom **id** property that matches the name of the attribute, then to get the value of this attribute, one could do without the special **$host** property:
-
-```js
-printIdAttr() {
-  console.log('printIdAttr: ', this)
-  return this.id
-}
-```
-
-This is exactly what happens in the method:
-
-```js
-printTitle() {
-  console.log('printTitle: ', this)
-  return this.dataset.title
-}
-```
-
-Since the component data object does not have a custom **dataset** property, the search occurs in the component itself, which has such a property.
-
-However, in the substitution:
-
-```html
-<h1>${ this.$host.dataset.title }</h1>
-```
-
-the **$host** property still applies.
-
-It can be simply removed:
-
-```html
-<h1>${ this.dataset.title }</h1>
-```
-
-and the result will not change.
+In this way, data can be easily exchanged between different components.
 
 <br>
 <br>
