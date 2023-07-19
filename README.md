@@ -101,7 +101,7 @@ To ensure there are no naming conflicts between standard and custom HTML element
 
 When you open the *index.html* file in the browser, the screen will display the message created in the Hello component:
 
-> <h1 style="color: red;">Hello, Creaton!</h1>
+<h1 style="color: red;">Hello, Creaton!</h1>
 
 <br>
 
@@ -190,7 +190,7 @@ mycomp.$update({ message: 'Web Components', color: 'green' })
 
 The title color and message will change immediately:
 
-> <h1 style="color: green;">Hello, Web Components!</h1>
+<h1 style="color: green;">Hello, Web Components!</h1>
 
 <br>
 <br>
@@ -552,7 +552,7 @@ mycomp.$update({ message: 'Web Components', color: 'green' })
 
 The title color and message will change immediately:
 
-> <h1 style="color: green;">Hello, Web Components!</h1>
+<h1 style="color: green;">Hello, Web Components!</h1>
 
 The second way to update the component's HTML content based on the new state value is to use the **$props** special property, which is used to quickly access all of the component's attributes.
 
@@ -564,7 +564,7 @@ mycomp.$props.color = 'blue'
 
 The title color will change immediately:
 
-> <h1 style="color: blue;">Hello, Web Components!</h1>
+<h1 style="color: blue;">Hello, Web Components!</h1>
 
 Special methods and properties will be discussed in the next section. They all begin with a dollar sign and are defined internally by the component.
 
