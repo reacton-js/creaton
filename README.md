@@ -804,6 +804,13 @@ When this method is called with no arguments, the state object is not changed an
 mycomp.$update()
 ```
 
+In addition, the **$update()** method is asynchronous and returns [promise](https://javascript.info/promise-basics), the value of which will be a string showing the number of milliseconds for which a complete update of the component's DOM occurred, for example:
+
+```
+await mycomp.$update({ message: 'Web Components', color: 'green' })
+'1 ms'
+```
+
 In the first version of the plugin, a simple replacement of the old DOM with a new one was used. The second version of Creaton uses a matching principle based on comparing the old DOM with the new one. If a mismatch is found, then the value in the old DOM is replaced by the new [node](https://javascript.info/dom-nodes#other-node-types).
 
 This avoids losing events assigned to elements using the [addEventListener()](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) method and does not overload the browser with unnecessary redrawing of the entire HTML content of the component.
