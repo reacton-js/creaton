@@ -1281,4 +1281,177 @@ static connected() {
 In this way, data can be easily exchanged between different components.
 
 <br>
+
+To demonstrate the interaction of components with external code, add a button to clear the array in the markup of the *index.html* file:
+
+```html
+<!-- mount the MyComponent component -->
+<my-component id="mycomp"></my-component>
+
+<!-- mount the NewComponent component -->
+<new-component id="newcomp"></new-component>
+
+<!-- clear array button -->
+<button id="btn-clear">Clear array</button>
+```
+
+Add a new *"clear-colors"* event handler to the static **connected()** method of the NewComponent component, as shown below:
+
+```js
+static connected() {
+  // add a "reverse" event handler to the myEvent element
+  myEvent.addEventListener('reverse', () => {
+    this.colors.reverse() // reverse array
+
+    // update the DOM of the component
+    this.$update()
+  })
+
+  // add a "new-colors" event handler to the myEvent element
+  myEvent.addEventListener('new-colors', event => {
+    this.colors = event.detail // assign new array
+
+    // update the DOM of the component
+    this.$update()
+  })
+
+  // add a "clear-colors" event handler to the myEvent element
+  myEvent.addEventListener('clear-colors', event => {
+    this.colors.length = 0 //  clear array
+
+    // update the DOM of the component
+    this.$update()
+  })
+}
+```
+
+and the *"click"* event handler for the new button:
+
+```js
+// add a "click" event handler for the button
+document.querySelector('#btn-clear').addEventListener('click', () => {
+  // trigger "clear-colors" event on element myEvent
+  Creaton.event(myEvent, 'clear-colors')
+})
+
+// pass component classes to Creaton plugin
+Creaton(MyComponent, NewComponent)
+```
+
+Inside this handler, the *"clear-colors"* event for the myEvent element is called using the **event()** method of the plugin itself:
+
+```js
+// trigger "clear-colors" event on element myEvent
+Creaton.event(myEvent, 'clear-colors')
+```
+
+ rather than using the special **$event()** method, which is only available in components, but is essentially just a reference to the **event()** method of the Creaton plugin.
+
+ Below is the full content of the *index.html* file:
+
+ ```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component id="mycomp"></my-component>
+
+  <!-- mount the NewComponent component -->
+  <new-component id="newcomp"></new-component>
+
+  <!-- clear array button -->
+  <button id="btn-clear">Clear array</button>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create event element myEvent
+    const myEvent = new Creaton.event()
+
+    // create component class NewComponent
+    class NewComponent {
+      colors = ['red', 'green', 'blue']
+
+      static render() {
+        return `
+          <ul>
+            ${ this.colors.map(col => `<li>${ col }</li>`).join('') }
+          </ul>
+        `
+      }
+
+      static connected() {
+        // add a "reverse" event handler to the myEvent element
+        myEvent.addEventListener('reverse', () => {
+          this.colors.reverse() // reverse array
+
+          // update the DOM of the component
+          this.$update()
+        })
+
+        // add a "new-colors" event handler to the myEvent element
+        myEvent.addEventListener('new-colors', event => {
+          this.colors = event.detail // assign new array
+
+          // update the DOM of the component
+          this.$update()
+        })
+
+        // add a "clear-colors" event handler to the myEvent element
+        myEvent.addEventListener('clear-colors', event => {
+          this.colors.length = 0 //  clear array
+
+          // update the DOM of the component
+          this.$update()
+        })
+      }
+    }
+
+    // create component class MyComponent
+    class MyComponent {
+      static render() {
+        return `
+          <button id="btn-reverse">Reverse array</button>
+          <button id="btn-new">New array</button>
+        `
+      }
+
+      static connected() {
+        // add a "click" event handler for the button
+        this.$('#btn-reverse').addEventListener('click', () => {
+          // trigger "reverse" event on element myEvent
+          this.$event(myEvent, 'reverse')
+        })
+
+        // add a "click" event handler for the button
+        this.$('#btn-new').addEventListener('click', () => {
+          // trigger "new-colors" event on element myEvent
+          this.$event(myEvent, 'new-colors', {
+            // pass a new array to the event handler
+            detail: ['blue', 'orange', 'purple', 'gold']
+          })
+        })
+      }
+    }
+
+    // add a "click" event handler for the button
+    document.querySelector('#btn-clear').addEventListener('click', () => {
+      // trigger "clear-colors" event on element myEvent
+      Creaton.event(myEvent, 'clear-colors')
+    })
+
+    // pass component classes to Creaton plugin
+    Creaton(MyComponent, NewComponent)
+  </script>
+</body>
+</html>
+ ```
+
+<br>
 <br>

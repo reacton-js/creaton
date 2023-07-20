@@ -1281,4 +1281,177 @@ static connected() {
 Таким образом, можно легко обмениваться данными между различными компонентами.
 
 <br>
+
+Для демонстрации взаимодействия компонентов с внешним кодом, добавьте в разметку файла *index.html* кнопку для очистки массива:
+
+```html
+<!-- монтировать компонент MyComponent -->
+<my-component id="mycomp"></my-component>
+
+<!-- монтировать компонент NewComponent -->
+<new-component id="newcomp"></new-component>
+
+<!-- кнопка очистки массива -->
+<button id="btn-clear">Очистить массив</button>
+```
+
+Добавьте в статический метод **connected()** компонента NewComponent новый обработчик события *"clear-colors"*, как показано ниже:
+
+```js
+static connected() {
+  // добавить элементу myEvent обработчик события "reverse"
+  myEvent.addEventListener('reverse', () => {
+    this.colors.reverse() // обратить массив
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myEvent обработчик события "new-colors"
+  myEvent.addEventListener('new-colors', event => {
+    this.colors = event.detail // присвоить новый массив
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myEvent обработчик события "clear-colors"
+  myEvent.addEventListener('clear-colors', event => {
+    this.colors.length = 0 //  очистить массив
+
+    // обновить DOM компонента
+    this.$update()
+  })
+}
+```
+
+и обработчик события *"click"* для новой кнопки:
+
+```js
+// добавить для кнопки обработчик события "click"
+document.querySelector('#btn-clear').addEventListener('click', () => {
+  // вызвать событие "clear-colors" для элемента myEvent
+  Creaton.event(myEvent, 'clear-colors')
+})
+
+// передать классы компонентов в плагин Creaton
+Creaton(MyComponent, NewComponent)
+```
+
+Внутри этого обработчика, событие *"clear-colors"* для элемента myEvent вызывается с помощью метода **event()** самого плагина:
+
+```js
+// вызвать событие "clear-colors" для элемента myEvent
+Creaton.event(myEvent, 'clear-colors')
+```
+
+ а не специального метода **$event()**, который доступен только в компонентах, но по своей сути, просто является ссылкой на метод **event()** плагина Creaton.
+
+ Ниже представлено полное содержимое файла *index.html*:
+
+ ```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент MyComponent -->
+  <my-component id="mycomp"></my-component>
+
+  <!-- монтировать компонент NewComponent -->
+  <new-component id="newcomp"></new-component>
+
+  <!-- кнопка очистки массива -->
+  <button id="btn-clear">Очистить массив</button>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // создать элемент события myEvent
+    const myEvent = new Creaton.event()
+
+    // создать класс компонента NewComponent
+    class NewComponent {
+      colors = ['красный', 'зелёный', 'синий']
+
+      static render() {
+        return `
+          <ul>
+            ${ this.colors.map(col => `<li>${ col }</li>`).join('') }
+          </ul>
+        `
+      }
+
+      static connected() {
+        // добавить элементу myEvent обработчик события "reverse"
+        myEvent.addEventListener('reverse', () => {
+          this.colors.reverse() // обратить массив
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myEvent обработчик события "new-colors"
+        myEvent.addEventListener('new-colors', event => {
+          this.colors = event.detail // присвоить новый массив
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myEvent обработчик события "clear-colors"
+        myEvent.addEventListener('clear-colors', event => {
+          this.colors.length = 0 //  очистить массив
+
+          // обновить DOM компонента
+          this.$update()
+        })
+      }
+    }
+
+    // создать класс компонента MyComponent
+    class MyComponent {
+      static render() {
+        return `
+          <button id="btn-reverse">Обратить массив</button>
+          <button id="btn-new">Новый массив</button>
+        `
+      }
+
+      static connected() {
+        // добавить для кнопки обработчик события "click"
+        this.$('#btn-reverse').addEventListener('click', () => {
+          // вызвать событие "reverse" для элемента myEvent
+          this.$event(myEvent, 'reverse')
+        })
+
+        // добавить для кнопки обработчик события "click"
+        this.$('#btn-new').addEventListener('click', () => {
+          // вызвать событие "new-colors" для элемента myEvent
+          this.$event(myEvent, 'new-colors', {
+            // передать в обработчик события новый массив
+            detail: ['синий', 'оранжевый', 'фиолетовый', 'золотой']
+          })
+        })
+      }
+    }
+
+    // добавить для кнопки обработчик события "click"
+    document.querySelector('#btn-clear').addEventListener('click', () => {
+      // вызвать событие "clear-colors" для элемента myEvent
+      Creaton.event(myEvent, 'clear-colors')
+    })
+
+    // передать классы компонентов в плагин Creaton
+    Creaton(MyComponent, NewComponent)
+  </script>
+</body>
+</html>
+ ```
+
+<br>
 <br>
