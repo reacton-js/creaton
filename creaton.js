@@ -233,7 +233,7 @@
           updateAttr(newNode.attributes, oldNode) // обновить атрибуты
         }
 
-        // если старая нода является компонентом и не содержит Теневой DOM
+        // если старая нода является компонентом и не содержит теневой DOM
         if (oldNode.$state && oldNode.$light) {
           return true // вернуть Истину
         }
