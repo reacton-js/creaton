@@ -43,6 +43,7 @@ class MyComponent {
 6. [Стили](#styles)
 7. [Слоты](#slots)
 8. [События](#events)
+9. [Маршруты](#routes)
 
 <br>
 <hr>
@@ -683,6 +684,15 @@ static mode = 'closed' // добавить закрытый Теневой DOM
 ```
 mycomp.$shadow
 null
+```
+
+<br>
+
+Свойство **$light** возвращает значение Истина, если компонент не содержит [Теневой DOM](https://learn.javascript.ru/shadow-dom), иначе оно возвращает значение Ложь, например:
+
+```
+mycomp.$light
+true
 ```
 
 <br>
@@ -1345,11 +1355,11 @@ Creaton(MyComponent, NewComponent)
 Creaton.event(myEvent, 'clear-colors')
 ```
 
- а не специального метода **$event()**, который доступен только в компонентах, но по своей сути, просто является ссылкой на метод **event()** плагина Creaton.
+а не специального метода **$event()**, который доступен только в компонентах, но по своей сути, просто является ссылкой на метод **event()** плагина Creaton.
 
- Ниже представлено полное содержимое файла *index.html*:
+Ниже представлено полное содержимое файла *index.html*:
 
- ```html
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -1451,7 +1461,850 @@ Creaton.event(myEvent, 'clear-colors')
   </script>
 </body>
 </html>
- ```
+```
+
+<br>
+<br>
+<h2 id="routes">Маршруты</h2>
+
+<br>
+
+Для создания маршрутизации, применяется усовершенствованный механизм [пользовательских событий](https://learn.javascript.ru/dispatch-events). Этот механизм подразумевает использование метода **route()** плагина Creaton и специального метода **$route()**, который доступен в каждом компоненте.
+
+Когда метод **route()** плагина Creaton вызывается как конструктор, то он возвращает новый [фрагмент документа](https://developer.mozilla.org/ru/docs/Web/API/DocumentFragment), который является источником и получателем пользовательских событий. А когда этот метод вызывается не как конструктор, то он работает аналогично специальному методу **$route()**. Это позволяет связывать компоненты участвующие в маршрутизации не только между собой, но и с любым внешним кодом.
+
+В отличие от метода **event()**, вызываемый как конструктор метод **route()** возвращает фрагменты документа с усовершенствованным методом [addEventListener()](https://developer.mozilla.org/ru/docs/Web/API/EventTarget/addEventListener), что позволяет в названиях событий использовать символы регулярных выражений.
+
+Внесите изменения в файл *index.html*, как показано ниже:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент MyMenu -->
+  <my-menu></my-menu>
+
+  <!-- монтировать компонент MyContent -->
+  <my-content></my-content>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // создать элемент события myRoute
+    const myRoute = new Creaton.route()
+
+    // создать класс компонента myHome
+    class myHome {
+      static render() {
+        return `
+          <h2>Главная</h2>
+        `
+      }
+    }
+
+    // создать класс компонента myAbout
+    class myAbout {
+      static render() {
+        return `
+          <h2>О нас</h2>
+        `
+      }
+    }
+
+    // создать класс компонента myContacts
+    class myContacts {
+      static render() {
+        return `
+          <h2>Контакты</h2>
+        `
+      }
+    }
+
+    // создать класс компонента MyMenu
+    class MyMenu {
+      static render() {
+        return `
+          <nav>
+            <a href="/">Главная</a>
+            <a href="/about">О нас</a>
+            <a href="/contacts">Контакты</a>
+          </nav>
+        `
+      }
+
+      static connected() {
+        // добавить для элемента NAV обработчик события "click"
+        this.$('nav').addEventListener('click', event => {
+          // отменить переход по ссылке
+          event.preventDefault()
+
+          // вызвать событие адреса ссылки для элемента myRoute
+          this.$route(myRoute, event.target.href)
+        })
+      }
+    }
+
+    // создать класс компонента MyContent
+    class MyContent {
+      page = 'my-home' // начальное значение состояния
+
+      static render() {
+        return `
+          <${this.page} />
+        `
+      }
+
+      static connected() {
+        // добавить элементу myRoute обработчик события "/"
+        myRoute.addEventListener('/', () => {
+          this.page = 'my-home' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myRoute обработчик события "/about"
+        myRoute.addEventListener('/about', () => {
+          this.page = 'my-about' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myRoute обработчик события "/contacts"
+        myRoute.addEventListener('/contacts', () => {
+          this.page = 'my-contacts' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+      }
+    }
+
+    // передать классы компонентов в плагин Creaton
+    Creaton(myHome, myAbout, myContacts, MyMenu, MyContent)
+  </script>
+</body>
+</html>
+```
+
+Для работы с маршрутизацией, нам потребуется любой разработочный сервер, такой, например, как [lite-server](https://www.npmjs.com/package/lite-server).
+
+Установите данный сервер с помощью команды в терминале:
+
+```
+npm install --global lite-server
+```
+
+Теперь перейдите в каталог *app* с помощью терминала или откройте терминал в этом каталоге, и в терминале введите команду:
+
+```
+lite-server
+```
+
+После этого откроется окно браузера по умолчанию, в котором будет отображаться созданное выше приложение.
+
+<br>
+
+В данном примере, вначале создаётся новый элемент события myRoute:
+
+```js
+// создать элемент события myRoute
+const myRoute = new Creaton.route()
+```
+
+Этому элементу будут назначаться обработчики адресных событий в одних компонентах и вызываться в других.
+
+Затем у нас происходит определение трёх компонентов страниц:
+
+```js
+// создать класс компонента myHome
+class myHome {
+  static render() {
+    return `
+      <h2>Главная</h2>
+    `
+  }
+}
+
+// создать класс компонента myAbout
+class myAbout {
+  static render() {
+    return `
+      <h2>О нас</h2>
+    `
+  }
+}
+
+// создать класс компонента myContacts
+class myContacts {
+  static render() {
+    return `
+      <h2>Контакты</h2>
+    `
+  }
+}
+```
+
+После создания компонентов страниц, создаётся компонент главного меню:
+
+```js
+// создать класс компонента MyMenu
+class MyMenu {
+  static render() {
+    return `
+      <nav>
+        <a href="/">Главная</a>
+        <a href="/about">О нас</a>
+        <a href="/contacts">Контакты</a>
+      </nav>
+    `
+  }
+
+  static connected() {
+    // добавить для элемента NAV обработчик события "click"
+    this.$('nav').addEventListener('click', event => {
+      // отменить переход по ссылке
+      event.preventDefault()
+
+      // вызвать событие адреса ссылки для элемента myRoute
+      this.$route(myRoute, event.target.href)
+    })
+  }
+}
+```
+
+Этот компонент монтируется первым в приложении:
+
+```html
+<!-- монтировать компонент MyMenu -->
+<my-menu></my-menu>
+```
+
+В статическом методе **connected()** класса компонента MyMenu элементу NAV добавляется обработчик события *"click"*, внутри которого, приостанавливается переход по ссылке и вызывается адресное событие для элемента myRoute, как показано ниже:
+
+```js
+static connected() {
+  // добавить для элемента NAV обработчик события "click"
+  this.$('nav').addEventListener('click', event => {
+    // отменить переход по ссылке
+    event.preventDefault()
+
+    // вызвать событие адреса ссылки для элемента myRoute
+    this.$route(myRoute, event.target.href)
+  })
+}
+```
+
+В качестве названия адресного события, во втором аргументе метода **$route()** передаётся содержимое атрибута ***href*** ссылки, по которой был произведён щелчок:
+
+```js
+// вызвать событие адреса ссылки для элемента myRoute
+this.$route(myRoute, event.target.href)
+```
+
+Как и при работе с пользовательскими событиями, методу **$route()** можно передать в третьем аргументе объект со свойством **detail**, в котором обработчикам передаются какие-то данные, например:
+
+```js
+// вызвать событие адреса ссылки для элемента myRoute
+this.$route(myRoute, event.target.href, {
+  // передать в обработчик события новый массив
+  detail: ['синий', 'оранжевый', 'фиолетовый', 'золотой']
+})
+```
+
+Важным отличием от пользовательских событий является то, что передаваемые в адресные события данные должны поддаваться сериализации и их размер не должен превышать 16 MiB. Т.е. эти данные должны соответствовать параметру **state** метода [pushState()](https://developer.mozilla.org/ru/docs/Web/API/History/pushState).
+
+<br>
+
+Последним в приложении определяется компонент для вывода страниц: 
+
+```js
+// создать класс компонента MyContent
+class MyContent {
+  page = 'my-home' // начальное значение состояния
+
+  static render() {
+    return `
+      <${this.page} />
+    `
+  }
+
+  static connected() {
+    // добавить элементу myRoute обработчик события "/"
+    myRoute.addEventListener('/', () => {
+      this.page = 'my-home' // присвоить значение
+
+      // обновить DOM компонента
+      this.$update()
+    })
+
+    // добавить элементу myRoute обработчик события "/about"
+    myRoute.addEventListener('/about', () => {
+      this.page = 'my-about' // присвоить значение
+
+      // обновить DOM компонента
+      this.$update()
+    })
+
+    // добавить элементу myRoute обработчик события "/contacts"
+    myRoute.addEventListener('/contacts', () => {
+      this.page = 'my-contacts' // присвоить значение
+
+      // обновить DOM компонента
+      this.$update()
+    })
+  }
+}
+```
+
+Этот компонент монтируется последним в приложении:
+
+```html
+<!-- монтировать компонент MyContent -->
+<my-content></my-content>
+```
+
+В самом начале класса этого компонента, определяется начальное значение состояния **page**, как показано ниже:
+
+```js
+page = 'my-home' // начальное значение состояния
+```
+
+Оно соответствует названию компонента страницы myHome:
+
+```js
+// создать класс компонента myHome
+class myHome {
+  static render() {
+    return `
+      <h2>Главная</h2>
+    `
+  }
+}
+```
+
+В HTML-разметке компонента MyContent происходит создание компонента myHome с помощью самозакрывающегося тега:
+
+```js
+static render() {
+  return `
+    <${this.page} />
+  `
+}
+```
+
+Этот пример можно переписать с использованием открывающего и закрывающего тегов:
+
+```js
+static render() {
+  return `
+    <${this.page}></${this.page}>
+  `
+}
+```
+
+Такой способ используется, когда необходимо, например, передать HTML-содержимое в [слоты](https://learn.javascript.ru/slots-composition):
+
+```js
+static render() {
+  return `
+    <${this.page}>
+      <span slot="username">Иван</span>
+      <span slot="age">32</span>
+    </${this.page}>
+  `
+}
+```
+
+В статическом методе **connected()** компонента MyContent происходит назначение трёх обработчиков для элемента myRoute, как показано ниже:
+
+```js
+static connected() {
+  // добавить элементу myRoute обработчик события "/"
+  myRoute.addEventListener('/', () => {
+    this.page = 'my-home' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/about"
+  myRoute.addEventListener('/about', () => {
+    this.page = 'my-about' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/contacts"
+  myRoute.addEventListener('/contacts', () => {
+    this.page = 'my-contacts' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+}
+```
+
+Внутри каждого обработчика происходит присвоение состоянию **page** нового значения, соответствующего адресу страницы, на котором сработал данный обработчик, например:
+
+```js
+this.page = 'my-about' // присвоить значение
+```
+
+Этот обработчик сработает, если адрес страницы соответствует */about*.
+
+В конце каждого обработчика, происходит обновление DOM компонента MyContent:
+
+```js
+// обновить DOM компонента
+this.$update()
+```
+
+Если начальное значение состояния **page** не будет соответствовать названию компонента, например:
+
+```js
+page = '' // начальное значение состояния
+```
+
+или если предполагается открытие приложения не с главной страницы, а, например, со страницы */about* или любой другой, то рекомендуется в статический метод **connected()** компонента MyMenu добавить обработчик события *"load"* для глобального объекта [window](https://learn.javascript.ru/global-object), чтобы маршрутизация срабатывала сразу после загрузки страницы, как показано ниже:
+
+```js
+static connected() {
+  // добавить для элемента NAV обработчик события "click"
+  this.$('nav').addEventListener('click', event => {
+    // отменить переход по ссылке
+    event.preventDefault()
+
+    // вызвать событие адреса ссылки для элемента myRoute
+    this.$route(myRoute, event.target.href)
+  })
+
+  // добавить обработчик события "load" для глобального объекта Window
+  window.addEventListener('load', () => {
+    // вызвать событие адреса ссылки для элемента myRoute
+    this.$route(myRoute, location.href)
+  })
+}
+```
+
+Тогда во втором аргументе методу **$route()** передаётся свойство **href** объекта [location](https://developer.mozilla.org/ru/docs/Web/API/Location):
+
+```js
+// вызвать событие адреса ссылки для элемента myRoute
+this.$route(myRoute, location.href)
+```
+
+<br>
+
+Для элементов событий, созданных с помощью метода **route()** плагина Creaton, допускается использование символов [регулярных выражений](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/RegExp) в названии событий создаваемых методом **addEventListener()**, например:
+
+```js
+// добавить элементу myRoute обработчик события "/abo\\w+"
+myRoute.addEventListener('/abo\\w+', () => {
+  this.page = 'my-about' // присвоить значение
+
+  // обновить DOM компонента
+  this.$update()
+})
+```
+
+В данном примере, обработчик будет вызываться для всех страниц, которые начинаются с */abo*.
+
+Важной особенностью создания регулярных выражений в строке является то, что специальные символы необходимо экранировать дважды:
+
+```js
+'/abo\\w+'
+```
+
+вместо:
+
+```js
+'/abo\w+'
+```
+
+На внутреннем уровне, такая строка преобразуется в регулярное выражение следующего вида:
+
+```js
+/\/abo\w+/
+```
+
+<br>
+
+Все обработчики поддерживают [параметры маршрутов](https://developer.mozilla.org/ru/docs/Learn/Server-side/Express_Nodejs/routes#%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D1%8B_%D0%BC%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82%D0%BE%D0%B2). Добавьте в HTML-разметку компонента MyMenu новую ссылку:
+
+```js
+static render() {
+  return `
+    <nav>
+      <a href="/">Главная</a>
+      <a href="/about">О нас</a>
+      <a href="/contacts">Контакты</a>
+      <a href="/ivan/32">Иван</a>
+    </nav>
+  `
+}
+```
+
+Создайте новый компонент страницы myUsers:
+
+```js
+// создать класс компонента myUsers
+class myUsers {
+  static mode = 'open' // добавить Теневой DOM
+  
+  static render() {
+    return `
+      <slot name="user"></slot>
+      <slot name="age"></slot>
+    `
+  }
+}
+```
+
+Поскольку этот компонент будет получать в [слоты](https://learn.javascript.ru/slots-composition) HTML-содержимое извне, необходимо было добавить ему [Теневой DOM](https://learn.javascript.ru/shadow-dom), как показано ниже:
+
+```js
+static mode = 'open' // добавить Теневой DOM
+```
+
+Передайте класс нового компонента в плагин Creaton:
+
+```js
+// передать классы компонентов в плагин Creaton
+Creaton(myHome, myAbout, myContacts, MyMenu, MyContent, myUsers)
+```
+
+Внесите изменения в разметку компонента MyContent, добавив вывод HTML-содержимого в именованные слоты с помощью атрибута [slot](https://learn.javascript.ru/slots-composition#imenovannye-sloty), как показано ниже:
+
+```js
+static render() {
+  return `
+    <${this.page}>
+      <p slot="user">${this.user}</p>
+      <p slot="age">${this.age}</p>
+    </${this.page}>
+  `
+}
+```
+
+Для всех остальных компонентов страниц, кроме компонента myUsers, содержимое, передаваемое в слоты, будет проигнорировано.
+
+Осталось добавить обработчик для этого адресного события в конце статического метода **connected()** компонента MyContent:
+
+```js
+static connected() {
+  // добавить элементу myRoute обработчик события "/"
+  myRoute.addEventListener('/', () => {
+    this.page = 'my-home' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/about"
+  myRoute.addEventListener('/abo\\w+', () => {
+    this.page = 'my-about' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/contacts"
+  myRoute.addEventListener('/contacts', () => {
+    this.page = 'my-contacts' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/:user/:age"
+  myRoute.addEventListener('/:user/:age', event => {
+    this.page = 'my-users' // название компонента
+    this.user = event.params.user // имя пользователя
+    this.age = event.params.age // возраст пользователя
+
+    // обновить DOM компонента
+    this.$update()
+  })
+}
+```
+
+Параметры задаются в названии обрабатываемого события с помощью символа «:». В примере выше, было задано два параметра: ***:user*** и ***:age***. Они доступны внутри обработчика через свойство **params** объекта [event](https://learn.javascript.ru/introduction-browser-events#obekt-sobytiya), как показано ниже:
+
+```js
+this.user = event.params.user // имя пользователя
+this.age = event.params.age // возраст пользователя
+```
+
+<br>
+
+Кроме параметров маршрутов, обработчики позволяют работать и с параметрами запросов. Добавьте в HTML-разметку компонента MyMenu новую ссылку:
+
+```js
+static render() {
+  return `
+    <nav>
+      <a href="/">Главная</a>
+      <a href="/about">О нас</a>
+      <a href="/contacts">Контакты</a>
+      <a href="/ivan/32">Иван</a>
+      <a href="/ivan?age=32">Возраст</a>
+    </nav>
+  `
+}
+```
+
+Добавьте последний обработчик для этого адресного события в конце статического метода **connected()** компонента MyContent:
+
+```js
+static connected() {
+  // добавить элементу myRoute обработчик события "/"
+  myRoute.addEventListener('/', () => {
+    this.page = 'my-home' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/about"
+  myRoute.addEventListener('/abo\\w+', () => {
+    this.page = 'my-about' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/contacts"
+  myRoute.addEventListener('/contacts', () => {
+    this.page = 'my-contacts' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/:user/:age"
+  myRoute.addEventListener('/:user/:age', event => {
+    this.page = 'my-users' // название компонента
+    this.user = event.params.user // имя пользователя
+    this.age = event.params.age // возраст пользователя
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // добавить элементу myRoute обработчик события "/:user\\?age=32"
+  myRoute.addEventListener('/:user\\?age=32', event => {
+    this.page = 'my-users' // название компонента
+    this.user = event.params.user // имя пользователя
+    this.age = event.url.searchParams.get('age') // возраст пользователя
+    
+    // обновить DOM компонента
+    this.$update()
+  })
+}
+```
+
+Для доступа к параметрам запроса, используется свойство [url](https://learn.javascript.ru/url) объекта [event](https://learn.javascript.ru/introduction-browser-events#obekt-sobytiya). Оно содержит свойство [searchParams](https://learn.javascript.ru/url#searchparams), которое предоставляет удобные методы для работы с параметрами запросов, одним из которых является метод **get()**, как показано ниже:
+
+```js
+this.age = event.url.searchParams.get('age') // возраст пользователя
+```
+
+<br>
+
+Для демонстрации взаимодействия обработчиков адресных событий с внешним кодом, вместо компонента MyMenu добавьте в разметку файла *index.html* элемент NAV главного меню:
+
+```html
+<!-- Главное меню -->
+<nav id="mymenu">
+  <a href="/">Главная</a>
+  <a href="/about">О нас</a>
+  <a href="/contacts">Контакты</a>
+  <a href="/ivan/32">Иван</a>
+  <a href="/ivan?age=32">Возраст</a>
+</nav>
+
+<!-- монтировать компонент MyContent -->
+<my-content></my-content>
+```
+
+Добавьте обработчик события *"click"* для этого меню:
+
+```js
+// добавить для элемента NAV обработчик события "click"
+document.querySelector('#mymenu').addEventListener('click', () => {
+  // отменить переход по ссылке
+  event.preventDefault()
+
+  // вызвать событие адреса ссылки для элемента myRoute
+  Creaton.route(myRoute, event.target.href)
+})
+
+// передать классы компонентов в плагин Creaton
+Creaton(myHome, myAbout, myContacts, MyContent, myUsers)
+```
+
+Внутри этого обработчика, адресное событие для элемента myRoute вызывается с помощью метода **route()** самого плагина:
+
+```js
+// вызвать событие адреса ссылки для элемента myRoute
+Creaton.route(myRoute, event.target.href)
+```
+
+а не специального метода **$route()**, который доступен только в компонентах, но по своей сути, просто является ссылкой на метод **route()** плагина Creaton.
+
+Ниже представлено полное содержимое файла *index.html*:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- Главное меню -->
+  <nav id="mymenu">
+    <a href="/">Главная</a>
+    <a href="/about">О нас</a>
+    <a href="/contacts">Контакты</a>
+    <a href="/ivan/32">Иван</a>
+    <a href="/ivan?age=32">Возраст</a>
+  </nav>
+
+  <!-- монтировать компонент MyContent -->
+  <my-content></my-content>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // создать элемент события myRoute
+    const myRoute = new Creaton.route()
+
+    // создать класс компонента myHome
+    class myHome {
+      static render() {
+        return `
+          <h2>Главная</h2>
+        `
+      }
+    }
+
+    // создать класс компонента myAbout
+    class myAbout {
+      static render() {
+        return `
+          <h2>О нас</h2>
+        `
+      }
+    }
+
+    // создать класс компонента myContacts
+    class myContacts {
+      static render() {
+        return `
+          <h2>Контакты</h2>
+        `
+      }
+    }
+
+    // создать класс компонента myUsers
+    class myUsers {
+      static mode = 'open' // добавить Теневой DOM
+
+      static render() {
+        return `
+          <slot name="user"></slot>
+          <slot name="age"></slot>
+        `
+      }
+    }
+
+    // создать класс компонента MyContent
+    class MyContent {
+      page = 'my-home' // начальное значение состояния
+
+      static render() {
+        return `
+          <${this.page}>
+            <p slot="user">${this.user}</p>
+            <p slot="age">${this.age}</p>
+          </${this.page}>
+        `
+      }
+
+      static connected() {
+        // добавить элементу myRoute обработчик события "/"
+        myRoute.addEventListener('/', () => {
+          this.page = 'my-home' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myRoute обработчик события "/about"
+        myRoute.addEventListener('/abo\\w+', () => {
+          this.page = 'my-about' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myRoute обработчик события "/contacts"
+        myRoute.addEventListener('/contacts', () => {
+          this.page = 'my-contacts' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myRoute обработчик события "/:user/:age"
+        myRoute.addEventListener('/:user/:age', event => {
+          this.page = 'my-users' // название компонента
+          this.user = event.params.user // имя пользователя
+          this.age = event.params.age // возраст пользователя
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myRoute обработчик события "/:user\\?age=32"
+        myRoute.addEventListener('/:user\\?age=32', event => {
+          this.page = 'my-users' // название компонента
+          this.user = event.params.user // имя пользователя
+          this.age = event.url.searchParams.get('age') // возраст пользователя
+          
+          // обновить DOM компонента
+          this.$update()
+        })
+      }
+    }
+
+    // добавить для элемента NAV обработчик события "click"
+    document.querySelector('#mymenu').addEventListener('click', () => {
+      // отменить переход по ссылке
+      event.preventDefault()
+
+      // вызвать событие адреса ссылки для элемента myRoute
+      Creaton.route(myRoute, event.target.href)
+    })
+
+    // передать классы компонентов в плагин Creaton
+    Creaton(myHome, myAbout, myContacts, MyContent, myUsers)
+  </script>
+</body>
+</html>
+```
 
 <br>
 <br>

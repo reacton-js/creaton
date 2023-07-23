@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.0.0
+ * Creaton.js v2.1.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -151,6 +151,11 @@
         return this.shadowRoot
       }
 
+      // возвращает Истину, если компонент не содержит Теневой DOM
+      get $light() {
+        return SERVICE.get(this.$state).root === this || false
+      }
+
       // возвращает хозяина теневого DOM компонента
       get $host() {
         return SERVICE.get(this.$state).root === this ? this : this.shadowRoot ? this.shadowRoot.host : undefined
@@ -164,6 +169,11 @@
       // возвращает функцию создания пользовательских событий
       get $event() {
         return customEvent
+      }
+
+      // возвращает функцию создания маршрутных событий
+      get $route() {
+        return routeEvent
       }
 
       
@@ -196,18 +206,6 @@
   }
 
 
-  // определить функцию для работы с пользовательскими событиями
-  function customEvent (elem, ...args) {
-    // если функция была вызвана как конструктор
-    if (new.target) {
-      return new DocumentFragment // вернуть новый элемент событий
-    }
-    
-    // вызвать пользовательское событие для элемента
-    (elem || this).dispatchEvent(new CustomEvent(...args))
-  }
-
-
   // обновляет HTML-содержимое компонента
   function updateDOM($parent, newNode, oldNode, index = 0) {
     // если нет старой ноды
@@ -228,9 +226,17 @@
     }
     // если у ноды имеются дочерние элементы
     else if (newNode.childNodes.length) {
-      // если у ноды имеются атрибуты
-      if (!new.target && newNode.attributes) {
-        updateAttr(newNode.attributes, oldNode) // обновить атрибуты
+      // если функция запускается не в режиме конструктора
+      if (!new.target) {
+        // если у ноды имеются атрибуты
+        if (newNode.attributes) {
+          updateAttr(newNode.attributes, oldNode) // обновить атрибуты
+        }
+
+        // если старая нода является компонентом и не содержит Теневой DOM
+        if (oldNode.$state && oldNode.$light) {
+          return true // вернуть Истину
+        }
       }
 
       // перебрать дочерние узлы новой и старой ноды
@@ -263,9 +269,107 @@
   }
 
 
+  // определить функцию для работы с пользовательскими событиями
+  function customEvent (elem, ...args) {
+    // если функция была вызвана как конструктор
+    if (new.target) {
+      // вернуть новый элемент пользовательских событий
+      return new DocumentFragment
+    }
+    
+    // вызвать пользовательское событие для элемента
+    elem.dispatchEvent(new CustomEvent(...args))
+  }
+
+
+  // определить шаблон поиска параметров
+  const regParams = /:(\w+)/g
+
+  // определить множество для хранения элементов событий
+  const setElems = new WeakSet()
+
+  // определить функцию для работы с маршрутными событиями
+  function routeEvent (elem, href, props = null) {
+    // если функция была вызвана как конструктор
+    if (new.target) {
+      // определить объект для регулярных выражений маршрутных событий
+      const eventRegs = {}
+      
+      // вернуть новый элемент маршрутных событий
+      return new (class extends DocumentFragment {
+        addEventListener(...args) {
+          // добавить в объект регулярное выражение для маршрутного события
+          eventRegs[args[0]] = new RegExp(`^${args[0].replace(regParams, (_, fix) => `(?<${fix}>\\w+)`)}/?$`)
+
+          // добавить обработчик для элемента маршрутных событий
+          document.addEventListener.call(this, ...args)
+        }
+        getEventRegs() {
+          return eventRegs // вернуть объект
+        }
+      })
+    }
+
+    // если во множестве нет элемента маршрутных событий
+    if (!setElems.has(elem)) {
+      // добавить элемент события во множество
+      setElems.add(elem)
+
+      // добавить элементу Window обработчик события "popstate"
+      window.addEventListener('popstate', event => {
+        // отправить маршрутное событие для элемента
+        dispRoute(elem, location.href.replace(location.origin, ''), event.state)
+      })
+    }
+
+    // если маршрут не передан, то выйти из функции
+    if (!href) return
+
+    // определить маршрут без значения "origin"
+    const path = href.replace(location.origin, '')
+
+    // добавить в историю браузера текущий маршрут
+    history.pushState(props, '', path)
+
+    // отправить маршрутное событие для элемента
+    dispRoute(elem, path, props)
+  }
+
+
+  // определить функцию для вызова маршрутных событий
+  function dispRoute (elem, path, props) {
+    // получить объект регулярных выражений маршрутных событий
+    const eventRegs = elem.getEventRegs()
+
+    // перебрать регулярные выражения маршрутных событий
+    for (const key in eventRegs) {
+      // определить результат проверки совпадения пути с регулярным выражением
+      const obj = eventRegs[key].exec(path)
+
+      // если имеется совпадение
+      if (obj) {
+        // определить новое пользовательское событие
+        const event = new CustomEvent(key)
+
+        // добавить событию свойство "url" из класса URL
+        event.url = new URL(location.href)
+
+        // добавить событию свойство содержащее параметры
+        event.params = obj.groups
+
+        // отправить маршрутное событие для элемента
+        elem.dispatchEvent(event, props)
+      }
+    }
+  }
+
+
   // определить главную функцию в глобальной переменной
   window.Creaton = (...args) => args.forEach(arg => typeof arg !== 'function' || createComponent(arg))
 
   // определить для главной функции метод "event"
   window.Creaton.event = customEvent
+
+  // определить для главной функции метод "route"
+  window.Creaton.route = routeEvent
 }();
