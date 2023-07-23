@@ -151,7 +151,7 @@
         return this.shadowRoot
       }
 
-      // возвращает Истину, если компонент не содержит Теневой DOM
+      // возвращает Истину, если компонент не содержит теневой DOM
       get $light() {
         return SERVICE.get(this.$state).root === this || false
       }
