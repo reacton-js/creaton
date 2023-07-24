@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.1.0
+ * Creaton.js v2.1.1
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -67,14 +67,29 @@
           get: (target, key, receiver) => key in target ? Reflect.get(target, key, receiver) : this[key]
         })
 
-        // определить специальное свойство для доступа к объекту состояния компонента
-        Object.defineProperty(this, '$state', { value: state })
-
         // определить прокси для атрибутов компонента
         const attributes = new Proxy(this.attributes, attrHooks)
 
+        // определить специальные свойства для элемента компонента
+        Object.defineProperties(this, {
+          // возвращает объект состояния компонента
+          $state: { value: state },
+          // возвращает прокси атрибутов компонента
+          $props: { value: attributes },
+          // возвращает Истину, если компонент не содержит теневой DOM
+          $light: { value: root === this || false },
+          // возвращает теневой DOM компонента
+          $shadow: { value: this.shadowRoot },
+          // возвращает хозяина теневого DOM компонента
+          $host: { value: root === this ? this : this.shadowRoot ? this.shadowRoot.host : undefined },
+          // возвращает функцию создания пользовательских событий
+          $event: { value: customEvent },
+          // возвращает функцию создания маршрутных событий
+          $route: { value: routeEvent },
+        })
+        
         // добавить в хранилище служебные свойства компонента
-        SERVICE.set(this.$state, { root , template, attributes })
+        SERVICE.set(this.$state, { root , template })
       }
 
 
@@ -144,38 +159,7 @@
           return INITClass.attributes
         }
       }
-
-
-      // возвращает теневой DOM компонента
-      get $shadow() {
-        return this.shadowRoot
-      }
-
-      // возвращает Истину, если компонент не содержит теневой DOM
-      get $light() {
-        return SERVICE.get(this.$state).root === this || false
-      }
-
-      // возвращает хозяина теневого DOM компонента
-      get $host() {
-        return SERVICE.get(this.$state).root === this ? this : this.shadowRoot ? this.shadowRoot.host : undefined
-      }
-
-      // возвращает прокси атрибутов компонента
-      get $props() {
-        return SERVICE.get(this.$state).attributes
-      }
-
-      // возвращает функцию создания пользовательских событий
-      get $event() {
-        return customEvent
-      }
-
-      // возвращает функцию создания маршрутных событий
-      get $route() {
-        return routeEvent
-      }
-
+      
       
       // поиск элемента по заданному селектору
       $(selector) {
@@ -233,8 +217,8 @@
           updateAttr(newNode.attributes, oldNode) // обновить атрибуты
         }
 
-        // если старая нода является компонентом и не содержит теневой DOM
-        if (oldNode.$state && oldNode.$light) {
+        // если старая нода компонента не содержит теневой DOM
+        if (oldNode.$light) {
           return true // вернуть Истину
         }
       }
