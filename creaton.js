@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.1.1
+ * Creaton.js v2.1.2
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -81,7 +81,7 @@
           // возвращает теневой DOM компонента
           $shadow: { value: this.shadowRoot },
           // возвращает хозяина теневого DOM компонента
-          $host: { value: root === this ? this : this.shadowRoot ? this.shadowRoot.host : undefined },
+          $host: { value: !mode || mode === 'closed' ? undefined : this },
           // возвращает функцию создания пользовательских событий
           $event: { value: customEvent },
           // возвращает функцию создания маршрутных событий
@@ -163,26 +163,14 @@
       
       // поиск элемента по заданному селектору
       $(selector) {
-        // если метод вызывается в контексте объекта состояния или компонент не является закрытым
-        if (this === this.$state || mode !== 'closed') {
-          // выполнить поиск в корневом элементе компонента
-          return SERVICE.get(this.$state).root.querySelector(selector)
-        }
-
-        // выполнить поиск в элементе-хозяине компонента
-        return this.$host.querySelector(selector)
+        // выполнить поиск элемента в DOM компонента в зависимости от контекста вызова метода
+        return (this === this.$state || mode !== 'closed' ? SERVICE.get(this.$state).root : this.$host).querySelector(selector)
       }
 
       // поиск всех элементов по заданному селектору
       $$(selector) {
-        // если метод вызывается в контексте объекта состояния или компонент не является закрытым
-        if (this === this.$state || mode !== 'closed') {
-          // выполнить поиск в корневом элементе компонента
-          return SERVICE.get(this.$state).root.querySelectorAll(selector)
-        }
-        
-        // выполнить поиск в элементе-хозяине компонента
-        return this.$host.querySelectorAll(selector)
+        // выполнить поиск элементов в DOM компонента в зависимости от контекста вызова метода
+        return (this === this.$state || mode !== 'closed' ? SERVICE.get(this.$state).root : this.$host).querySelectorAll(selector)
       }
 
       // определить для компонента расширяемый элемент

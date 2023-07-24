@@ -697,7 +697,7 @@ true
 
 <br>
 
-The **$host** property returns a reference to the component itself if the component has an open Shadow DOM or is created without it. If the component has a closed Shadow DOM, then this property returns «undefined», as shown below:
+The **$host** property returns a reference to the component itself if the component has an open Shadow DOM. If the component has a closed Shadow DOM or is created without one, then this property returns «undefined», as shown below:
 
 ```
 mycomp.$host
