@@ -849,7 +849,7 @@ static connected() {
 
 <br>
 
-The **$event()** method is used to create custom events that allow different components to interact with each other. This method will be discussed later, as it requires a separate section for its explanation.
+The **$event()** method is used to create custom events that allow different components to interact with each other, and the **\$route()** method is used to build routing. They will be considered later, since they require separate chapters for their explanation.
 
 <br>
 <br>
