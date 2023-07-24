@@ -665,7 +665,7 @@ Error: Value must be a number...
 
 <br>
 
-Unlike methods and properties defined by the user in the component class, special methods and properties are defined at the internal level of the component and always start with a dollar sign.
+Unlike methods and properties defined by the user in the component class, special methods and properties are defined at the internal level of the component and always start with a dollar sign. It is not recommended to give states names that are the same as special property names. This may lead to errors.
 
 The **$shadow** property returns the [Shadow DOM](https://javascript.info/shadow-dom) of the component, which is created if the **mode** static property was defined in the component class:
 
