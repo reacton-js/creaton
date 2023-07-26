@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.2.0
+ * Creaton.js v2.3.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -86,18 +86,6 @@
           $event: { value: customEvent },
           // возвращает функцию создания маршрутных событий
           $route: { value: routeEvent },
-          // возвращает теговую функцию для обработки шаблонных строк
-          $tag: { value: (str, ...vals) => {
-            let result = ''
-            for (let i = 0; i < str.length; i++) {
-              result += str[i]
-              if (i < vals.length) {
-                // если значение является массивом, то удалить запятые при выводе строки
-                result += Array.isArray(vals[i]) ? vals[i].join('') : vals[i]
-              }
-            }
-            return result
-          }},
         })
         
         // добавить в хранилище служебные свойства компонента
@@ -183,6 +171,19 @@
       $$(selector) {
         // выполнить поиск элементов в DOM компонента в зависимости от контекста вызова метода
         return (this === this.$state || mode !== 'closed' ? SERVICE.get(this.$state).root : this.$host).querySelectorAll(selector)
+      }
+
+      // теговая функция для обработки массивов в шаблонных строках
+      $tag(str, ...vals) {
+        let result = ''
+        for (let i = 0; i < str.length; i++) {
+          result += str[i]
+          if (i < vals.length) {
+            // если значение является массивом, то удалить запятые при выводе строки
+            result += Array.isArray(vals[i]) ? vals[i].join('') : vals[i]
+          }
+        }
+        return result
       }
 
       // определить для компонента расширяемый элемент
