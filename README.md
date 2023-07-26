@@ -849,6 +849,24 @@ static connected() {
 
 <br>
 
+The **$tag** method is a [tagged function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) that automatically adds a **join()** method to arrays to remove commas between elements, and all other calculated values are displayed as is:
+
+```js
+class MyComponent {
+  colors = ['red', 'green', 'blue']
+
+  static render() {
+    return this.$tag`
+      <ul>
+        ${ this.colors.map(col => `<li>${ col }</li>`) }
+      </ul>
+    `
+  }
+}
+```
+
+<br>
+
 The **$event()** method is used to create custom events that allow different components to interact with each other, and the **\$route()** method is used to build routing. They will be considered later, since they require separate chapters for their explanation.
 
 <br>
@@ -1000,6 +1018,22 @@ class MyComponent {
 
 The **join()** method is passed an empty string to remove commas between the elements of the array to be displayed.
 
+To output arrays without using the **join()** method in component content markup, a template literal can be passed to a special [tagged function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) **$tag**, which automatically adds the **join()** method to arrays, and all other calculated values are displayed as is:
+
+```js
+class MyComponent {
+  colors = ['red', 'green', 'blue']
+
+  static render() {
+    return this.$tag`
+      <ul>
+        ${ this.colors.map(col => `<li>${ col }</li>`) }
+      </ul>
+    `
+  }
+}
+```
+
 <br>
 
 Similarly, you can display objects using the [Object.keys()](https://javascript.info/keys-values-entries) method, for example:
@@ -1012,9 +1046,9 @@ class MyComponent {
   }
 
   static render() {
-    return `
+    return this.$tag`
       <ul>
-        ${ Object.keys(this.user).map(key => `<li>${ key }: ${ this.user[key] }</li>`).join('') }
+        ${ Object.keys(this.user).map(key => `<li>${ key }: ${ this.user[key] }</li>`) }
       </ul>
     `
   }

@@ -849,6 +849,24 @@ static connected() {
 
 <br>
 
+Метод **$tag** является [теговой функцией](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Template_literals#%D1%82%D0%B5%D0%B3%D0%BE%D0%B2%D1%8B%D0%B5_%D1%88%D0%B0%D0%B1%D0%BB%D0%BE%D0%BD%D1%8B), которая автоматически добавляет массивам метод **join()**, для удаления запятых между элементами, а все остальные вычисляемые значения выводятся как есть:
+
+```js
+class MyComponent {
+  colors = ['красный', 'зелёный', 'синий']
+
+  static render() {
+    return this.$tag`
+      <ul>
+        ${ this.colors.map(col => `<li>${ col }</li>`) }
+      </ul>
+    `
+  }
+}
+```
+
+<br>
+
 Метод **$event()** применяется для создания пользовательских событий, позволяющих различным компонентам взаимодействовать между собой, а метод **\$route()** используется для построения маршрутизации. Они будут рассмотрены позже, поскольку требуют для своего пояснения отдельных глав.
 
 <br>
@@ -1000,6 +1018,22 @@ class MyComponent {
 
 Методу **join()** передаётся пустая строка для удаления запятых между элементами отображаемого массива.
 
+Чтобы выводить массивы без использования метода **join()** в разметке содержимого компонента, шаблонную строку можно передать специальной [теговой функции](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Template_literals#%D1%82%D0%B5%D0%B3%D0%BE%D0%B2%D1%8B%D0%B5_%D1%88%D0%B0%D0%B1%D0%BB%D0%BE%D0%BD%D1%8B) **$tag**, которая автоматически добавляет массивам метод **join()**, а все остальные вычисляемые значения выводятся как есть:
+
+```js
+class MyComponent {
+  colors = ['красный', 'зелёный', 'синий']
+
+  static render() {
+    return this.$tag`
+      <ul>
+        ${ this.colors.map(col => `<li>${ col }</li>`) }
+      </ul>
+    `
+  }
+}
+```
+
 <br>
 
 Аналогичным образом можно выводить и объекты, используя для этого метод [Object.keys()](https://learn.javascript.ru/keys-values-entries), например:
@@ -1012,9 +1046,9 @@ class MyComponent {
   }
 
   static render() {
-    return `
+    return this.$tag`
       <ul>
-        ${ Object.keys(this.user).map(key => `<li>${ key }: ${ this.user[key] }</li>`).join('') }
+        ${ Object.keys(this.user).map(key => `<li>${ key }: ${ this.user[key] }</li>`) }
       </ul>
     `
   }

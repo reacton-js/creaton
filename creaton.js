@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.1.2
+ * Creaton.js v2.2.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -86,6 +86,18 @@
           $event: { value: customEvent },
           // возвращает функцию создания маршрутных событий
           $route: { value: routeEvent },
+          // возвращает теговую функцию для обработки шаблонных строк
+          $tag: { value: (str, ...vals) => {
+            let result = ''
+            for (let i = 0; i < str.length; i++) {
+              result += str[i]
+              if (i < vals.length) {
+                // если значение является массивом, то удалить запятые при выводе строки
+                result += Array.isArray(vals[i]) ? vals[i].join('') : vals[i]
+              }
+            }
+            return result
+          }},
         })
         
         // добавить в хранилище служебные свойства компонента
