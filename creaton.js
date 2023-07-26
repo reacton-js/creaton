@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.3.0
+ * Creaton.js v2.3.1
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -24,6 +24,11 @@
       target[key].value = val
       return true
     }
+  }
+
+  // выполняет поиск элемента/элементов по заданному селектору
+  function elemSearch (selector, prop = 'querySelector') {
+    return SERVICE.get(this.$state).root[prop](selector)
   }
 
 
@@ -81,7 +86,7 @@
           // возвращает теневой DOM компонента
           $shadow: { value: this.shadowRoot },
           // возвращает хозяина теневого DOM компонента
-          $host: { value: !mode || mode === 'closed' ? undefined : this },
+          $host: { value:  mode !== 'closed' ? root.host : undefined },
           // возвращает функцию создания пользовательских событий
           $event: { value: customEvent },
           // возвращает функцию создания маршрутных событий
@@ -163,14 +168,12 @@
       
       // поиск элемента по заданному селектору
       $(selector) {
-        // выполнить поиск элемента в DOM компонента в зависимости от контекста вызова метода
-        return (this === this.$state || mode !== 'closed' ? SERVICE.get(this.$state).root : this.$host).querySelector(selector)
+        return elemSearch.call(this, selector)
       }
 
       // поиск всех элементов по заданному селектору
       $$(selector) {
-        // выполнить поиск элементов в DOM компонента в зависимости от контекста вызова метода
-        return (this === this.$state || mode !== 'closed' ? SERVICE.get(this.$state).root : this.$host).querySelectorAll(selector)
+        return elemSearch.call(this, selector, 'querySelectorAll')
       }
 
       // теговая функция для обработки массивов в шаблонных строках
