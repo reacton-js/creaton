@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.4.0
+ * Creaton.js v2.4.1
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -138,7 +138,7 @@
 
       // вызывает функцию обновления состояния и HTML-содержимого компонента
       async $update(obj) {
-        if (mode !== 'closed') {
+        if (mode !== 'closed' || this[getThis]) {
           return await updateState.call(this[getThis] || this, obj, INITClass)
         }
       }
