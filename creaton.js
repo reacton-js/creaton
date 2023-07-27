@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.4.2
+ * Creaton.js v2.4.3
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -146,7 +146,7 @@
       // поиск элемента по заданному селектору
       $(selector) {
         if (mode !== 'closed' || this[getThis]) {
-          return elemSearch.call(this[getThis] || this, selector)
+          return SERVICE.get(this[getThis] || this).root.querySelector(selector)
         }
         return null
       }
@@ -154,7 +154,7 @@
       // поиск всех элементов по заданному селектору
       $$(selector) {
         if (mode !== 'closed' || this[getThis]) {
-          return elemSearch.call(this[getThis] || this, selector, 'querySelectorAll')
+          return SERVICE.get(this[getThis] || this).root.querySelectorAll(selector)
         }
         return null
       }
@@ -176,13 +176,7 @@
     }, extend ? { extends: extend } : null)
   }
 
-
-  // выполняет поиск элемента/элементов по заданному селектору
-  function elemSearch (selector, prop = 'querySelector') {
-    return SERVICE.get(this).root[prop](selector)
-  }
-
-
+  
   // обновляет состояние и выводит HTML-содержимое компонента
   async function updateState(obj, INITClass) {
     const start = Date.now() // определить начало обновления
