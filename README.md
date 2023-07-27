@@ -10,7 +10,9 @@
 
 Creaton is a JavaScript plugin for quickly creating [Web Components](https://javascript.info/web-components). The plugin supports all technologies, methods and properties such as [slots](https://javascript.info/slots-composition) and [Shadow DOM](https://javascript.info/shadow-dom) that are provided by standard Web Components.
 
-> The second version of the plugin has been completely rewritten to optimize DOM redrawing and better organization of components. Components from the first version are not suitable for use in the second.
+*Since version 2.4.0, the security of closed components has increased significantly. Getting/changing the state and HTML content of a component is possible only from static methods.*
+
+<br>
 
 Below is an example of a simple component:
 
@@ -375,7 +377,7 @@ class MyComponent {
 }
 ```
 
-This type of components is the most secure, since access to the DOM of such a component is possible only from static methods of the class.
+This type of component is the most secure, since access to the state and DOM of such a component is possible only from static methods of the class.
 
 <br>
 
@@ -706,7 +708,9 @@ undefined
 
 <br>
 
-The **$props** property allows you to quickly set and get component attribute values. Add the ***title*** attribute to the component, as shown below:
+The **$props** property allows you to quickly set and get component attribute values. For closed components, calling this property from outside of static methods returns «undefined».
+
+Add the ***title*** attribute to the component, as shown below:
 
 ```html
 <!-- mount the MyComponent component -->
@@ -727,7 +731,9 @@ mycomp.$props.title = 'Web Components'
 
 <br>
 
-The **$state** property allows you to get/set the value of any state directly. To get the state value of **message**, enter the command in the browser console:
+The **$state** property allows you to get/set the value of any state directly. For closed components, calling this property from outside of static methods returns «undefined».
+
+To get the state value of **message**, enter the command in the browser console:
 
 ```
 mycomp.$state.message
@@ -802,7 +808,9 @@ This applies to all methods that are executed in the context of a state object, 
 
 <br>
 
-The **$update()** method is used to update the component's DOM. It can take one argument as an object. The property values of this object become new state values, for example:
+The **$update()** method is used to update the DOM based on the new state values of the component. It can take one argument as an object. For closed components, calling this method from outside the static methods does not affect the DOM change and the state of the component.
+
+The property values of this object become new state values, for example:
 
 ```
 mycomp.$update({ message: 'Web Components', color: 'green' })
@@ -827,7 +835,9 @@ This avoids losing events assigned to elements using the [addEventListener()](ht
 
 <br>
 
-The **$()** method is a shorthand analog of the [querySelector()](https://javascript.info/searching-elements-dom#querySelector) method and is used for quick access to a component's DOM element. For example, to assign an event listener:
+The **$()** method is a shorthand analog of the [querySelector()](https://javascript.info/searching-elements-dom#querySelector) method and is used for quick access to a component's DOM element. For closed components, calling this method from outside of static methods raises an error message.
+
+For example, to assign an event listener:
 
 ```js
 // called when the component is added to the document
@@ -837,7 +847,9 @@ static connected() {
 }
 ```
 
-The **$$()** method is a shorthand analog of the [querySelectorAll()](https://javascript.info/searching-elements-dom#querySelectorAll) method and is used for quick access to a component's DOM element. For example, to iterate over a collection of elements:
+The **$$()** method is a shorthand analog of the [querySelectorAll()](https://javascript.info/searching-elements-dom#querySelectorAll) method and is used for quick access to a component's DOM element. For closed components, calling this method from outside of static methods raises an error message.
+
+For example, to iterate over a collection of elements:
 
 ```js
 // called when the component is added to the document

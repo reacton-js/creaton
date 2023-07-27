@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.3.1
+ * Creaton.js v2.4.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -26,10 +26,8 @@
     }
   }
 
-  // выполняет поиск элемента/элементов по заданному селектору
-  function elemSearch (selector, prop = 'querySelector') {
-    return SERVICE.get(this.$state).root[prop](selector)
-  }
+  // определить символ для получения элемента компонентов
+  const getThis = Symbol()
 
 
   // определить функцию создания компонентов
@@ -69,7 +67,11 @@
         // определить объект с методом доступа к состоянию или свойству компонента
         const state = new Proxy(new INITClass(), {
           // вернуть значение свойства объекта состояния или компонента
-          get: (target, key, receiver) => key in target ? Reflect.get(target, key, receiver) : this[key]
+          get: (target, key, receiver) => {
+            if (key === getThis) return this // вернуть элемент компонента
+            // или значение запрашиваемого свойства
+            return key in target ? Reflect.get(target, key, receiver) : this[key]
+          }
         })
 
         // определить прокси для атрибутов компонента
@@ -78,15 +80,15 @@
         // определить специальные свойства для элемента компонента
         Object.defineProperties(this, {
           // возвращает объект состояния компонента
-          $state: { value: state },
+          $state: { get() { if (mode !== 'closed') return state }},
           // возвращает прокси атрибутов компонента
-          $props: { value: attributes },
+          $props: { get() { if (mode !== 'closed') return attributes }},
+          // возвращает хозяина теневого DOM компонента
+          $host: { get() { if (mode !== 'closed') return root.host }},
           // возвращает Истину, если компонент не содержит теневой DOM
           $light: { value: root === this || false },
           // возвращает теневой DOM компонента
           $shadow: { value: this.shadowRoot },
-          // возвращает хозяина теневого DOM компонента
-          $host: { value:  mode !== 'closed' ? root.host : undefined },
           // возвращает функцию создания пользовательских событий
           $event: { value: customEvent },
           // возвращает функцию создания маршрутных событий
@@ -94,67 +96,35 @@
         })
         
         // добавить в хранилище служебные свойства компонента
-        SERVICE.set(this.$state, { root , template })
+        SERVICE.set(this, { root , template, state })
       }
 
-
-      // обновляет состояние и выводит HTML-содержимое компонента
-      async $update(obj) {
-        const start = Date.now() // определить начало обновления
-
-        // получить корневой элемент и шаблон компонента
-        const { root, template } = SERVICE.get(this.$state)
-
-        // если был передан объект с новыми значениями
-        if (obj) {
-          // копировать новые значения состояния в его объект
-          Object.assign(this.$state, obj)
-        }
-
-        // если была определена статическая функция "before"
-        await (!INITClass.before || INITClass.before.call(this.$state))
-
-        // добавить сгенерированное HTML-содержимое в шаблон
-        template.innerHTML = await (INITClass.render ? INITClass.render.call(this.$state) : '')
-
-        // обновить HTML-содержимое компонента в соответствии с шаблоном
-        new updateDOM(root, template.content || template, root)
-
-        // очистить HTML-содержимое шаблона
-        template.innerHTML = ''
-
-        // если была определена статическая функция "after"
-        await (!INITClass.after || INITClass.after.call(this.$state))
-
-        return Date.now() - start + ' ms' // вернуть время обновления
-      }
-
-
+      
       // вызывается при добавлении компонента в документ
       async connectedCallback() {
         // обновить состояние компонента
-        await this.$update()
+        await updateState.call(this, undefined, INITClass)
 
         // если была определена статическая функция "connected"
-        await (!INITClass.connected || INITClass.connected.call(this.$state))
+        await (!INITClass.connected || INITClass.connected.call(SERVICE.get(this).state))
       }
 
       // вызывается при удалении компонента из документа
       async disconnectedCallback() {
         // если была определена статическая функция "disconnected"
-        await (!INITClass.disconnected || INITClass.disconnected.call(this.$state))
+        await (!INITClass.disconnected || INITClass.disconnected.call(SERVICE.get(this).state))
       }
 
       // вызывается при перемещении компонента в новый документ
       async adoptedCallback() {
         // если была определена статическая функция "adopted"
-        await (!INITClass.adopted || INITClass.adopted.call(this.$state))
+        await (!INITClass.adopted || INITClass.adopted.call(SERVICE.get(this).state))
       }
 
       // вызывается при изменении одного из отслеживаемых атрибутов
       async attributeChangedCallback(...args) {
         // если была определена статическая функция "changed"
-        await (!INITClass.changed || INITClass.changed.apply(this.$state, args))
+        await (!INITClass.changed || INITClass.changed.apply(SERVICE.get(this).state, args))
       }
 
       // массив имён атрибутов для отслеживания их изменений
@@ -165,15 +135,22 @@
         }
       }
       
+
+      // вызывает функцию обновления состояния и HTML-содержимого компонента
+      async $update(obj) {
+        if (mode !== 'closed') {
+          return await updateState.call(this[getThis] || this, obj, INITClass)
+        }
+      }
       
       // поиск элемента по заданному селектору
       $(selector) {
-        return elemSearch.call(this, selector)
+        return elemSearch.call(this[getThis] || mode === 'closed' || this, selector)
       }
 
       // поиск всех элементов по заданному селектору
       $$(selector) {
-        return elemSearch.call(this, selector, 'querySelectorAll')
+        return elemSearch.call(this[getThis] || mode === 'closed' || this, selector, 'querySelectorAll')
       }
 
       // теговая функция для обработки массивов в шаблонных строках
@@ -191,6 +168,44 @@
 
       // определить для компонента расширяемый элемент
     }, extend ? { extends: extend } : null)
+  }
+
+
+  // выполняет поиск элемента/элементов по заданному селектору
+  function elemSearch (selector, prop = 'querySelector') {
+    return (this === true ? undefined : SERVICE.get(this).root)[prop](selector)
+  }
+
+
+  // обновляет состояние и выводит HTML-содержимое компонента
+  async function updateState(obj, INITClass) {
+    const start = Date.now() // определить начало обновления
+
+    // получить корневой элемент, шаблон и объект состояния компонента
+    const { root, template, state } = SERVICE.get(this)
+
+    // если был передан объект с новыми значениями
+    if (obj) {
+      // копировать новые значения состояния в его объект
+      Object.assign(state, obj)
+    }
+
+    // если была определена статическая функция "before"
+    await (!INITClass.before || INITClass.before.call(state))
+
+    // добавить сгенерированное HTML-содержимое в шаблон
+    template.innerHTML = await (INITClass.render ? INITClass.render.call(state) : '')
+
+    // обновить HTML-содержимое компонента в соответствии с шаблоном
+    new updateDOM(root, template.content || template, root)
+
+    // очистить HTML-содержимое шаблона
+    template.innerHTML = ''
+
+    // если была определена статическая функция "after"
+    await (!INITClass.after || INITClass.after.call(state))
+
+    return Date.now() - start + ' ms' // вернуть время обновления
   }
 
 
