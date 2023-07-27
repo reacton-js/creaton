@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.4.1
+ * Creaton.js v2.4.2
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -145,12 +145,18 @@
       
       // поиск элемента по заданному селектору
       $(selector) {
-        return elemSearch.call(this[getThis] || mode === 'closed' || this, selector)
+        if (mode !== 'closed' || this[getThis]) {
+          return elemSearch.call(this[getThis] || this, selector)
+        }
+        return null
       }
 
       // поиск всех элементов по заданному селектору
       $$(selector) {
-        return elemSearch.call(this[getThis] || mode === 'closed' || this, selector, 'querySelectorAll')
+        if (mode !== 'closed' || this[getThis]) {
+          return elemSearch.call(this[getThis] || this, selector, 'querySelectorAll')
+        }
+        return null
       }
 
       // теговая функция для обработки массивов в шаблонных строках
@@ -173,7 +179,7 @@
 
   // выполняет поиск элемента/элементов по заданному селектору
   function elemSearch (selector, prop = 'querySelector') {
-    return (this === true ? undefined : SERVICE.get(this).root)[prop](selector)
+    return SERVICE.get(this).root[prop](selector)
   }
 
 
