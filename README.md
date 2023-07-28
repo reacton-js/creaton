@@ -1920,32 +1920,40 @@ If the initial state value **page** does not match the name of the component, fo
 page = '' // initial state value
 ```
 
-or if the application is supposed to be opened not from the main page, but, for example, from the page */about* or any other, then it is recommended to add the *"load"* event handler for the [window](https://javascript.info/global-object) global object to the **connected()** static method of the MyMenu component so that the routing works immediately after the page is loaded, as shown below:
+or if the application is supposed to be opened not from the main page, but, for example, from the page */about* or any other, then it is recommended to add to the end of the static method **connected()** of the MyContent component, calling the address event for the myRoute element.
+
+The second argument to the **$route()** method is the **href** property of the [location](https://developer.mozilla.org/en-US/docs/Web/API/Location) object, as shown below:
+
 
 ```js
 static connected() {
-  // add a "click" event handler to the NAV element
-  this.$('nav').addEventListener('click', event => {
-    // cancel clicking on the link
-    event.preventDefault()
+  // add a "/" event handler to the myRoute element
+  myRoute.addEventListener('/', () => {
+    this.page = 'my-home' // assign a value
 
-    // trigger a link address event on myRoute element
-    this.$route(myRoute, event.target.href)
+    // update the DOM of the component
+    this.$update()
   })
 
-  // add a "load" event handler to the global Window object
-  window.addEventListener('load', () => {
-    // trigger a link address event on myRoute element
-    this.$route(myRoute, location.href)
+  // add a "/about" event handler to the myRoute element
+  myRoute.addEventListener('/about', () => {
+    this.page = 'my-about' // assign a value
+
+    // update the DOM of the component
+    this.$update()
   })
+
+  // add a "/contacts" event handler to the myRoute element
+  myRoute.addEventListener('/contacts', () => {
+    this.page = 'my-contacts' // assign a value
+
+    // update the DOM of the component
+    this.$update()
+  })
+
+  // trigger page address event on myRoute element
+  this.$route(myRoute, location.href)
 }
-```
-
-Then the second argument to the **$route()** method is the **href** property of the [location](https://developer.mozilla.org/en-US/docs/Web/API/Location) object:
-
-```js
-// trigger a link address event on myRoute element
-this.$route(myRoute, location.href)
 ```
 
 <br>
@@ -2278,7 +2286,7 @@ Below is the full content of the *index.html* file:
 
     // create component class MyContent
     class MyContent {
-      page = 'my-home' // initial state value
+      page = '' // initial state value
 
       static render() {
         return `
@@ -2333,6 +2341,9 @@ Below is the full content of the *index.html* file:
           // update the DOM of the component
           this.$update()
         })
+
+        // trigger page address event on myRoute element
+        this.$route(myRoute, location.href)
       }
     }
 

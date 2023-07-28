@@ -1920,32 +1920,40 @@ this.$update()
 page = '' // начальное значение состояния
 ```
 
-или если предполагается открытие приложения не с главной страницы, а, например, со страницы */about* или любой другой, то рекомендуется в статический метод **connected()** компонента MyMenu добавить обработчик события *"load"* для глобального объекта [window](https://learn.javascript.ru/global-object), чтобы маршрутизация срабатывала сразу после загрузки страницы, как показано ниже:
+или если предполагается открытие приложения не с главной страницы, а, например, со страницы */about* или любой другой, то рекомендуется добавить в конец статического метода **connected()** компонента MyContent, вызов адресного события для элемента myRoute.
+
+При этом, во втором аргументе методу **$route()** передаётся свойство **href** объекта [location](https://developer.mozilla.org/ru/docs/Web/API/Location), как показано ниже:
+
 
 ```js
 static connected() {
-  // добавить для элемента NAV обработчик события "click"
-  this.$('nav').addEventListener('click', event => {
-    // отменить переход по ссылке
-    event.preventDefault()
+  // добавить элементу myRoute обработчик события "/"
+  myRoute.addEventListener('/', () => {
+    this.page = 'my-home' // присвоить значение
 
-    // вызвать событие адреса ссылки для элемента myRoute
-    this.$route(myRoute, event.target.href)
+    // обновить DOM компонента
+    this.$update()
   })
 
-  // добавить обработчик события "load" для глобального объекта Window
-  window.addEventListener('load', () => {
-    // вызвать событие адреса ссылки для элемента myRoute
-    this.$route(myRoute, location.href)
+  // добавить элементу myRoute обработчик события "/about"
+  myRoute.addEventListener('/about', () => {
+    this.page = 'my-about' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
   })
+
+  // добавить элементу myRoute обработчик события "/contacts"
+  myRoute.addEventListener('/contacts', () => {
+    this.page = 'my-contacts' // присвоить значение
+
+    // обновить DOM компонента
+    this.$update()
+  })
+
+  // вызвать событие адреса страницы для элемента myRoute
+  this.$route(myRoute, location.href)
 }
-```
-
-Тогда во втором аргументе методу **$route()** передаётся свойство **href** объекта [location](https://developer.mozilla.org/ru/docs/Web/API/Location):
-
-```js
-// вызвать событие адреса ссылки для элемента myRoute
-this.$route(myRoute, location.href)
 ```
 
 <br>
@@ -2278,7 +2286,7 @@ Creaton.route(myRoute, event.target.href)
 
     // создать класс компонента MyContent
     class MyContent {
-      page = 'my-home' // начальное значение состояния
+      page = '' // начальное значение состояния
 
       static render() {
         return `
@@ -2333,6 +2341,9 @@ Creaton.route(myRoute, event.target.href)
           // обновить DOM компонента
           this.$update()
         })
+
+        // вызвать событие адреса страницы для элемента myRoute
+        this.$route(myRoute, location.href)
       }
     }
 
