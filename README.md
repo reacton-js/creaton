@@ -1920,7 +1920,7 @@ If the initial state value **page** does not match the name of the component, fo
 page = '' // initial state value
 ```
 
-or if the application is supposed to be opened not from the main page, but, for example, from the page */about* or any other, then it is recommended to add to the end of the static method **connected()** of the MyContent component, calling the address event for the myRoute element.
+or if the application is supposed to be opened not from the main page, but, for example, from the page */about* or any other, then it is recommended to add to the end of the static method **connected()** of the MyContent component, calling the address event for the myRoute element. Thus, the routing will fire immediately after the page is loaded.
 
 The second argument to the **$route()** method is the **href** property of the [location](https://developer.mozilla.org/en-US/docs/Web/API/Location) object, as shown below:
 
