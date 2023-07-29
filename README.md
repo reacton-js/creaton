@@ -102,7 +102,7 @@ Add an *index.html* file to the directory with the following content:
 
 To ensure there are no naming conflicts between standard and custom HTML elements, the component name must contain a dash «-», for example, my-element and super-button are valid names, but myelement is not.
 
-When you open the *index.html* file in the browser, the screen will display the message created in the Hello component:
+When you open the *index.html* file in the browser, the screen will display the message created in the MyComponent component:
 
 <h1 style="color: red;">Hello, Creaton!</h1>
 
