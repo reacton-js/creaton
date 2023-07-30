@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.4.3
+ * Creaton.js v2.5.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -29,6 +29,18 @@
   // определить символ для получения элемента компонентов
   const getThis = Symbol()
 
+  // определить множество для хранения определяемых компонентов
+  const setDefs = new Set()
+
+  // определить элемент события готовности компонентов
+  const okEvent = new customEvent()
+
+  // определить событие инициализации компонента
+  const initEvent = new CustomEvent('init', { bubbles: true, composed: true })
+
+  // определить дескриптор для свойства "detail" с возможностью записи 
+  Object.defineProperty(initEvent, 'detail', { writable: true })
+
 
   // определить функцию создания компонентов
   function createComponent(INITClass) {
@@ -48,6 +60,9 @@
     customElements.define(name, class extends SUPERElement {
       constructor() {
         super()
+
+        // добавить определяемый компонент во множество
+        setDefs.add(this)
 
         // определить ссылку на теневой DOM или корневой элемент компонента
         const root = mode ? this.attachShadow({ mode }) : this
@@ -97,6 +112,21 @@
         
         // добавить в хранилище служебные свойства компонента
         SERVICE.set(this, { root , template, state })
+
+        // добавить компоненту обработчик события инициализации
+        this.addEventListener('init', event => {
+          // удалить передаваемый компонент из множества
+          setDefs.delete(event.detail)
+
+          // если множество определяемых компонентов пусто
+          if (setDefs.size === 0) {
+            // остановить всплытие события инициализации
+            event.stopPropagation()
+            
+            // вызвать событие готовности компонентов
+            customEvent(okEvent, 'ok')
+          }
+        })
       }
 
       
@@ -107,6 +137,15 @@
 
         // если была определена статическая функция "connected"
         await (!INITClass.connected || INITClass.connected.call(SERVICE.get(this).state))
+
+        // перейти к следующей итерации цикла событий
+        setTimeout(() => {
+          // определить передаваемый во множество компонент
+          initEvent.detail = this
+          
+          // вызвать обработчик события инициализации компонента
+          this.dispatchEvent(initEvent)
+        }, 0)
       }
 
       // вызывается при удалении компонента из документа
@@ -367,6 +406,84 @@
   }
 
 
+  // возвращает промис для рендеринга содержимого документа
+  function ssr ({ node, slots, clean = true } = {}) {
+    return new Promise(ready => okEvent.addEventListener('ok', () => {
+      // определить хранилище для вывода отрендеренного содержимого
+      const outNode = document.createElement('template')
+
+      // установить датчик очистки от мусорного содержимого
+      renderDOM.clean = clean
+
+      // определить массив для хранения слотов
+      renderDOM.slots = []
+  
+      // вызвать функцию рендеринга документа
+      renderDOM(node || document.children[0], outNode.content)
+
+      // если в отрендеренном содержимом слоты не нужны
+      if (!slots) {
+        // заменить слоты их дочерними узлами
+        renderDOM.slots.forEach(slot => slot.replaceWith(...slot.childNodes))
+      }
+  
+      // вернуть отрендеренное содержимое документа
+      ready(node ? outNode.innerHTML : `<!DOCTYPE html>\n${outNode.innerHTML}`)
+    }))
+  }
+
+
+  // выполняет рендеринг содержимого документа
+  function renderDOM (inNode, outNode, index = 0) {
+    // если установлен датчик очистки и нода является мусорным узлом
+    if (renderDOM.clean && (inNode.nodeName === 'STYLE' || inNode.nodeName === 'SCRIPT'
+      || inNode.nodeName === 'TEMPLATE' || inNode.nodeType === 8)) {
+        return false // вернуть Ложь
+    }
+
+    /* определить переменные для хранения новой ноды
+      и дочерних узлов входной ноды */
+    let newNode, inChildNodes
+
+    // если входная нода является компонентом
+    if (inNode.$state) {
+      // создать пустой элемент компонента
+      newNode = HTMLDocument.createElement(inNode.nodeName)
+
+      // добавить элементу атрибуты входной ноды
+      for (const attr of inNode.attributes) {
+        newNode.setAttribute(attr.name, attr.value)
+      }
+    }
+    // иначе, клонировать входную ноду без содержимого
+    else {
+      newNode = inNode.cloneNode(false)
+    }
+
+    // добавить новую ноду в отрендеренное содержимое
+    outNode.append(newNode)
+    
+    // если новая нода является слотом
+    if (newNode.nodeName === 'SLOT') {
+      // вернуть последовательность узлов назначенных входному слоту
+      inChildNodes = inNode.assignedNodes({ flatten: true })
+      // добавить новую ноду в массив
+      renderDOM.slots.push(newNode)
+    }
+    // иначе, вернуть коллекцию дочерних узлов входной ноды
+    else {
+      inChildNodes = (inNode.$shadow || inNode).childNodes
+    }
+
+    // вызвать функцию рендеринга для дочерних узлов входной и выходной ноды
+    for (let i = 0, y = 0; i < inChildNodes.length; i++, y++) {
+      renderDOM(inChildNodes[i], outNode.childNodes[index], y) || y--
+    }
+
+    return true // вернуть Истину
+  }
+
+
   // определить главную функцию в глобальной переменной
   window.Creaton = (...args) => args.forEach(arg => typeof arg !== 'function' || createComponent(arg))
 
@@ -375,4 +492,7 @@
 
   // определить для главной функции метод "route"
   window.Creaton.route = routeEvent
+
+  // определить для главной функции метод "ssr"
+  window.Creaton.ssr = ssr
 }();
