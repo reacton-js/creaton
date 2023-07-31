@@ -2755,7 +2755,9 @@ module.exports = [
 </html>
 ```
 
-Этот файл представляет собой немного изменённый маршрутизатор из прошлой главы. Все компоненты имеют [Теневой DOM](https://learn.javascript.ru/shadow-dom), а компонент MyContent имеет ещё и селектор [:host](https://learn.javascript.ru/shadow-dom-style#host) для стилизации элемента компонента:
+Этот файл представляет собой немного изменённый маршрутизатор из прошлой главы. Все компоненты имеют открытый [Теневой DOM](https://learn.javascript.ru/shadow-dom), поскольку компоненты с закрытым Теневым DOM не рендерятся.
+
+Компонент MyContent имеет селектор [:host](https://learn.javascript.ru/shadow-dom-style#host) для стилизации элемента компонента:
 
 ```js
 static render() {

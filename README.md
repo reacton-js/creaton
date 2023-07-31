@@ -2755,7 +2755,9 @@ The *index.html* file in the *server* directory is the main application file:
 </html>
 ```
 
-This file is a slightly modified router from the last chapter. All components have [Shadow DOM](https://javascript.info/shadow-dom), and the MyContent component also has a selector [:host](https://javascript.info/shadow-dom-style#host) to style the component element:
+This file is a slightly modified router from the last chapter. All components have an open [Shadow DOM](https://javascript.info/shadow-dom), since components with a closed Shadow DOM are not rendered.
+
+The MyContent component has a [:host](https://javascript.info/shadow-dom-style#host) selector to style the component element:
 
 ```js
 static render() {
