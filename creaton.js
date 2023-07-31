@@ -111,7 +111,7 @@
         })
         
         // добавить в хранилище служебные свойства компонента
-        SERVICE.set(this, { root , template, state })
+        SERVICE.set(this, { root, template, state })
 
         // добавить компоненту обработчик события инициализации
         this.addEventListener('init', event => {
