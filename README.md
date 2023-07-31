@@ -486,7 +486,7 @@ Tracked attributes can be used to determine the state in a component, without ha
   <my-component id="mycomp" message="Creaton" color="red"></my-component>
 
   <!-- include Creaton plugin -->
-  <script src="creaton.js"></script>
+  <script src="creaton.min.js"></script>
 
   <script>
     // create component class MyComponent

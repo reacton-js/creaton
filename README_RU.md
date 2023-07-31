@@ -486,7 +486,7 @@ title Creaton Веб-компоненты
   <my-component id="mycomp" message="Creaton" color="red"></my-component>
 
   <!-- подключить плагин Creaton -->
-  <script src="creaton.js"></script>
+  <script src="creaton.min.js"></script>
 
   <script>
     // создать класс компонента MyComponent
