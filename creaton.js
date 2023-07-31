@@ -1,11 +1,11 @@
 /*!
- * Creaton.js v2.5.0
+ * Creaton.js v2.5.1
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
 'use strict'
 
-!function() {
+!function () {
   // определить шаблон поиска заглавных букв
   const regUpper = /[A-Z]/g
 
@@ -43,7 +43,7 @@
 
 
   // определить функцию создания компонентов
-  function createComponent(INITClass) {
+  function createComponent (INITClass) {
     // определить уровень инкапсуляции компонента
     const mode = (INITClass.mode || '').toLowerCase()
 
@@ -217,7 +217,7 @@
 
   
   // обновляет состояние и выводит HTML-содержимое компонента
-  async function updateState(obj, INITClass) {
+  async function updateState (obj, INITClass) {
     const start = Date.now() // определить начало обновления
 
     // получить корневой элемент, шаблон и объект состояния компонента
@@ -249,7 +249,7 @@
 
 
   // обновляет HTML-содержимое компонента
-  function updateDOM($parent, newNode, oldNode, index = 0) {
+  function updateDOM ($parent, newNode, oldNode, index = 0) {
     // если нет старой ноды
     if (!oldNode) {
       $parent.append(newNode.cloneNode(true)) // добавить ноду
@@ -292,7 +292,7 @@
 
 
   // обновляет атрибуты элементов компонента
-  function updateAttr(newAttrs, oldNode, oldAttrs = oldNode.attributes) {
+  function updateAttr (newAttrs, oldNode, oldAttrs = oldNode.attributes) {
     // перебрать дочерние атрибуты новой и старой ноды
     for (let i = 0; i < newAttrs.length || i < oldAttrs.length; i++) {
       // если нет старого атрибута
