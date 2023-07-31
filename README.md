@@ -2949,6 +2949,12 @@ else {
 Now navigate to the *server* directory using a terminal, or open a terminal in this directory, and in the terminal enter the command:
 
 ```
+npm i
+```
+
+This will install all dependencies. To run the application, enter the command:
+
+```
 node server
 ```
 
