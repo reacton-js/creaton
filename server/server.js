@@ -25,7 +25,7 @@ app.get('/favicon.ico', (req, res) => res.sendStatus(204))
 
 // process all other requests
 app.use(async (req, res) => {
-  // define agent string
+  // define user agent
   const userAgent = (process.argv[2] == 'bot') ? botAgent : req.get('User-Agent')
   
   // if the request comes from a bot
@@ -49,8 +49,8 @@ app.use(async (req, res) => {
     // return rendered HTML content
     res.send(html)
   }
-
-  // otherwise, if the request comes from the user
+  
+  // otherwise, if the request comes from a user
   else {
     // return the main page file of the application
     res.sendFile(__dirname + "/index.html")

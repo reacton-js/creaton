@@ -2374,7 +2374,426 @@ Creaton.route(myRoute, event.target.href)
 
 [SSR](https://academy.yandex.com/journal/server-side-rendering) - это метод отрисовки веб-страницы на сервере, а не в браузере. Для реализации рендеринга Веб-компонентов, используется пакет [jsdom](https://github.com/jsdom/jsdom) - виртуализации DOM в JavaScript.
 
-Содержимое файла *server.js*:
+Перед тем, как переходить к рендерингу на сервере, давайте ознакомимся в браузере с функцией, которая за него отвечает.
+
+Внесите изменения в файл *index.html*, как показано ниже:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент MyComponent -->
+  <my-component>
+    <p>Веб-компоненты - это просто!</p>
+  </my-component>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script type="module">
+    // создать класс компонента MyComponent
+    class MyComponent {
+      message = 'Creaton'
+      color = 'red'
+
+      static mode = 'open' // добавить Теневой DOM
+
+      static render() {
+        return `
+          <h1>Привет, ${ this.message }!</h1>
+          <slot></slot>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // передать класс компонента MyComponent в плагин Creaton
+    Creaton(MyComponent)
+
+    // выполнить рендеринг HTML-содержимого страницы
+    const html = await Creaton.ssr()
+
+    // вывести отрендеренное содержимое в консоль
+    console.log(html)
+  </script>
+</body>
+</html>
+```
+
+Метод **ssr()** плагина Creaton выполняет рендеринг HTML-содержимого страницы. Он возвращает промис, значением которого является строка, содержащая отрендеренное HTML-содержимое:
+
+```js
+// выполнить рендеринг HTML-содержимого страницы
+const html = await Creaton.ssr()
+```
+
+которое будет выведено в консоль браузера:
+
+```
+<!DOCTYPE html>
+<html lang="ru"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+
+  
+  <my-component>
+          <h1>Привет, Creaton!</h1>
+          
+    <p>Веб-компоненты - это просто!</p>
+  
+          
+          
+        </my-component>
+
+  
+  
+
+</body></html>
+```
+
+<br>
+
+По умолчанию, метод **ssr()** удаляет все скрипты, стили, комментарии и теги &lt;template&gt; в возвращаемом HTML-содержимом.
+
+Метод **ssr()** принимает один параметр - объект с тремя опциональными свойствами. Добавление свойства **clean** со значением "false":
+
+```js
+const html = await Creaton.ssr({ clean: false })
+```
+
+отменяет очистку по умолчанию, и всё содержимое выводится как есть:
+
+```
+<!DOCTYPE html>
+<html lang="ru"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- монтировать компонент MyComponent -->
+  <my-component>
+          <h1>Привет, Creaton!</h1>
+          
+    <p>Веб-компоненты - это просто!</p>
+  
+          
+          <style>
+            h1 {
+              color: red;
+            }
+          </style>
+        </my-component>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script type="module">
+    // создать класс компонента MyComponent
+    class MyComponent {
+      message = 'Creaton'
+      color = 'red'
+
+      static mode = 'open' // добавить Теневой DOM
+
+      static render() {
+        return `
+          <h1>Привет, ${ this.message }!</h1>
+          <slot></slot>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // передать класс компонента MyComponent в плагин Creaton
+    Creaton(MyComponent)
+
+    // выполнить рендеринг HTML-содержимого страницы
+    const html = await Creaton.ssr({ clean: false })
+
+    // вывести отрендеренное содержимое в консоль
+    console.log(html)
+  </script>
+
+</body></html>
+```
+
+<br>
+
+По умолчанию, метод **ssr()** удаляет все [слоты](https://learn.javascript.ru/slots-composition). Но если добавить свойство **slots** со значением "true":
+
+```js
+const html = await Creaton.ssr({ slots: true })
+```
+
+то слоты будут выводиться в содержимое :
+
+```
+<h1>Привет, Creaton!</h1>
+          <slot>
+    <p>Веб-компоненты - это просто!</p>
+  </slot>
+```
+
+<br>
+
+По умолчанию, метод **ssr()** рендерит всю страницу целиком. Но ему можно добавить свойство **node** со значением равным узлу, с которого должен начинаться рендеринг:
+
+```js
+const html = await Creaton.ssr({ node: document.body })
+```
+
+Тогда в отрендеренное содержимое попадёт только этот узел и всё, что в нём находится:
+
+```
+<body>
+
+  
+  <my-component>
+          <h1>Привет, Creaton!</h1>
+          
+    <p>Веб-компоненты - это просто!</p>
+  
+          
+          
+        </my-component>
+
+  
+  
+
+</body>
+```
+
+<br>
+
+Теперь можно переходить к теме рендеринга на сервере. Скачайте каталог [server](https://github.com/reacton-js/creaton/tree/main/server) и давайте рассмотрим его содержимое:
+
+Подкаталог *public* содержит все статические файлы сервера, такие как стили, шрифты, изображения и т. д.
+
+В файле *bots.js* содержится массив с названиями известных ботов. Этот массив можно изменять по своему усмотрению:
+
+```js
+module.exports = [
+  // Yandex
+  'YandexBot', 'YandexAccessibilityBot', 'YandexMobileBot', 'YandexDirectDyn',
+
+  // Google
+  'Googlebot', 'Googlebot-Image', 'Mediapartners-Google', 'AdsBot-Google', 'APIs-Google',
+  'AdsBot-Google-Mobile',
+
+  // Other
+  'Mail.RU_Bot', 'bingbot', 'Accoona', 'Lighthouse', 'ia_archiver', 'Ask Jeeves', 'OmniExplorer_Bot', 'W3C_Validator',
+]
+```
+
+<br>
+
+Файл *index.html* из каталога *server* является главным файлом приложения:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+  <link rel="stylesheet" href="normalize.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- монтировать компонент MyMenu -->
+  <my-menu></my-menu>
+
+  <!-- элемент Header -->
+  <header>
+    <img src="img/logo.jpg" alt="logo">
+  </header>
+
+  <!-- монтировать компонент MyContent -->
+  <my-content></my-content>
+
+  <!-- подключить плагин Creaton -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // создать элемент события myRoute
+    const myRoute = new Creaton.route()
+
+    // создать класс компонента myHome
+    class myHome {
+      static mode = 'open' // добавить Теневой DOM
+
+      static render() {
+        return `
+          <h2>Главная</h2>
+        `
+      }
+    }
+
+    // создать класс компонента myAbout
+    class myAbout {
+      static mode = 'open' // добавить Теневой DOM
+
+      static async render() {
+        // получить данные через одну секунду после вызова метода
+        const message = await new Promise(ok => setTimeout(() => ok('О нас'), 1000))
+
+        return `
+          <h2>${message}</h2>
+        `
+      }
+    }
+
+    // создать класс компонента myContacts
+    class myContacts {
+      static mode = 'open' // добавить Теневой DOM
+
+      static render() {
+        return `
+          <h2>Контакты</h2>
+        `
+      }
+    }
+
+    // создать класс компонента MyMenu
+    class MyMenu {
+      static mode = 'open' // добавить Теневой DOM
+
+      static render() {
+        return `
+          <nav>
+            <a href="/">Главная</a>
+            <a href="/about">О нас</a>
+            <a href="/contacts">Контакты</a>
+          </nav>
+        `
+      }
+
+      static connected() {
+        // добавить для элемента NAV обработчик события "click"
+        this.$('nav').addEventListener('click', event => {
+          // отменить переход по ссылке
+          event.preventDefault()
+
+          // вызвать событие адреса ссылки для элемента myRoute
+          this.$route(myRoute, event.target.href)
+        })
+      }
+    }
+
+    // создать класс компонента MyContent
+    class MyContent {
+      page = 'my-home' // начальное значение состояния
+
+      static mode = 'open' // добавить Теневой DOM
+
+      static render() {
+        return `
+          <${this.page} />
+
+          <style>
+            :host {
+              display: block;
+              margin-top: 30px;
+            }
+          </style>
+        `
+      }
+
+      static connected() {
+        // добавить элементу myRoute обработчик события "/"
+        myRoute.addEventListener('/', () => {
+          this.page = 'my-home' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myRoute обработчик события "/about"
+        myRoute.addEventListener('/about', () => {
+          this.page = 'my-about' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // добавить элементу myRoute обработчик события "/contacts"
+        myRoute.addEventListener('/contacts', () => {
+          this.page = 'my-contacts' // присвоить значение
+
+          // обновить DOM компонента
+          this.$update()
+        })
+
+        // вызвать событие адреса страницы для элемента myRoute
+        this.$route(myRoute, location.href)
+      }
+    }
+
+    // передать классы компонентов в плагин Creaton
+    Creaton(myHome, myAbout, myContacts, MyMenu, MyContent)
+  </script>
+</body>
+</html>
+```
+
+Этот файл представляет собой немного изменённый маршрутизатор из прошлой главы. Все компоненты имеют [Теневой DOM](https://learn.javascript.ru/shadow-dom), а компонент MyContent имеет ещё и селектор [:host](https://learn.javascript.ru/shadow-dom-style#host) для стилизации элемента компонента:
+
+```js
+static render() {
+  return `
+    <${this.page} />
+
+    <style>
+      :host {
+        display: block;
+        margin-top: 30px;
+      }
+    </style>
+  `
+}
+```
+
+Кроме этого, компонент myAbout имитирует загрузку данных с сервера через одну секунду:
+
+```js
+static async render() {
+  // получить данные через одну секунду после вызова метода
+  const message = await new Promise(ok => setTimeout(() => ok('О нас'), 1000))
+
+  return `
+    <h2>${message}</h2>
+  `
+}
+```
+
+<br>
+
+*Если вы планируете в будущем использовать асинхронные скрипты с типом [module](https://learn.javascript.ru/modules-intro) на странице своего приложения, то обратитесь к [руководству](https://github.com/jsdom/jsdom#asynchronous-script-loading) по jsdom.*
+
+*Если вы планируете в будущем использовать метод [fetch()](https://learn.javascript.ru/fetch) вместо объекта [XMLHttpRequest](https://learn.javascript.ru/xmlhttprequest), то обратитесь к [руководству](https://github.com/jsdom/jsdom#advanced-configuration) по jsdom.*
+
+<br>
+
+Самым главным файлом для сервера из каталога *server*, является файл *server.js*, который представляет собой обычное приложение [Express](https://expressjs.com/ru/), как показано ниже:
 
 ```js
 const express = require("express")
@@ -2404,7 +2823,7 @@ app.get('/favicon.ico', (req, res) => res.sendStatus(204))
 
 // обработать все остальные запросы
 app.use(async (req, res) => {
-  // определить строку агента
+  // определить пользовательского агента
   const userAgent = (process.argv[2] == 'bot') ? botAgent : req.get('User-Agent')
   
   // если запрос исходит от бота
@@ -2429,7 +2848,7 @@ app.use(async (req, res) => {
     res.send(html)
   }
 
-  // иначе, если запрос идёт от пользователя
+  // иначе, если запрос исходит от пользователя
   else {
     // вернуть файл главной страницы приложения
     res.sendFile(__dirname + "/index.html")
@@ -2443,7 +2862,99 @@ app.listen(port, () => console.log(`The server is running at http://localhost:${
 
 <br>
 
-Раздел в разработке...
+Все запросы в нём обрабатываются в методе **use()**. Сначала идёт определение пользовательского агента:
+
+```js
+// определить пользовательского агента
+const userAgent = (process.argv[2] == 'bot') ? botAgent : req.get('User-Agent')
+```
+
+Это позволяет протестировать сервер в режиме бота. Затем, если запрос происходит от бота, то выполняется следующий блок кода:
+
+```js
+// если запрос исходит от бота
+if (regBots.test(userAgent)) {
+  // определить полный URL запроса
+  const fullURL = req.protocol + "://" + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
+
+  // загрузить файл главной страницы приложения
+  const file = await readFile(__dirname + '/index.html')
+
+  // определить новый объект JSDOM с параметрами
+  const dom = new JSDOM(file.toString(), {
+    url: fullURL, // установить URL страницы
+    resources: 'usable', // разрешить загружать внешние ресурсы
+    runScripts: 'dangerously', // разрешить выполнять скрипты страницы
+  })
+
+  // получить отрендеренное HTML-содержимое страницы
+  const html = await new Promise(ok => dom.window.onload = () => dom.window.Creaton.ssr().then(ok))
+
+  // вернуть отрендеренное HTML-содержимое
+  res.send(html)
+}
+```
+
+<br>
+
+В нём определяется полный URL запроса, загружается файл главной страницы приложения и формируется новый объект jsdom:
+
+```js
+// определить полный URL запроса
+const fullURL = req.protocol + "://" + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
+
+// загрузить файл главной страницы приложения
+const file = await readFile(__dirname + '/index.html')
+
+// определить новый объект JSDOM с параметрами
+const dom = new JSDOM(file.toString(), {
+  url: fullURL, // установить URL страницы
+  resources: 'usable', // разрешить загружать внешние ресурсы
+  runScripts: 'dangerously', // разрешить выполнять скрипты страницы
+})
+```
+
+<br>
+
+После этого, в виртуальном DOM созданного объекта запускается метод **ssr()** плагина Creaton, который возвращает промис, значением которого является отрендеренное HTML-содержимое страницы в виде строки:
+
+```js
+// получить отрендеренное HTML-содержимое страницы
+const html = await new Promise(ok => dom.window.onload = () => dom.window.Creaton.ssr().then(ok))
+```
+
+Эта строка отдаётся боту:
+
+```js
+// вернуть отрендеренное HTML-содержимое
+res.send(html)
+```
+
+<br>
+
+Если запрос исходит от пользователя, а не от бота, то ему просто возвращается главный файл приложения:
+
+```js
+// иначе, если запрос исходит от пользователя
+else {
+  // вернуть файл главной страницы приложения
+  res.sendFile(__dirname + "/index.html")
+}
+```
+
+<br>
+
+Теперь перейдите в каталог *server* с помощью терминала или откройте терминал в этом каталоге, и в терминале введите команду:
+
+```
+node server
+```
+
+Это запустит сервер в обычном режиме. Чтобы протестировать сервер в режиме бота, введите команду:
+
+```
+node server bot
+```
 
 <br>
 <br>

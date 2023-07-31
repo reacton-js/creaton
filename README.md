@@ -2374,7 +2374,426 @@ Below is the full content of the *index.html* file:
 
 [SSR](https://www.patterns.dev/posts/server-side-rendering) is a method of rendering a web page on the server, not in the browser. To implement the rendering of Web components, the [jsdom](https://github.com/jsdom/jsdom) package is used - DOM virtualization in JavaScript.
 
-Contents of *server.js* file:
+Before moving on to rendering on the server, let's get acquainted in the browser with the function that is responsible for it.
+
+Make changes to the index.html file as shown below:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component>
+    <p>Web Components made easy!</p>
+  </my-component>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script type="module">
+    // create component class MyComponent
+    class MyComponent {
+      message = 'Creaton'
+      color = 'red'
+
+      static mode = 'open' // add Shadow DOM
+
+      static render() {
+        return `
+          <h1>Hello, ${ this.message }!</h1>
+          <slot></slot>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
+
+    // execute render the HTML content of the page
+    const html = await Creaton.ssr()
+
+    // print rendered content to console
+    console.log(html)
+  </script>
+</body>
+</html>
+```
+
+The **ssr()** method of the Creaton plugin renders the HTML content of the page. It returns a promise whose value is a string containing the rendered HTML content:
+
+```js
+// execute render the HTML content of the page
+const html = await Creaton.ssr()
+```
+
+which will be displayed in the browser console:
+
+```
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+
+  
+  <my-component>
+          <h1>Hello, Creaton!</h1>
+          
+    <p>Web Components made easy!</p>
+  
+          
+          
+        </my-component>
+
+  
+  
+
+</body></html>
+```
+
+<br>
+
+By default, the **ssr()** method removes all scripts, styles, comments, and &lt;template&gt; in the returned HTML content.
+
+The **ssr()** method takes one parameter, an object with three optional properties. Adding a **clean** property with a value of "false":
+
+```js
+const html = await Creaton.ssr({ clean: false })
+```
+
+cancels the default cleanup, and all content is output as is:
+
+```
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component>
+          <h1>Hello, Creaton!</h1>
+          
+    <p>Web Components made easy!</p>
+  
+          
+          <style>
+            h1 {
+              color: red;
+            }
+          </style>
+        </my-component>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script type="module">
+    // create component class MyComponent
+    class MyComponent {
+      message = 'Creaton'
+      color = 'red'
+
+      static mode = 'open' // add Shadow DOM
+
+      static render() {
+        return `
+          <h1>Hello, ${ this.message }!</h1>
+          <slot></slot>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
+
+    // execute render the HTML content of the page
+    const html = await Creaton.ssr({ clean: false })
+
+    // print rendered content to console
+    console.log(html)
+  </script>
+
+</body></html>
+```
+
+<br>
+
+By default, the **ssr()** method removes all [slots](https://javascript.info/slots-composition). But if you add the **slots** property with the value "true":
+
+```js
+const html = await Creaton.ssr({ slots: true })
+```
+
+then the slots will be output to the content:
+
+```
+<h1>Hello, Creaton!</h1>
+          <slot>
+    <p>Web Components made easy!</p>
+  </slot>
+```
+
+<br>
+
+By default, the **ssr()** method renders the entire page. But you can add a **node** property to it with a value equal to the node from which rendering should begin:
+
+```js
+const html = await Creaton.ssr({ node: document.body })
+```
+
+Then only this node and everything in it will get into the rendered content:
+
+```
+<body>
+
+  
+  <my-component>
+          <h1>Hello, Creaton!</h1>
+          
+    <p>Web Components made easy!</p>
+  
+          
+          
+        </my-component>
+
+  
+  
+
+</body>
+```
+
+<br>
+
+Now we can move on to the topic of rendering on the server. Download the [server](https://github.com/reacton-js/creaton/tree/main/server) directory and let's take a look at its contents:
+
+The *public* subdirectory contains all the server's static files such as styles, fonts, images, etc.
+
+The *bots.js* file contains an array with the names of known bots. This array can be modified to your liking:
+
+```js
+module.exports = [
+  // Yandex
+  'YandexBot', 'YandexAccessibilityBot', 'YandexMobileBot', 'YandexDirectDyn',
+
+  // Google
+  'Googlebot', 'Googlebot-Image', 'Mediapartners-Google', 'AdsBot-Google', 'APIs-Google',
+  'AdsBot-Google-Mobile',
+
+  // Other
+  'Mail.RU_Bot', 'bingbot', 'Accoona', 'Lighthouse', 'ia_archiver', 'Ask Jeeves', 'OmniExplorer_Bot', 'W3C_Validator',
+]
+```
+
+<br>
+
+The *index.html* file in the *server* directory is the main application file:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+  <link rel="stylesheet" href="normalize.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- mount the MyMenu component -->
+  <my-menu></my-menu>
+
+  <!-- Header element -->
+  <header>
+    <img src="img/logo.jpg" alt="logo">
+  </header>
+
+  <!-- mount the MyContent component -->
+  <my-content></my-content>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create event element myRoute
+    const myRoute = new Creaton.route()
+
+    // create component class myHome
+    class myHome {
+      static mode = 'open' // add Shadow DOM
+
+      static render() {
+        return `
+          <h2>Home</h2>
+        `
+      }
+    }
+
+    // create component class myAbout
+    class myAbout {
+      static mode = 'open' // add Shadow DOM
+
+      static async render() {
+        // get data one second after method call
+        const message = await new Promise(ok => setTimeout(() => ok('About'), 1000))
+
+        return `
+          <h2>${message}</h2>
+        `
+      }
+    }
+
+    // create component class myContacts
+    class myContacts {
+      static mode = 'open' // add Shadow DOM
+
+      static render() {
+        return `
+          <h2>Contacts</h2>
+        `
+      }
+    }
+
+    // create component class MyMenu
+    class MyMenu {
+      static mode = 'open' // add Shadow DOM
+
+      static render() {
+        return `
+          <nav>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/contacts">Contacts</a>
+          </nav>
+        `
+      }
+
+      static connected() {
+        // add a "click" event handler to the NAV element
+        this.$('nav').addEventListener('click', event => {
+          // cancel clicking on the link
+          event.preventDefault()
+
+          // trigger a link address event on myRoute element
+          this.$route(myRoute, event.target.href)
+        })
+      }
+    }
+
+    // create component class MyContent
+    class MyContent {
+      page = '' // initial state value
+
+      static mode = 'open' // add Shadow DOM
+
+      static render() {
+        return `
+          <${this.page} />
+
+          <style>
+            :host {
+              display: block;
+              margin-top: 30px;
+            }
+          </style>
+        `
+      }
+
+      static connected() {
+        // add a "/" event handler to the myRoute element
+        myRoute.addEventListener('/', () => {
+          this.page = 'my-home' // assign a value
+
+          // update the DOM of the component
+          this.$update()
+        })
+
+        // add a "/about" event handler to the myRoute element
+        myRoute.addEventListener('/about', () => {
+          this.page = 'my-about' // assign a value
+
+          // update the DOM of the component
+          this.$update()
+        })
+
+        // add a "/contacts" event handler to the myRoute element
+        myRoute.addEventListener('/contacts', () => {
+          this.page = 'my-contacts' // assign a value
+
+          // update the DOM of the component
+          this.$update()
+        })
+
+        // trigger page address event on myRoute element
+        this.$route(myRoute, location.href)
+      }
+    }
+
+    // pass component classes to Creaton plugin
+    Creaton(myHome, myAbout, myContacts, MyMenu, MyContent)
+  </script>
+</body>
+</html>
+```
+
+This file is a slightly modified router from the last chapter. All components have [Shadow DOM](https://javascript.info/shadow-dom), and the MyContent component also has a selector [:host](https://javascript.info/shadow-dom-style#host) to style the component element:
+
+```js
+static render() {
+  return `
+    <${this.page} />
+
+    <style>
+      :host {
+        display: block;
+        margin-top: 30px;
+      }
+    </style>
+  `
+}
+```
+
+In addition, the myAbout component simulates loading data from the server in one second:
+
+```js
+static async render() {
+  // get data one second after method call
+  const message = await new Promise(ok => setTimeout(() => ok('About'), 1000))
+
+  return `
+    <h2>${message}</h2>
+  `
+}
+```
+
+<br>
+
+*If you plan to use asynchronous scripts with the [module](https://javascript.info/modules-intro) type on your application page in the future, then refer to the [guide](https://github.com/jsdom/jsdom#asynchronous-script-loading) by jsdom.*
+
+*If you plan to use the [fetch()](https://javascript.info/fetch) method instead of the [XMLHttpRequest](https://javascript.info/xmlhttprequest) object in the future, then refer to the [guide](https://github.com/jsdom/jsdom#advanced-configuration) by jsdom.*
+
+<br>
+
+The most important server file in the *server* directory is the *server.js* file, which is a normal [Express](https://expressjs.com/) application, as shown below:
 
 ```js
 const express = require("express")
@@ -2404,7 +2823,7 @@ app.get('/favicon.ico', (req, res) => res.sendStatus(204))
 
 // process all other requests
 app.use(async (req, res) => {
-  // define agent string
+  // define user agent
   const userAgent = (process.argv[2] == 'bot') ? botAgent : req.get('User-Agent')
   
   // if the request comes from a bot
@@ -2428,8 +2847,8 @@ app.use(async (req, res) => {
     // return rendered HTML content
     res.send(html)
   }
-
-  // otherwise, if the request comes from the user
+  
+  // otherwise, if the request comes from a user
   else {
     // return the main page file of the application
     res.sendFile(__dirname + "/index.html")
@@ -2443,7 +2862,99 @@ app.listen(port, () => console.log(`The server is running at http://localhost:${
 
 <br>
 
-Section under construction...
+All requests in it are processed in the **use()** method. First comes the definition of the user agent:
+
+```js
+// define user agent
+const userAgent = (process.argv[2] == 'bot') ? botAgent : req.get('User-Agent')
+```
+
+This allows you to test the server in bot mode. Then, if the request comes from a bot, then the following block of code is executed:
+
+```js
+// if the request comes from a bot
+if (regBots.test(userAgent)) {
+  // determine the full URL of the request
+  const fullURL = req.protocol + "://" + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
+
+  // load the main page file of the application
+  const file = await readFile(__dirname + '/index.html')
+
+  // define a new JSDOM object with parameters
+  const dom = new JSDOM(file.toString(), {
+    url: fullURL, // set page url
+    resources: 'usable', // allow loading external resources
+    runScripts: 'dangerously', // allow page scripts to execute
+  })
+
+  // get the rendered HTML content of the page
+  const html = await new Promise(ok => dom.window.onload = () => dom.window.Creaton.ssr().then(ok))
+
+  // return rendered HTML content
+  res.send(html)
+}
+```
+
+<br>
+
+It defines the full URL of the request, loads the application's main page file, and forms a new jsdom object:
+
+```js
+// determine the full URL of the request
+const fullURL = req.protocol + "://" + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
+
+// load the main page file of the application
+const file = await readFile(__dirname + '/index.html')
+
+// define a new JSDOM object with parameters
+const dom = new JSDOM(file.toString(), {
+  url: fullURL, // set page url
+  resources: 'usable', // allow loading external resources
+  runScripts: 'dangerously', // allow page scripts to execute
+})
+```
+
+<br>
+
+After that, in the virtual DOM of the created object, the **ssr()** method of the Creaton plugin is launched, which returns a promise, the value of which is the rendered HTML content of the page as a string:
+
+```js
+// get the rendered HTML content of the page
+const html = await new Promise(ok => dom.window.onload = () => dom.window.Creaton.ssr().then(ok))
+```
+
+This line is given to the bot:
+
+```js
+// return rendered HTML content
+res.send(html)
+```
+
+<br>
+
+If the request comes from a user and not from a bot, then the main application file is simply returned to him:
+
+```js
+// otherwise, if the request comes from a user
+else {
+  // return the main page file of the application
+  res.sendFile(__dirname + "/index.html")
+}
+```
+
+<br>
+
+Now navigate to the *server* directory using a terminal, or open a terminal in this directory, and in the terminal enter the command:
+
+```
+node server
+```
+
+This will start the server normally. To test the server in bot mode, enter the command:
+
+```
+node server bot
+```
 
 <br>
 <br>
