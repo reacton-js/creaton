@@ -2586,7 +2586,7 @@ Then only this node and everything in it will get into the rendered content:
 
 Now we can move on to the topic of rendering on the server. Download the [server](https://github.com/reacton-js/creaton/tree/main/server) directory and let's take a look at its contents:
 
-The *public* subdirectory contains all the server's static files such as styles, fonts, images, etc.
+The *public* subdirectory contains all the server's static files such as styles, fonts, images, scripts, etc.
 
 The *bots.js* file contains an array with the names of known bots. This array can be modified to your liking:
 
