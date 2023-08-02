@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.5.1
+ * Creaton.js v2.5.2
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -359,8 +359,8 @@
 
       // добавить элементу Window обработчик события "popstate"
       window.addEventListener('popstate', event => {
-        // отправить маршрутное событие для элемента
-        dispRoute(elem, location.href.replace(location.origin, ''), event.state)
+        // вызвать маршрутное событие для элемента
+        callRoute(elem, location.href.replace(location.origin, ''), event.state)
       })
     }
 
@@ -373,13 +373,13 @@
     // добавить в историю браузера текущий маршрут
     history.pushState(props, '', path)
 
-    // отправить маршрутное событие для элемента
-    dispRoute(elem, path, props)
+    // вызвать маршрутное событие для элемента
+    callRoute(elem, path, props)
   }
 
 
   // определить функцию для вызова маршрутных событий
-  function dispRoute (elem, path, props) {
+  function callRoute (elem, path, props) {
     // получить объект регулярных выражений маршрутных событий
     const eventRegs = elem.getEventRegs()
 
@@ -399,7 +399,7 @@
         // добавить событию свойство содержащее параметры
         event.params = obj.groups
 
-        // отправить маршрутное событие для элемента
+        // вызвать маршрутное событие для элемента
         elem.dispatchEvent(event, props)
       }
     }
