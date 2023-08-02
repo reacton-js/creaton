@@ -2964,5 +2964,7 @@ This will start the server normally. To test the server in bot mode, enter the c
 node server bot
 ```
 
+To view the rendered content, switch to source code mode in the browser using the keyboard shortcut Ctrl + U.
+
 <br>
 <br>
