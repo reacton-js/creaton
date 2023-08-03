@@ -2798,6 +2798,18 @@ static async render() {
 
 *Use the [XMLHttpRequest](https://javascript.info/xmlhttprequest) object for requests in scripts and components instead of the [fetch()](https://javascript.info/fetch) method, as the latter causes rendering errors.*
 
+```js
+// instead of the fetch() method
+const response = await fetch('file.txt')
+const file = await response.text()
+
+// use the XMLHttpRequest object
+const xhr = new XMLHttpRequest()
+xhr.open('GET', 'file.txt')
+xhr.send()
+const file = await new Promise(ok => xhr.onload = () => ok(xhr.response))
+```
+
 <br>
 
 The most important server file in the *server* directory is the *server.js* file, which is a normal [Express](https://expressjs.com/) application, as shown below:
@@ -2867,7 +2879,7 @@ app.use(async (req, res) => {
   // otherwise, if the request comes from a user
   else {
     // return the main page file of the application
-    res.sendFile(__dirname + "/index.html")
+    req.path === "/" ? res.sendFile(__dirname + "/index.html") : res.send("404 Not found :(")
   }
 })
 
@@ -2953,7 +2965,7 @@ If the request comes from a user and not from a bot, then the main application f
 // otherwise, if the request comes from a user
 else {
   // return the main page file of the application
-  res.sendFile(__dirname + "/index.html")
+  req.path === "/" ? res.sendFile(__dirname + "/index.html") : res.send("404 Not found :(")
 }
 ```
 

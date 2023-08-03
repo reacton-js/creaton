@@ -62,7 +62,7 @@ app.use(async (req, res) => {
   // otherwise, if the request comes from a user
   else {
     // return the main page file of the application
-    res.sendFile(__dirname + "/index.html")
+    req.path === "/" ? res.sendFile(__dirname + "/index.html") : res.send("404 Not found :(")
   }
 })
 

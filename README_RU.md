@@ -2798,6 +2798,18 @@ static async render() {
 
 *Используйте в скриптах и компонентах для запросов объект [XMLHttpRequest](https://learn.javascript.ru/xmlhttprequest) вместо метода [fetch()](https://learn.javascript.ru/fetch), поскольку последний приводит к ошибкам при рендеринге.*
 
+```js
+// вместо метода fetch()
+const response = await fetch('file.txt')
+const file = await response.text()
+
+// используйте объект XMLHttpRequest
+const xhr = new XMLHttpRequest()
+xhr.open('GET', 'file.txt')
+xhr.send()
+const file = await new Promise(ok => xhr.onload = () => ok(xhr.response))
+```
+
 <br>
 
 Самым главным файлом для сервера из каталога *server*, является файл *server.js*, который представляет собой обычное приложение [Express](https://expressjs.com/ru/), как показано ниже:
@@ -2867,7 +2879,7 @@ app.use(async (req, res) => {
   // иначе, если запрос исходит от пользователя
   else {
     // вернуть файл главной страницы приложения
-    res.sendFile(__dirname + "/index.html")
+    req.path === "/" ? res.sendFile(__dirname + "/index.html") : res.send("404 Not found :(")
   }
 })
 
@@ -2953,7 +2965,7 @@ res.send(html)
 // иначе, если запрос исходит от пользователя
 else {
   // вернуть файл главной страницы приложения
-  res.sendFile(__dirname + "/index.html")
+  req.path === "/" ? res.sendFile(__dirname + "/index.html") : res.send("404 Not found :(")
 }
 ```
 
