@@ -2621,7 +2621,6 @@ The *index.html* file in the *server* directory is the main application file:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
-  <link rel="stylesheet" href="normalize.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -2797,7 +2796,7 @@ static async render() {
 
 *If you plan to use asynchronous scripts with the [module](https://javascript.info/modules-intro) type on your application page in the future, then refer to the [guide](https://github.com/jsdom/jsdom#asynchronous-script-loading) by jsdom.*
 
-*If you plan to use the [fetch()](https://javascript.info/fetch) method instead of the [XMLHttpRequest](https://javascript.info/xmlhttprequest) object in the future, then refer to the [guide](https://github.com/jsdom/jsdom#advanced-configuration) by jsdom.*
+*Use the [XMLHttpRequest](https://javascript.info/xmlhttprequest) object for requests in scripts and components instead of the [fetch()](https://javascript.info/fetch) method, as the latter causes rendering errors.*
 
 <br>
 
@@ -2806,6 +2805,7 @@ The most important server file in the *server* directory is the *server.js* file
 ```js
 const express = require("express")
 const { readFile } = require('fs/promises')
+const jsdom = require("jsdom")
 const { JSDOM } = require("jsdom")
 const port = process.env.PORT || 3000
 
@@ -2824,10 +2824,18 @@ const botAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com
 // define a regular expression to search for bot names in a string
 const regBots = new RegExp(`(${arrBots.join(')|(')})`, 'i')
 
+// search for script file extensions
+const regJS = /(.js)|(.mjs)$/
+
+// loads only scripts and ignores all other resources
+class CustomResourceLoader extends jsdom.ResourceLoader {
+  fetch(url, options) {
+    return regJS.test(url) ? super.fetch(url, options) : null
+  }
+}
 
 // process favicon
 app.get('/favicon.ico', (req, res) => res.sendStatus(204))
-
 
 // process all other requests
 app.use(async (req, res) => {
@@ -2845,7 +2853,7 @@ app.use(async (req, res) => {
     // define a new JSDOM object with parameters
     const dom = new JSDOM(file.toString(), {
       url: fullURL, // set page url
-      resources: 'usable', // allow loading external resources
+      resources: new CustomResourceLoader(), // loading only scripts
       runScripts: 'dangerously', // allow page scripts to execute
     })
 
@@ -2862,7 +2870,6 @@ app.use(async (req, res) => {
     res.sendFile(__dirname + "/index.html")
   }
 })
-
 
 // start the server
 app.listen(port, () => console.log(`The server is running at http://localhost:${port}/`))
@@ -2891,7 +2898,7 @@ if (regBots.test(userAgent)) {
   // define a new JSDOM object with parameters
   const dom = new JSDOM(file.toString(), {
     url: fullURL, // set page url
-    resources: 'usable', // allow loading external resources
+    resources: new CustomResourceLoader(), // loading only scripts
     runScripts: 'dangerously', // allow page scripts to execute
   })
 
@@ -2917,7 +2924,7 @@ const file = await readFile(__dirname + '/index.html')
 // define a new JSDOM object with parameters
 const dom = new JSDOM(file.toString(), {
   url: fullURL, // set page url
-  resources: 'usable', // allow loading external resources
+  resources: new CustomResourceLoader(), // loading only scripts
   runScripts: 'dangerously', // allow page scripts to execute
 })
 ```

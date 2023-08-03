@@ -2621,7 +2621,6 @@ module.exports = [
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
-  <link rel="stylesheet" href="normalize.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -2797,7 +2796,7 @@ static async render() {
 
 *Если вы планируете в будущем использовать асинхронные скрипты с типом [module](https://learn.javascript.ru/modules-intro) на странице своего приложения, то обратитесь к [руководству](https://github.com/jsdom/jsdom#asynchronous-script-loading) по jsdom.*
 
-*Если вы планируете в будущем использовать метод [fetch()](https://learn.javascript.ru/fetch) вместо объекта [XMLHttpRequest](https://learn.javascript.ru/xmlhttprequest), то обратитесь к [руководству](https://github.com/jsdom/jsdom#advanced-configuration) по jsdom.*
+*Используйте в скриптах и компонентах для запросов объект [XMLHttpRequest](https://learn.javascript.ru/xmlhttprequest) вместо метода [fetch()](https://learn.javascript.ru/fetch), поскольку последний приводит к ошибкам при рендеринге.*
 
 <br>
 
@@ -2806,6 +2805,7 @@ static async render() {
 ```js
 const express = require("express")
 const { readFile } = require('fs/promises')
+const jsdom = require("jsdom")
 const { JSDOM } = require("jsdom")
 const port = process.env.PORT || 3000
 
@@ -2824,10 +2824,18 @@ const botAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com
 // определить регулярное выражение для поиска названий ботов в строке
 const regBots = new RegExp(`(${arrBots.join(')|(')})`, 'i')
 
+// поиск расширений файлов скриптов
+const regJS = /(.js)|(.mjs)$/
+
+// загружает только скрипты и игнорирует все остальные ресурсы
+class CustomResourceLoader extends jsdom.ResourceLoader {
+  fetch(url, options) {
+    return regJS.test(url) ? super.fetch(url, options) : null
+  }
+}
 
 // обработать фавикон
 app.get('/favicon.ico', (req, res) => res.sendStatus(204))
-
 
 // обработать все остальные запросы
 app.use(async (req, res) => {
@@ -2845,7 +2853,7 @@ app.use(async (req, res) => {
     // определить новый объект JSDOM с параметрами
     const dom = new JSDOM(file.toString(), {
       url: fullURL, // установить URL страницы
-      resources: 'usable', // разрешить загружать внешние ресурсы
+      resources: new CustomResourceLoader(), // загрузка только скриптов
       runScripts: 'dangerously', // разрешить выполнять скрипты страницы
     })
 
@@ -2862,7 +2870,6 @@ app.use(async (req, res) => {
     res.sendFile(__dirname + "/index.html")
   }
 })
-
 
 // запустить сервер
 app.listen(port, () => console.log(`The server is running at http://localhost:${port}/`))
@@ -2891,7 +2898,7 @@ if (regBots.test(userAgent)) {
   // определить новый объект JSDOM с параметрами
   const dom = new JSDOM(file.toString(), {
     url: fullURL, // установить URL страницы
-    resources: 'usable', // разрешить загружать внешние ресурсы
+    resources: new CustomResourceLoader(), // загрузка только скриптов
     runScripts: 'dangerously', // разрешить выполнять скрипты страницы
   })
 
@@ -2917,7 +2924,7 @@ const file = await readFile(__dirname + '/index.html')
 // определить новый объект JSDOM с параметрами
 const dom = new JSDOM(file.toString(), {
   url: fullURL, // установить URL страницы
-  resources: 'usable', // разрешить загружать внешние ресурсы
+  resources: new CustomResourceLoader(), // загрузка только скриптов
   runScripts: 'dangerously', // разрешить выполнять скрипты страницы
 })
 ```

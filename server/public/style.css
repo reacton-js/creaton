@@ -1,7 +1,6 @@
+@import url('normalize.min.css');
+
+/* general styles */
 body {
   padding: 10px;
-}
-
-header {
-  margin-top: 15px;
 }
