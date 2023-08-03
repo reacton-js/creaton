@@ -2621,7 +2621,7 @@ module.exports = [
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <!-- монтировать компонент MyMenu -->
@@ -2636,7 +2636,7 @@ module.exports = [
   <my-content></my-content>
 
   <!-- подключить плагин Creaton -->
-  <script src="creaton.min.js"></script>
+  <script src="js/creaton.min.js"></script>
 
   <script>
     // создать элемент события myRoute

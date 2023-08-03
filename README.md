@@ -2621,7 +2621,7 @@ The *index.html* file in the *server* directory is the main application file:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creaton</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <!-- mount the MyMenu component -->
@@ -2636,7 +2636,7 @@ The *index.html* file in the *server* directory is the main application file:
   <my-content></my-content>
 
   <!-- include Creaton plugin -->
-  <script src="creaton.min.js"></script>
+  <script src="js/creaton.min.js"></script>
 
   <script>
     // create event element myRoute
