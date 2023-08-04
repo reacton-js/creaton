@@ -1,14 +1,14 @@
-const express = require("express")
+const express = require('express')
 const { readFile } = require('fs/promises')
-const jsdom = require("jsdom")
-const { JSDOM } = require("jsdom")
+const jsdom = require('jsdom')
+const { JSDOM } = require('jsdom')
 const port = process.env.PORT || 3000
 
 // create an Express application object
 const app = express()
 
 // define directory for static files
-app.use(express.static(__dirname + "/public"))
+app.use(express.static(__dirname + '/public'))
 
 // get an array of bot names from an external file
 const arrBots = require('./bots.js')
@@ -20,7 +20,7 @@ const botAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com
 const regBots = new RegExp(`(${arrBots.join(')|(')})`, 'i')
 
 // search for script file extensions
-const regJS = /(.js)|(.mjs)$/
+const regJS = /\.m?js$/
 
 // loads only scripts and ignores all other resources
 class CustomResourceLoader extends jsdom.ResourceLoader {
@@ -40,7 +40,7 @@ app.use(async (req, res) => {
   // if the request comes from a bot
   if (regBots.test(userAgent)) {
     // determine the full URL of the request
-    const fullURL = req.protocol + "://" + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
+    const fullURL = req.protocol + '://' + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
 
     // load the main page file of the application
     const file = await readFile(__dirname + '/index.html')
@@ -62,7 +62,7 @@ app.use(async (req, res) => {
   // otherwise, if the request comes from a user
   else {
     // return the main page file of the application
-    req.path === "/" ? res.sendFile(__dirname + "/index.html") : res.send("404 Not found :(")
+    res.sendFile(__dirname + '/index.html')
   }
 })
 

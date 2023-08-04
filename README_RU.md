@@ -2815,17 +2815,17 @@ const file = await new Promise(ok => xhr.onload = () => ok(xhr.response))
 Самым главным файлом для сервера из каталога *server*, является файл *server.js*, который представляет собой обычное приложение [Express](https://expressjs.com/ru/), как показано ниже:
 
 ```js
-const express = require("express")
+const express = require('express')
 const { readFile } = require('fs/promises')
-const jsdom = require("jsdom")
-const { JSDOM } = require("jsdom")
+const jsdom = require('jsdom')
+const { JSDOM } = require('jsdom')
 const port = process.env.PORT || 3000
 
 // создать объект приложения Express
 const app = express()
 
 // определить каталог для статических файлов
-app.use(express.static(__dirname + "/public"))
+app.use(express.static(__dirname + '/public'))
 
 // получить массив названий ботов из внешнего файла
 const arrBots = require('./bots.js')
@@ -2837,7 +2837,7 @@ const botAgent = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com
 const regBots = new RegExp(`(${arrBots.join(')|(')})`, 'i')
 
 // поиск расширений файлов скриптов
-const regJS = /(.js)|(.mjs)$/
+const regJS = /\.m?js$/
 
 // загружает только скрипты и игнорирует все остальные ресурсы
 class CustomResourceLoader extends jsdom.ResourceLoader {
@@ -2857,7 +2857,7 @@ app.use(async (req, res) => {
   // если запрос исходит от бота
   if (regBots.test(userAgent)) {
     // определить полный URL запроса
-    const fullURL = req.protocol + "://" + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
+    const fullURL = req.protocol + '://' + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
 
     // загрузить файл главной страницы приложения
     const file = await readFile(__dirname + '/index.html')
@@ -2879,7 +2879,7 @@ app.use(async (req, res) => {
   // иначе, если запрос исходит от пользователя
   else {
     // вернуть файл главной страницы приложения
-    req.path === "/" ? res.sendFile(__dirname + "/index.html") : res.send("404 Not found :(")
+    res.sendFile(__dirname + '/index.html')
   }
 })
 
@@ -2902,7 +2902,7 @@ const userAgent = (process.argv[2] == 'bot') ? botAgent : req.get('User-Agent')
 // если запрос исходит от бота
 if (regBots.test(userAgent)) {
   // определить полный URL запроса
-  const fullURL = req.protocol + "://" + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
+  const fullURL = req.protocol + '://' + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
 
   // загрузить файл главной страницы приложения
   const file = await readFile(__dirname + '/index.html')
@@ -2928,7 +2928,7 @@ if (regBots.test(userAgent)) {
 
 ```js
 // определить полный URL запроса
-const fullURL = req.protocol + "://" + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
+const fullURL = req.protocol + '://' + req.hostname + `${port ? `:${port}` : ''}` + req.originalUrl
 
 // загрузить файл главной страницы приложения
 const file = await readFile(__dirname + '/index.html')
@@ -2965,7 +2965,7 @@ res.send(html)
 // иначе, если запрос исходит от пользователя
 else {
   // вернуть файл главной страницы приложения
-  req.path === "/" ? res.sendFile(__dirname + "/index.html") : res.send("404 Not found :(")
+  res.sendFile(__dirname + '/index.html')
 }
 ```
 
