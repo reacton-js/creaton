@@ -4,13 +4,13 @@
 npm i
 ```
 
-#### Webpack Development
+#### Development
 
 ```
 npm start
 ```
 
-#### Webpack Production
+#### Production
 
 ```
 npm run build

@@ -4,13 +4,13 @@
 npm i
 ```
 
-#### Node Server
+#### Server
 
 ```
 node server
 ```
 
-#### Node Server Bot
+#### Bot
 
 ```
 node server bot
