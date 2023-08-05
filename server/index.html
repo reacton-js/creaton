@@ -94,6 +94,12 @@
       static mode = 'open' // add Shadow DOM
 
       static render() {
+        // if no such component exists
+        if (!customElements.get(this.page)) {
+          return '<h2>Page not found</h2>'
+        }
+
+        // output the requested component
         return `
           <${this.page} />
 

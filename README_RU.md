@@ -2711,6 +2711,12 @@ module.exports = [
       static mode = 'open' // добавить Теневой DOM
 
       static render() {
+        // если такого компонента не существует
+        if (!customElements.get(this.page)) {
+          return '<h2>Page not found</h2>'
+        }
+
+        // вывести запрошенный компонент
         return `
           <${this.page} />
 
@@ -2762,10 +2768,16 @@ module.exports = [
 
 Этот файл представляет собой немного изменённый маршрутизатор из прошлой главы. Все компоненты имеют открытый [Теневой DOM](https://learn.javascript.ru/shadow-dom), поскольку компоненты с закрытым Теневым DOM не рендерятся.
 
-Компонент MyContent имеет селектор [:host](https://learn.javascript.ru/shadow-dom-style#host) для стилизации элемента компонента:
+Компонент MyContent имеет селектор [:host](https://learn.javascript.ru/shadow-dom-style#host) для стилизации элемента компонента и выполняет проверку на существование запрашиваемого компонента страницы:
 
 ```js
 static render() {
+  // если такого компонента не существует
+  if (!customElements.get(this.page)) {
+    return '<h2>Page not found</h2>'
+  }
+
+  // вывести запрошенный компонент
   return `
     <${this.page} />
 

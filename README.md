@@ -2711,6 +2711,12 @@ The *index.html* file in the *server* directory is the main application file:
       static mode = 'open' // add Shadow DOM
 
       static render() {
+        // if no such component exists
+        if (!customElements.get(this.page)) {
+          return '<h2>Page not found</h2>'
+        }
+
+        // output the requested component
         return `
           <${this.page} />
 
@@ -2762,10 +2768,16 @@ The *index.html* file in the *server* directory is the main application file:
 
 This file is a slightly modified router from the last chapter. All components have an open [Shadow DOM](https://javascript.info/shadow-dom), since components with a closed Shadow DOM are not rendered.
 
-The MyContent component has a [:host](https://javascript.info/shadow-dom-style#host) selector to style the component element:
+The MyContent component has a [:host](https://javascript.info/shadow-dom-style#host) selector to style the component element and checks for the existence of the requested page component:
 
 ```js
 static render() {
+  // if no such component exists
+  if (!customElements.get(this.page)) {
+    return '<h2>Page not found</h2>'
+  }
+
+  // output the requested component
   return `
     <${this.page} />
 
