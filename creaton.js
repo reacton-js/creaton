@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.5.2
+ * Creaton.js v2.6.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -254,20 +254,20 @@
     if (!oldNode) {
       $parent.append(newNode.cloneNode(true)) // добавить ноду
     }
-    // если нет новой ноды
+    // иначе, если нет новой ноды
     else if (!newNode) {
       return !$parent.removeChild($parent.childNodes[index]) // удалить ноду и вернуть Ложь
     }
-    // если типы или названия нод не совпадают
+    // иначе, если типы или названия нод не совпадают
     else if (newNode.nodeType !== oldNode.nodeType || newNode.nodeName !== oldNode.nodeName) {
       $parent.replaceChild(newNode.cloneNode(true), $parent.childNodes[index]) // заменить ноду
     }
-    // если значения нод не совпадают
+    // иначе, если значения нод не совпадают
     else if (newNode.nodeValue !== oldNode.nodeValue) {
       oldNode.nodeValue = newNode.nodeValue // заменить значение
     }
-    // если у ноды имеются дочерние элементы
-    else if (newNode.childNodes.length) {
+    // иначе,
+    else {
       // если функция запускается не в режиме конструктора
       if (!new.target) {
         // если у ноды имеются атрибуты
