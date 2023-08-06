@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.6.0
+ * Creaton.js v2.6.1
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -18,7 +18,7 @@
   // определить ловушки для прокси атрибутов компонентов
   const attrHooks = {
     get(target, key) {
-      return target[key] ? target[key].value : undefined
+      return target.hasOwnProperty(key) ? target[key].value : target[key]
     },
     set(target, key, val) {
       target[key].value = val
@@ -85,7 +85,7 @@
           get: (target, key, receiver) => {
             if (key === getThis) return this // вернуть элемент компонента
             // или значение запрашиваемого свойства
-            return key in target ? Reflect.get(target, key, receiver) : this[key]
+            return (typeof key === 'symbol' || key in target) ? Reflect.get(target, key, receiver) : this[key]
           }
         })
 
