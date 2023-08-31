@@ -982,8 +982,6 @@ In order not to create the same methods for different types of components, you c
       message = 'Creaton'
       color = 'red'
 
-      static mode = 'open'
-
       static render() {
         return `
           <h1>${ this.printHello() }</h1>

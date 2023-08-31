@@ -982,8 +982,6 @@ class MyComponent {
       message = 'Creaton'
       color = 'red'
 
-      static mode = 'open'
-
       static render() {
         return `
           <h1>${ this.printHello() }</h1>
