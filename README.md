@@ -1388,7 +1388,7 @@ static connected() {
 }
 ```
 
-and the *"click"* event handler for the new button:
+and the *"click"* event handler for the new button at the end of the script:
 
 ```js
 // add a "click" event handler for the button
