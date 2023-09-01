@@ -2197,7 +2197,7 @@ To demonstrate the interaction of address event handlers with external code, ins
 <my-content></my-content>
 ```
 
-Add a *"click"* event handler for this menu:
+Add a *"click"* event handler for this menu at the end of the script:
 
 ```js
 // add a "click" event handler to the NAV element
