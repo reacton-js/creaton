@@ -870,6 +870,27 @@ static connected() {
 
 <br>
 
+Метод **$entities()** позволяет [обезвредить](https://css-tricks.com/snippets/javascript/htmlentities-for-javascript/) данные, полученные из ненадёжных источников:
+
+```js
+static async render() {
+  // обезопасить данные полученные от ненадёжного источника
+  const message = this.$entities(await new Promise(ok => setTimeout(() => ok('<em>небезопасный код</em>'), 1000)))
+
+  return `
+    <h1>Привет, ${ message }!</h1>
+    
+    <style>
+      h1 {
+        color: ${ this.color };
+      }
+    </style>
+  `
+}
+```
+
+<br>
+
 Метод **$tag** является [теговой функцией](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Template_literals#%D1%82%D0%B5%D0%B3%D0%BE%D0%B2%D1%8B%D0%B5_%D1%88%D0%B0%D0%B1%D0%BB%D0%BE%D0%BD%D1%8B), которая автоматически добавляет массивам метод **join()** для удаления запятых между элементами, а все остальные вычисляемые значения выводятся как есть:
 
 ```js

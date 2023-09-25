@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.6.1
+ * Creaton.js v2.7.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -196,6 +196,11 @@
           return SERVICE.get(this[getThis] || this).root.querySelectorAll(selector)
         }
         return null
+      }
+
+      // возвращает HTML-сущности в строке
+      $entities(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
       }
 
       // теговая функция для обработки массивов в шаблонных строках

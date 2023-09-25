@@ -870,6 +870,27 @@ static connected() {
 
 <br>
 
+The **$entities()** method allows you to [render harmless](https://css-tricks.com/snippets/javascript/htmlentities-for-javascript/) data received from unreliable sources:
+
+```js
+static async render() {
+  // render harmless data received from an unreliable source
+  const message = this.$entities(await new Promise(ok => setTimeout(() => ok('<em>unsafe code</em>'), 1000)))
+
+  return `
+    <h1>Hello, ${ message }!</h1>
+    
+    <style>
+      h1 {
+        color: ${ this.color };
+      }
+    </style>
+  `
+}
+```
+
+<br>
+
 The **$tag** method is a [tagged function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) that automatically adds a **join()** method to arrays to remove commas between elements, and all other calculated values are displayed as is:
 
 ```js
