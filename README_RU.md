@@ -874,7 +874,7 @@ static connected() {
 
 ```js
 static async render() {
-  // обезопасить данные полученные от ненадёжного источника
+  // обезопасить данные, полученные от ненадёжного источника
   const message = this.$entities(await new Promise(ok => setTimeout(() => ok('<em>небезопасный код</em>'), 1000)))
 
   return `
