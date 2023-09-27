@@ -14,7 +14,7 @@ Creaton - это плагин JavaScript для быстрого создани�
 
 *- Начиная с версии 2.5.0, в плагин была добавлена поддержка [рендеринга](https://academy.yandex.com/journal/server-side-rendering) на сервере [Node.js](https://nodejs.org/ru).*
 
-*- Добавлена система [сборки](https://github.com/reacton-js/creaton/tree/main/webpack) на основе [webpack](https://webpack.js.org/).*
+*- Добавлена система [сборки](https://github.com/reacton-js/creaton/tree/main/webpack) на основе [Webpack](https://webpack.js.org/).*
 
 <br>
 

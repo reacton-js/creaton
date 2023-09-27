@@ -14,7 +14,7 @@ Creaton is a JavaScript plugin for quickly creating [Web Components](https://jav
 
 *- Since version  2.5.0, support for [rendering](https://www.patterns.dev/posts/server-side-rendering) on the [Node.js](https://nodejs.org/) server has been added to the plugin.*
 
-*- Added [build](https://github.com/reacton-js/creaton/tree/main/webpack) system based on [webpack](https://webpack.js.org/).*
+*- Added [build](https://github.com/reacton-js/creaton/tree/main/webpack) system based on [Webpack](https://webpack.js.org/).*
 
 <br>
 
