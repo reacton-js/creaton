@@ -1,6 +1,6 @@
 {
   "name": "app",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "``` npm i ```",
   "main": "server.js",
   "scripts": {
@@ -11,7 +11,7 @@
   "author": "https://github.com/reacton-js",
   "license": "MIT",
   "dependencies": {
-    "creaton-js": "^2.7.4"
+    "creaton-js": "^2.7.5"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
