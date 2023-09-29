@@ -1,4 +1,4 @@
-import './creaton.min.js'
+import 'creaton-js'
 import MyHeader from './components/MyHeader'
 import MyComponent from './components/MyComponent'
 
