@@ -24,7 +24,7 @@ Creaton - это плагин JavaScript для быстрого создани�
 
 ```html
 <!-- монтировать компонент MyComponent -->
-<my-component color="red" id="mycomp"></my-component>
+<my-component color="red"></my-component>
 ```
 
 ```js
@@ -34,6 +34,8 @@ class MyComponent {
     this.message = 'Reacton'
     this.color = props.color
   }
+
+  static mode = 'open' // добавить Теневой DOM
 
   static render() {
     return `

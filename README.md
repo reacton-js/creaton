@@ -24,7 +24,7 @@ Below is an example of a simple component:
 
 ```html
 <!-- mount the MyComponent component -->
-<my-component color="red" id="mycomp"></my-component>
+<my-component color="red"></my-component>
 ```
 
 ```js
@@ -34,6 +34,8 @@ class MyComponent {
     this.message = 'Reacton'
     this.color = props.color
   }
+
+  static mode = 'open' // add Shadow DOM
 
   static render() {
     return `
