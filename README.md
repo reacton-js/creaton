@@ -10,6 +10,8 @@
 
 Creaton is a JavaScript plugin for quickly creating [Web Components](https://javascript.info/web-components). The plugin supports all technologies, methods and properties such as [slots](https://javascript.info/slots-composition) and [Shadow DOM](https://javascript.info/shadow-dom) that are provided by standard Web Components.
 
+*- Updating the [build](https://github.com/reacton-js/creaton/tree/main/webpack) for [Webpack](https://webpack.js.org/).*
+
 *- In version 2.8.0, a bug in accessing special properties in static methods of closed components was fixed.*
 
 *- Since version 2.4.0, the security of closed components has increased significantly. Getting/changing the state and HTML content of a component is possible only from static methods.*

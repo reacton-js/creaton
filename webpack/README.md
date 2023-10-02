@@ -15,3 +15,14 @@ npm start
 ```
 npm run build
 ```
+
+#### Server
+
+```
+node server/app
+```
+
+#### Test Bot
+
+```
+node server/app bot
