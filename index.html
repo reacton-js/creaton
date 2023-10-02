@@ -7,7 +7,7 @@
 </head>
 <body>
   <!-- mount the MyComponent component -->
-  <my-component id="mycomp"></my-component>
+  <my-component color="red" id="mycomp"></my-component>
 
   <!-- include Creaton plugin -->
   <script src="creaton.min.js"></script>
@@ -15,8 +15,11 @@
   <script>
     // create component class MyComponent
     class MyComponent {
-      message = 'Creaton'
-      color = 'red'
+      // initializing the state object in the constructor
+      constructor(props) {
+        this.message = 'Reacton'
+        this.color = props.color
+      }
 
       static mode = 'open' // add Shadow DOM
 

@@ -1,6 +1,8 @@
 export default class MyComponent {
-  message = 'Creaton'
-  color = 'red'
+  constructor(props) {
+    this.message = 'Reacton'
+    this.color = props.color
+  }
 
   static mode = 'open' // add Shadow DOM
 

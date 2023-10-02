@@ -11,7 +11,7 @@
   "author": "https://github.com/reacton-js",
   "license": "MIT",
   "dependencies": {
-    "creaton-js": "^2.7.5"
+    "creaton-js": "^2.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",

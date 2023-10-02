@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.7.0
+ * Creaton.js v2.8.0
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -36,7 +36,7 @@
   const okEvent = new customEvent()
 
   // определить событие инициализации компонента
-  const initEvent = new CustomEvent('init', { bubbles: true, composed: true })
+  const initEvent = new CustomEvent('init-event', { bubbles: true, composed: true })
 
   // определить дескриптор для свойства "detail" с возможностью записи 
   Object.defineProperty(initEvent, 'detail', { writable: true })
@@ -79,27 +79,51 @@
           template = document.createElement('template')
         }
 
+        // определить прокси для атрибутов компонента
+        const props = new Proxy(this.attributes, attrHooks)
+
+        // определить хозяина теневого DOM компонента
+        const host = root.host
+
+        // определить функцию поиска элемента по заданному селектору
+        const $ = sel => root.querySelector(sel)
+
+        // определить функцию поиска элементов по заданному селектору
+        const $$ = sel => root.querySelectorAll(sel)
+
         // определить объект с методом доступа к состоянию или свойству компонента
-        const state = new Proxy(new INITClass(), {
+        const state = new Proxy(new INITClass(props), {
           // вернуть значение свойства объекта состояния или компонента
           get: (target, key, receiver) => {
-            if (key === getThis) return this // вернуть элемент компонента
-            // или значение запрашиваемого свойства
+            // если запрашивается символ компонента, то вернуть компонент
+            if (key === getThis) return this
+
+            // если запрашивается одно из специальных свойств компонента
+            switch (key) {
+              case '$state': return state
+              case '$props': return props
+              case '$host': return host
+              case '$': return $
+              case '$$': return $$
+            }
+
+            // вернуть значение свойства
             return (typeof key === 'symbol' || key in target) ? Reflect.get(target, key, receiver) : this[key]
           }
         })
-
-        // определить прокси для атрибутов компонента
-        const attributes = new Proxy(this.attributes, attrHooks)
 
         // определить специальные свойства для элемента компонента
         Object.defineProperties(this, {
           // возвращает объект состояния компонента
           $state: { get() { if (mode !== 'closed') return state }},
           // возвращает прокси атрибутов компонента
-          $props: { get() { if (mode !== 'closed') return attributes }},
+          $props: { get() { if (mode !== 'closed') return props }},
           // возвращает хозяина теневого DOM компонента
-          $host: { get() { if (mode !== 'closed') return root.host }},
+          $host: { get() { if (mode !== 'closed') return host }},
+          // возвращает элемент из теневого DOM компонента
+          $: { get() { if (mode !== 'closed') return $ }},
+          // возвращает элементы из теневого DOM компонента
+          $$: { get() { if (mode !== 'closed') return $$ }},
           // возвращает Истину, если компонент не содержит теневой DOM
           $light: { value: root === this || false },
           // возвращает теневой DOM компонента
@@ -114,7 +138,7 @@
         SERVICE.set(this, { root, template, state })
 
         // добавить компоненту обработчик события инициализации
-        this.addEventListener('init', event => {
+        this.addEventListener('init-event', event => {
           // удалить передаваемый компонент из множества
           setDefs.delete(event.detail)
 
@@ -180,22 +204,6 @@
         if (mode !== 'closed' || this[getThis]) {
           return await updateState.call(this[getThis] || this, obj, INITClass)
         }
-      }
-      
-      // поиск элемента по заданному селектору
-      $(selector) {
-        if (mode !== 'closed' || this[getThis]) {
-          return SERVICE.get(this[getThis] || this).root.querySelector(selector)
-        }
-        return null
-      }
-
-      // поиск всех элементов по заданному селектору
-      $$(selector) {
-        if (mode !== 'closed' || this[getThis]) {
-          return SERVICE.get(this[getThis] || this).root.querySelectorAll(selector)
-        }
-        return null
       }
 
       // возвращает HTML-сущности в строке
