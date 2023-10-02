@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.8.0
+ * Creaton.js v2.8.1
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -25,9 +25,6 @@
       return true
     }
   }
-
-  // определить символ для получения элемента компонентов
-  const getThis = Symbol()
 
   // определить множество для хранения определяемых компонентов
   const setDefs = new Set()
@@ -85,6 +82,9 @@
         // определить хозяина теневого DOM компонента
         const host = root.host
 
+        // определить функцию обновления состояния и HTML-содержимого компонента
+        const update = async obj => await updateState.call(this, obj, INITClass)
+
         // определить функцию поиска элемента по заданному селектору
         const $ = sel => root.querySelector(sel)
 
@@ -95,14 +95,12 @@
         const state = new Proxy(new INITClass(props), {
           // вернуть значение свойства объекта состояния или компонента
           get: (target, key, receiver) => {
-            // если запрашивается символ компонента, то вернуть компонент
-            if (key === getThis) return this
-
             // если запрашивается одно из специальных свойств компонента
             switch (key) {
               case '$state': return state
               case '$props': return props
               case '$host': return host
+              case '$update': return update
               case '$': return $
               case '$$': return $$
             }
@@ -120,6 +118,8 @@
           $props: { get() { if (mode !== 'closed') return props }},
           // возвращает хозяина теневого DOM компонента
           $host: { get() { if (mode !== 'closed') return host }},
+          // возвращает функцию обновления состояния и содержимого компонента
+          $update: { get() { if (mode !== 'closed') return update }},
           // возвращает элемент из теневого DOM компонента
           $: { get() { if (mode !== 'closed') return $ }},
           // возвращает элементы из теневого DOM компонента
@@ -152,7 +152,6 @@
           }
         })
       }
-
       
       // вызывается при добавлении компонента в документ
       async connectedCallback() {
@@ -198,14 +197,6 @@
         }
       }
       
-
-      // вызывает функцию обновления состояния и HTML-содержимого компонента
-      async $update(obj) {
-        if (mode !== 'closed' || this[getThis]) {
-          return await updateState.call(this[getThis] || this, obj, INITClass)
-        }
-      }
-
       // возвращает HTML-сущности в строке
       $entities(str) {
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
