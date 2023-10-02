@@ -1,6 +1,6 @@
 export default class MyComponent {
   constructor(props) {
-    this.message = 'Reacton'
+    this.message = 'Creaton'
     this.color = props.color
   }
 

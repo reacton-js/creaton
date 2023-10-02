@@ -31,7 +31,7 @@ Below is an example of a simple component:
 class MyComponent {
   // initializing the state object in the constructor
   constructor(props) {
-    this.message = 'Reacton'
+    this.message = 'Creaton'
     this.color = props.color
   }
 

@@ -31,7 +31,7 @@ Creaton - это плагин JavaScript для быстрого создани�
 class MyComponent {
   // инициализация объекта состояния в конструкторе
   constructor(props) {
-    this.message = 'Reacton'
+    this.message = 'Creaton'
     this.color = props.color
   }
 
