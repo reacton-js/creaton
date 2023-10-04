@@ -197,7 +197,7 @@ This will open a default browser window displaying the welcome message shown abo
 
 <br>
 
-To work with modular components, it is convenient to use various systems for assembling modules. You can customize your own or [download](https://github.com/reacton-js/creaton/tree/main/webpack) a ready-made build system based on [webpack](https://webpack.js.org/).
+To work with modular components, it is convenient to use various systems for assembling modules. You can customize your own or [download](https://github.com/reacton-js/creaton/tree/main/webpack) a ready-made build system based on [Webpack](https://webpack.js.org/).
 
 <br>
 
@@ -326,7 +326,7 @@ In this example, the **printHello()** method of the MyComponent class object has
 
 To render the component's HTML content, the class must have a static **render()** method that returns a string. From this line, the HTML markup of the future component will be created.
 
-This method is executed in the context of the component's state object, which allows you to refer to the properties of this object using the *this* keyword and using template literals, for example:
+This method is executed in the context of the component's state object, which allows you to refer to the properties of this object using the *this* keyword and using [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), for example:
 
 ```js
 static render() {
@@ -553,7 +553,7 @@ The initial state values are defined in the tracked attributes ***message*** and
 <my-component id="mycomp" message="Creaton" color="red"></my-component>
 ```
 
-The assignment of these values to properties of the state object occurs in the **changed()** method, which is called every time values are assigned/changed to tracked attributes:
+The assignment of these values to properties of the state object occurs in the **changed()** method, which is called every time values are Assigned/Changed to tracked attributes:
 
 ```js
 // called when the tracked attribute changes
@@ -752,9 +752,55 @@ To set a new value for this attribute, enter the command:
 mycomp.$props.title = 'Web Components'
 ```
 
+To initialize the state of a component using attributes passed to its mount element, the component's constructor uses the **props** parameter, as shown below:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creaton</title>
+</head>
+<body>
+  <!-- mount the MyComponent component -->
+  <my-component color="red"></my-component>
+
+  <!-- include Creaton plugin -->
+  <script src="creaton.min.js"></script>
+
+  <script>
+    // create component class MyComponent
+    class MyComponent {
+      // initializing the state object in the constructor
+      constructor(props) {
+        this.message = 'Creaton'
+        this.color = props.color
+      }
+
+      static render() {
+        return `
+          <h1>Hello, ${ this.message }!</h1>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // pass component class MyComponent to Creaton plugin
+    Creaton(MyComponent)
+  </script>
+</body>
+</html>
+```
+
 <br>
 
-The **$state** property allows you to get/set the value of any state directly. For closed components, calling this property from outside of static methods returns «undefined».
+The **$state** property allows you to Get/Set the value of any state property. For closed components, calling this property from outside of static methods returns «undefined».
 
 To get the state value of **message**, enter the command in the browser console:
 
@@ -831,9 +877,9 @@ This applies to all methods that are executed in the context of a state object, 
 
 <br>
 
-The **$update()** method is used to update the DOM based on the new state values of the component. It can take one argument as an object. For closed components, calling this method from outside the static methods does not affect the DOM change and the state of the component.
+The **$update()** method is used to update the DOM based on the new state values of the component. It can take one argument as an object. For closed components, calling this method from outside of static methods returns «undefined».
 
-The property values of this object become new state values, for example:
+The property values of the passed object become the new property values of the state object, for example:
 
 ```
 mycomp.$update({ message: 'Web Components', color: 'green' })
@@ -858,9 +904,9 @@ This avoids losing events assigned to elements using the [addEventListener()](ht
 
 <br>
 
-The **$()** method is a shorthand analog of the [querySelector()](https://javascript.info/searching-elements-dom#querySelector) method and is used for quick access to a component's DOM element. For closed components, calling this method from outside of static methods returns «null».
+The **$()** method is a shorthand analog of the [querySelector()](https://javascript.info/searching-elements-dom#querySelector) method and is used for quick access to a component's DOM element. For closed components, calling this method from outside of static methods returns «undefined».
 
-For example, to assign an event listener:
+The method is used, for example, to assign an event listener:
 
 ```js
 // called when the component is added to the document
@@ -870,9 +916,9 @@ static connected() {
 }
 ```
 
-The **$$()** method is a shorthand analog of the [querySelectorAll()](https://javascript.info/searching-elements-dom#querySelectorAll) method and is used for quick access to a component's DOM element. For closed components, calling this method from outside of static methods returns «null».
+The **$$()** method is a shorthand analog of the [querySelectorAll()](https://javascript.info/searching-elements-dom#querySelectorAll) method and is used for quick access to a component's DOM element. For closed components, calling this method from outside of static methods returns «undefined».
 
-For example, to iterate over a collection of elements:
+This method is used, for example, to iterate over a collection of elements:
 
 ```js
 // called when the component is added to the document

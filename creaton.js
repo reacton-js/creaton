@@ -1,5 +1,5 @@
 /*!
- * Creaton.js v2.8.1
+ * Creaton.js v2.8.2
  * (c) 2022-2023 | github.com/reacton-js
  * Released under the MIT License.
  */
@@ -91,8 +91,11 @@
         // определить функцию поиска элементов по заданному селектору
         const $$ = sel => root.querySelectorAll(sel)
 
+        // определить объект для хранения свойств состояния
+        const object = new INITClass(props)
+
         // определить объект с методом доступа к состоянию или свойству компонента
-        const state = new Proxy(new INITClass(props), {
+        const state = new Proxy(object, {
           // вернуть значение свойства объекта состояния или компонента
           get: (target, key, receiver) => {
             // если запрашивается одно из специальных свойств компонента
@@ -184,9 +187,9 @@
       }
 
       // вызывается при изменении одного из отслеживаемых атрибутов
-      async attributeChangedCallback(...args) {
+      attributeChangedCallback(...args) {
         // если была определена статическая функция "changed"
-        await (!INITClass.changed || INITClass.changed.apply(SERVICE.get(this).state, args))
+        setTimeout(() => !INITClass.changed || INITClass.changed.apply(SERVICE.get(this).state, args), 0)
       }
 
       // массив имён атрибутов для отслеживания их изменений
