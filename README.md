@@ -30,6 +30,7 @@ Below is an example of a simple component:
 ```
 
 ```js
+// create component class MyComponent
 class MyComponent {
   // initializing the state object in the constructor
   constructor(props) {
