@@ -2,5 +2,5 @@ import 'creaton-js'
 import MyHeader from './components/MyHeader'
 import MyComponent from './components/MyComponent'
 
-// pass components classes to Creaton plugin
+// passing component classes to the Creaton plugin
 Creaton(MyHeader, MyComponent)
