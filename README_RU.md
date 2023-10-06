@@ -10,6 +10,8 @@
 
 Creaton - это плагин JavaScript для быстрого создания [Веб-компонентов](https://learn.javascript.ru/web-components). Плагин поддерживает все технологии, методы и свойства, такие, например, как [слоты](https://learn.javascript.ru/slots-composition) и [Теневой DOM](https://learn.javascript.ru/shadow-dom), которые предоставляются стандартными Веб-компонентами.
 
+*- [Добавлен](https://github.com/reacton-js/creaton/tree/main/webpack-example-events) пример сборки [Webpack](https://webpack.js.org/) для [событий](#events).*
+
 *- Обновление [сборки](https://github.com/reacton-js/creaton/tree/main/webpack) для [Webpack](https://webpack.js.org/).*
 
 *- В версии 2.8.0 была исправлена ошибка доступа к [специальным свойствам](#special-properties) в статических методах закрытых компонентов.*
