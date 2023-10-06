@@ -10,6 +10,8 @@
 
 Creaton - это плагин JavaScript для быстрого создания [Веб-компонентов](https://learn.javascript.ru/web-components). Плагин поддерживает все технологии, методы и свойства, такие, например, как [слоты](https://learn.javascript.ru/slots-composition) и [Теневой DOM](https://learn.javascript.ru/shadow-dom), которые предоставляются стандартными Веб-компонентами.
 
+*- [Добавлен](https://github.com/reacton-js/creaton/tree/main/webpack-example-routes) пример сборки [Webpack](https://webpack.js.org/) для [маршрутов](#routes).*
+
 *- [Добавлен](https://github.com/reacton-js/creaton/tree/main/webpack-example-events) пример сборки [Webpack](https://webpack.js.org/) для [событий](#events).*
 
 *- Обновление [сборки](https://github.com/reacton-js/creaton/tree/main/webpack) для [Webpack](https://webpack.js.org/).*
@@ -1636,8 +1638,8 @@ Creaton.event(myEvent, 'clear-colors')
     // создать элемент события myRoute
     const myRoute = new Creaton.route()
 
-    // создать класс компонента myHome
-    class myHome {
+    // создать класс компонента MyHome
+    class MyHome {
       static render() {
         return `
           <h2>Главная</h2>
@@ -1645,8 +1647,8 @@ Creaton.event(myEvent, 'clear-colors')
       }
     }
 
-    // создать класс компонента myAbout
-    class myAbout {
+    // создать класс компонента MyAbout
+    class MyAbout {
       static render() {
         return `
           <h2>О нас</h2>
@@ -1654,8 +1656,8 @@ Creaton.event(myEvent, 'clear-colors')
       }
     }
 
-    // создать класс компонента myContacts
-    class myContacts {
+    // создать класс компонента MyContacts
+    class MyContacts {
       static render() {
         return `
           <h2>Контакты</h2>
@@ -1725,7 +1727,7 @@ Creaton.event(myEvent, 'clear-colors')
     }
 
     // передать классы компонентов в плагин Creaton
-    Creaton(myHome, myAbout, myContacts, MyMenu, MyContent)
+    Creaton(MyHome, MyAbout, MyContacts, MyMenu, MyContent)
   </script>
 </body>
 </html>
@@ -1761,8 +1763,8 @@ const myRoute = new Creaton.route()
 Затем у нас происходит определение трёх компонентов страниц:
 
 ```js
-// создать класс компонента myHome
-class myHome {
+// создать класс компонента MyHome
+class MyHome {
   static render() {
     return `
       <h2>Главная</h2>
@@ -1770,8 +1772,8 @@ class myHome {
   }
 }
 
-// создать класс компонента myAbout
-class myAbout {
+// создать класс компонента MyAbout
+class MyAbout {
   static render() {
     return `
       <h2>О нас</h2>
@@ -1779,8 +1781,8 @@ class myAbout {
   }
 }
 
-// создать класс компонента myContacts
-class myContacts {
+// создать класс компонента MyContacts
+class MyContacts {
   static render() {
     return `
       <h2>Контакты</h2>
@@ -1914,11 +1916,11 @@ class MyContent {
 page = 'my-home' // начальное значение состояния
 ```
 
-Оно соответствует названию компонента страницы myHome:
+Оно соответствует названию компонента страницы MyHome:
 
 ```js
-// создать класс компонента myHome
-class myHome {
+// создать класс компонента MyHome
+class MyHome {
   static render() {
     return `
       <h2>Главная</h2>
@@ -1927,7 +1929,7 @@ class myHome {
 }
 ```
 
-В HTML-разметке компонента MyContent происходит создание компонента myHome с помощью самозакрывающегося тега:
+В HTML-разметке компонента MyContent происходит создание компонента MyHome с помощью самозакрывающегося тега:
 
 ```js
 static render() {
@@ -2098,11 +2100,11 @@ static render() {
 }
 ```
 
-Создайте новый компонент страницы myUsers:
+Создайте новый компонент страницы MyUsers:
 
 ```js
-// создать класс компонента myUsers
-class myUsers {
+// создать класс компонента MyUsers
+class MyUsers {
   static mode = 'open' // добавить Теневой DOM
   
   static render() {
@@ -2124,7 +2126,7 @@ static mode = 'open' // добавить Теневой DOM
 
 ```js
 // передать классы компонентов в плагин Creaton
-Creaton(myHome, myAbout, myContacts, MyMenu, MyContent, myUsers)
+Creaton(MyHome, MyAbout, MyContacts, MyUsers, MyMenu, MyContent)
 ```
 
 Внесите изменения в разметку компонента MyContent, добавив вывод HTML-содержимого в именованные слоты с помощью атрибута [slot](https://learn.javascript.ru/slots-composition#imenovannye-sloty), как показано ниже:
@@ -2140,7 +2142,7 @@ static render() {
 }
 ```
 
-Для всех остальных компонентов страниц, кроме компонента myUsers, содержимое, передаваемое в слоты, будет проигнорировано.
+Для всех остальных компонентов страниц, кроме компонента MyUsers, содержимое, передаваемое в слоты, будет проигнорировано.
 
 Осталось добавить обработчик для этого адресного события в конце статического метода **connected()** компонента MyContent:
 
@@ -2294,7 +2296,7 @@ document.querySelector('#mymenu').addEventListener('click', () => {
 })
 
 // передать классы компонентов в плагин Creaton
-Creaton(myHome, myAbout, myContacts, MyContent, myUsers)
+Creaton(MyHome, MyAbout, MyContacts, MyUsers, MyContent)
 ```
 
 Внутри этого обработчика, адресное событие для элемента myRoute вызывается с помощью метода **route()** самого плагина:
@@ -2336,8 +2338,8 @@ Creaton.route(myRoute, event.target.href)
     // создать элемент события myRoute
     const myRoute = new Creaton.route()
 
-    // создать класс компонента myHome
-    class myHome {
+    // создать класс компонента MyHome
+    class MyHome {
       static render() {
         return `
           <h2>Главная</h2>
@@ -2345,8 +2347,8 @@ Creaton.route(myRoute, event.target.href)
       }
     }
 
-    // создать класс компонента myAbout
-    class myAbout {
+    // создать класс компонента MyAbout
+    class MyAbout {
       static render() {
         return `
           <h2>О нас</h2>
@@ -2354,8 +2356,8 @@ Creaton.route(myRoute, event.target.href)
       }
     }
 
-    // создать класс компонента myContacts
-    class myContacts {
+    // создать класс компонента MyContacts
+    class MyContacts {
       static render() {
         return `
           <h2>Контакты</h2>
@@ -2363,8 +2365,8 @@ Creaton.route(myRoute, event.target.href)
       }
     }
 
-    // создать класс компонента myUsers
-    class myUsers {
+    // создать класс компонента MyUsers
+    class MyUsers {
       static mode = 'open' // добавить Теневой DOM
 
       static render() {
@@ -2380,6 +2382,9 @@ Creaton.route(myRoute, event.target.href)
       page = '' // начальное значение состояния
 
       static render() {
+        // если состояние отсутствует
+        if (!this.page) return ''
+
         return `
           <${this.page}>
             <p slot="user">${this.user}</p>
@@ -2448,7 +2453,7 @@ Creaton.route(myRoute, event.target.href)
     })
 
     // передать классы компонентов в плагин Creaton
-    Creaton(myHome, myAbout, myContacts, MyContent, myUsers)
+    Creaton(MyHome, MyAbout, MyContacts, MyUsers, MyContent)
   </script>
 </body>
 </html>

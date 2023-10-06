@@ -10,6 +10,8 @@
 
 Creaton is a JavaScript plugin for quickly creating [Web Components](https://javascript.info/web-components). The plugin supports all technologies, methods and properties such as [slots](https://javascript.info/slots-composition) and [Shadow DOM](https://javascript.info/shadow-dom) that are provided by standard Web Components.
 
+*- [Added](https://github.com/reacton-js/creaton/tree/main/webpack-example-routes) example [Webpack](https://webpack.js.org/) build for [routes](#routes).*
+
 *- [Added](https://github.com/reacton-js/creaton/tree/main/webpack-example-events) example [Webpack](https://webpack.js.org/) build for [events](#events).*
 
 *- Updating the [build](https://github.com/reacton-js/creaton/tree/main/webpack) for [Webpack](https://webpack.js.org/).*
@@ -1636,8 +1638,8 @@ Make changes to the *index.html* file as shown below:
     // create event element myRoute
     const myRoute = new Creaton.route()
 
-    // create component class myHome
-    class myHome {
+    // create component class MyHome
+    class MyHome {
       static render() {
         return `
           <h2>Home</h2>
@@ -1645,8 +1647,8 @@ Make changes to the *index.html* file as shown below:
       }
     }
 
-    // create component class myAbout
-    class myAbout {
+    // create component class MyAbout
+    class MyAbout {
       static render() {
         return `
           <h2>About</h2>
@@ -1654,8 +1656,8 @@ Make changes to the *index.html* file as shown below:
       }
     }
 
-    // create component class myContacts
-    class myContacts {
+    // create component class MyContacts
+    class MyContacts {
       static render() {
         return `
           <h2>Contacts</h2>
@@ -1725,7 +1727,7 @@ Make changes to the *index.html* file as shown below:
     }
 
     // pass component classes to Creaton plugin
-    Creaton(myHome, myAbout, myContacts, MyMenu, MyContent)
+    Creaton(MyHome, MyAbout, MyContacts, MyMenu, MyContent)
   </script>
 </body>
 </html>
@@ -1761,8 +1763,8 @@ This element will be assigned address event handlers in some components and call
 Then we have the definition of the three components of the pages:
 
 ```js
-// create component class myHome
-class myHome {
+// create component class MyHome
+class MyHome {
   static render() {
     return `
       <h2>Home</h2>
@@ -1770,8 +1772,8 @@ class myHome {
   }
 }
 
-// create component class myAbout
-class myAbout {
+// create component class MyAbout
+class MyAbout {
   static render() {
     return `
       <h2>About</h2>
@@ -1779,8 +1781,8 @@ class myAbout {
   }
 }
 
-// create component class myContacts
-class myContacts {
+// create component class MyContacts
+class MyContacts {
   static render() {
     return `
       <h2>Contacts</h2>
@@ -1914,11 +1916,11 @@ At the very beginning of this component's class, an initial state value of **pag
 page = 'my-home' // initial state value
 ```
 
-It matches the name of the myHome page component:
+It matches the name of the MyHome page component:
 
 ```js
-// create component class myHome
-class myHome {
+// create component class MyHome
+class MyHome {
   static render() {
     return `
       <h2>Home</h2>
@@ -1927,7 +1929,7 @@ class myHome {
 }
 ```
 
-In the HTML markup of the MyContent component, the myHome component is created using a self-closing tag:
+In the HTML markup of the MyContent component, the MyHome component is created using a self-closing tag:
 
 ```js
 static render() {
@@ -2098,11 +2100,11 @@ static render() {
 }
 ```
 
-Create a new page component myUsers:
+Create a new page component MyUsers:
 
 ```js
-// create component class myUsers
-class myUsers {
+// create component class MyUsers
+class MyUsers {
   static mode = 'open' // add Shadow DOM
   
   static render() {
@@ -2124,7 +2126,7 @@ Pass the class of the new component to the Creaton plugin:
 
 ```js
 // pass component classes to Creaton plugin
-Creaton(myHome, myAbout, myContacts, MyMenu, MyContent, myUsers)
+Creaton(MyHome, MyAbout, MyContacts, MyUsers, MyMenu, MyContent)
 ```
 
 Modify the markup of the MyContent component by adding HTML output to named slots using the [slot](https://javascript.info/slots-composition#named-slots) attribute, as shown below:
@@ -2140,7 +2142,7 @@ static render() {
 }
 ```
 
-For all other pages components, except for the myUsers component, the content passed to the slots will be ignored.
+For all other pages components, except for the MyUsers component, the content passed to the slots will be ignored.
 
 It remains to add a handler for this address event at the end of the static method **connected()** of the MyContent component:
 
@@ -2294,7 +2296,7 @@ document.querySelector('#mymenu').addEventListener('click', () => {
 })
 
 // pass component classes to Creaton plugin
-Creaton(myHome, myAbout, myContacts, MyContent, myUsers)
+Creaton(MyHome, MyAbout, MyContacts, MyUsers, MyContent)
 ```
 
 Inside this handler, the address event for the myRoute element is called using the **route()** method of the plugin itself:
@@ -2336,8 +2338,8 @@ Below is the full content of the *index.html* file:
     // create event element myRoute
     const myRoute = new Creaton.route()
 
-    // create component class myHome
-    class myHome {
+    // create component class MyHome
+    class MyHome {
       static render() {
         return `
           <h2>Home</h2>
@@ -2345,8 +2347,8 @@ Below is the full content of the *index.html* file:
       }
     }
 
-    // create component class myAbout
-    class myAbout {
+    // create component class MyAbout
+    class MyAbout {
       static render() {
         return `
           <h2>About</h2>
@@ -2354,8 +2356,8 @@ Below is the full content of the *index.html* file:
       }
     }
 
-    // create component class myContacts
-    class myContacts {
+    // create component class MyContacts
+    class MyContacts {
       static render() {
         return `
           <h2>Contacts</h2>
@@ -2363,8 +2365,8 @@ Below is the full content of the *index.html* file:
       }
     }
 
-    // create component class myUsers
-    class myUsers {
+    // create component class MyUsers
+    class MyUsers {
       static mode = 'open' // add Shadow DOM
       
       static render() {
@@ -2380,6 +2382,9 @@ Below is the full content of the *index.html* file:
       page = '' // initial state value
 
       static render() {
+        // if the state is missing
+        if (!this.page) return ''
+        
         return `
           <${this.page}>
             <p slot="user">${this.user}</p>
@@ -2448,7 +2453,7 @@ Below is the full content of the *index.html* file:
     })
 
     // pass component classes to Creaton plugin
-    Creaton(myHome, myAbout, myContacts, MyContent, myUsers)
+    Creaton(MyHome, MyAbout, MyContacts, MyUsers, MyContent)
   </script>
 </body>
 </html>
