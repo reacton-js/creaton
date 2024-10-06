@@ -222,7 +222,6 @@ An example of a simple embedded component is shown below:
         static mode = 'open' // add Shadow DOM
       }
     </script>
-
   </template>
 
   <script src="src/ctn.global.js"></script>

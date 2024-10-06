@@ -222,7 +222,6 @@ lite-server
         static mode = 'open' // добавить Теневой DOM
       }
     </script>
-
   </template>
 
   <script src="src/ctn.global.js"></script>
