@@ -224,7 +224,7 @@ An example of a simple embedded component is shown below:
     </script>
   </template>
 
-  <script src="src/ctn.global.js"></script>
+  <script src="ctn.global.js"></script>
 
   <script>
     // pass the template of the Hello component to the Ctn function

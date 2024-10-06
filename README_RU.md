@@ -224,7 +224,7 @@ lite-server
     </script>
   </template>
 
-  <script src="src/ctn.global.js"></script>
+  <script src="ctn.global.js"></script>
 
   <script>
     // передать шаблон компонента Hello функции Ctn
