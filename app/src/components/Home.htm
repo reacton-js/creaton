@@ -1,0 +1,23 @@
+<h2>${ this.title }</h2>
+<p>${ this.message }</p>
+
+<script>
+  import { httpRequest } from '../helpers'
+
+  exports = class WHome {
+    static mode = 'open'
+
+    static async startConnect() {
+      const home = await httpRequest('/db?page=home')
+      this.title = home.title
+      this.message = home.message
+    }
+
+    static template() {
+      return `
+        <h2>${ this.title }</h2>
+        <p>${ this.message }</p>
+      `
+    }
+  }
+</script>

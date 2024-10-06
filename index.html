@@ -3,27 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creaton</title>
+  <title>Document</title>
 </head>
 <body>
-  <!-- mount the MyComponent component -->
-  <my-component color="red" id="mycomp"></my-component>
+  <!-- connect Hello component to the document -->
+  <w-hello id="hello"></w-hello>
 
-  <!-- include Creaton plugin -->
-  <script src="creaton.min.js"></script>
+  <script src="ctn.global.js"></script>
 
   <script>
-    // create component class MyComponent
-    class MyComponent {
-      // initializing the state object in the constructor
-      constructor(props) {
-        this.message = 'Creaton'
-        this.color = props.color
-      }
+    class WHello {
+      // initializing the properties of a state object
+      message = 'Creaton'
+      color = 'orange'
 
       static mode = 'open' // add Shadow DOM
 
-      static render() {
+      // return the HTML markup of the component
+      static template() {
         return `
           <h1>Hello, ${ this.message }!</h1>
           
@@ -36,8 +33,8 @@
       }
     }
 
-    // pass component class MyComponent to Creaton plugin
-    Creaton(MyComponent)
+    // pass the class of the Hello component to the Ctn function
+    Ctn(WHello)
   </script>
 </body>
 </html>

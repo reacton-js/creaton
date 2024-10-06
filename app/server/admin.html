@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin</title>
+  <style>
+    form {
+      display: flex;
+      flex-flow: column;
+      max-width: 250px;
+    }
+    select, input {
+      width: 100%;
+    }
+    input[type="checkbox"] {
+      width: auto;
+      margin-left: 15px;
+      position: relative;
+      top: 2px;
+    }
+    input[type="submit"] {
+      max-width: 150px;
+      align-self: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <form method="post">
+    <h3>Delete pages from storage</h3>
+    <select name="page">
+      <option value="">-</option>
+      <option value="/">Home</option>
+      <option value="/about">About</option>
+      <option value="/contacts">Contacts</option>
+      <option value="all">All</option>
+    </select>
+    <h3><label>Reload the database <input type="checkbox" name="database" value="on"></label></h3>
+    <br>
+    <label>Login</label>
+    <input type="text" name="login"><br>
+    <label>Password</label>
+    <input type="password" name="password"><br><br>
+    <input type="submit" value="Send">
+  </form>
+</body>
+</html>

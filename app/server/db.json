@@ -1,0 +1,14 @@
+{
+  "home": {
+    "title": "Company home page",
+    "message": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit, aliquid eum laudantium deserunt esse a inventore fuga obcaecati quia voluptatibus."
+  },
+  "about": {
+    "title": "About Company",
+    "message": "Ab, voluptatum. Cum, exercitationem molestiae. Esse earum expedita nesciunt assumenda voluptas iste in laborum, maiores fugiat alias doloremque ipsam maxime quibusdam non ea aliquid architecto error."
+  },
+  "contacts": {
+    "title": "Company contacts",
+    "message": "Vero illum aut magni, necessitatibus a laudantium officia placeat ullam voluptates ex maiores ipsam suscipit tempora reiciendis dignissimos sit rem voluptatibus unde officiis debitis. Ratione minus ipsum blanditiis cum excepturi hic perspiciatis deserunt error eius odit eligendi omnis, dolore accusamus ipsa."
+  }
+}

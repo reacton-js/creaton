@@ -1,0 +1,23 @@
+<h2>${ this.title }</h2>
+<p>${ this.message }</p>
+
+<script>
+  import { httpRequest } from '../helpers'
+
+  exports = class WContacts {
+    static mode = 'open'
+
+    static async startConnect() {
+      const contacts = await httpRequest('/db?page=contacts')
+      this.title = contacts.title
+      this.message = contacts.message
+    }
+
+    static template() {
+      return `
+        <h2>${ this.title }</h2>
+        <p>${ this.message }</p>
+      `
+    }
+  }
+</script>
