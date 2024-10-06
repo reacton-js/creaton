@@ -4,8 +4,6 @@
 
 <h3>Расширенные Веб-компоненты</h3>
 
-<br>
-
 ![creaton](https://raw.githubusercontent.com/reacton-js/creaton/main/logo.png)
 
 [GitHub](https://github.com/reacton-js/creaton) | [GitFlic](https://gitflic.ru/project/reacton/creaton) | [NpmJS](https://www.npmjs.com/package/creaton-js) | [Скачать⤵️](https://raw.githubusercontent.com/reacton-js/creaton/main/ctn.global.min.js)
