@@ -9,15 +9,9 @@
 
     static async startConnect() {
       const about = await httpRequest('/db?page=about')
+      
       this.title = about.title
       this.message = about.message
-    }
-
-    static template() {
-      return `
-        <h2>${ this.title }</h2>
-        <p>${ this.message }</p>
-      `
     }
   }
 </script>
