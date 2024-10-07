@@ -19,7 +19,7 @@ function module() {
         rules: [
           {
             test: /\.html?$/,
-            loader: 'ctn-loader'
+            loader: 'creaton-loader'
           },
           {
             test: /\.m?js$/,
@@ -32,9 +32,6 @@ function module() {
             }
           }
         ]
-      },
-      resolveLoader: {
-        modules: ['node_modules', path.resolve(__dirname, 'src/libs')]
       },
       optimization: {
         minimize: true,

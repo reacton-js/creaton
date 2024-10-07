@@ -1,4 +1,4 @@
-import { Router } from './libs/ctn.esm'
+import { Router } from 'creaton-js'
 
 export const emitRouter = new Router()
 

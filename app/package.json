@@ -1,6 +1,6 @@
 {
   "name": "app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -29,6 +29,8 @@
     "webpack-stream": "^7.0.0"
   },
   "dependencies": {
+    "creaton-js": "^3.0.6",
+    "creaton-loader": "^1.0.1",
     "express": "^4.21.0",
     "jsdom": "^25.0.1"
   }

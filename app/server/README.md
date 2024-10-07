@@ -16,7 +16,7 @@ node app
 node app test
 ```
 
-### Password hash generation
+### Hash
 
 ```
 node genhash login password

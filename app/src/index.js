@@ -1,4 +1,4 @@
-import Ctn, { Render } from './libs/ctn.esm'
+import Ctn, { Render } from 'creaton-js'
 import Header from './components/Header'
 import Router from './components/Router'
 import Content from './components/Content'
