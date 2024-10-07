@@ -44,12 +44,13 @@ class WHello {
 <br>
 
 1. [Quick start](#quick-start)
-2. ~~[Static properties](#static-properties)~~
-3. ~~[Service methods](#service-methods)~~
-4. ~~[Cycles](#cycles)~~
-5. ~~[Event Emitter](#event-emitter)~~
-6. ~~[Router](#router)~~
-7. ~~[SSR](#ssr)~~
+2. ~~[Component state](#component-state)~~
+3. ~~[Static properties](#static-properties)~~
+4. ~~[Service methods](#service-methods)~~
+5. ~~[Cycles](#cycles)~~
+6. ~~[Event Emitter](#event-emitter)~~
+7. ~~[Router](#router)~~
+8. ~~[SSR](#ssr)~~
 
 <br>
 <hr>

@@ -44,12 +44,13 @@ class WHello {
 <br>
 
 1. [Быстрый старт](#quick-start)
-2. ~~[Статические свойства](#static-properties)~~
-3. ~~[Служебные методы](#service-methods)~~
-4. ~~[Циклы](#cycles)~~
-5. ~~[Эмиттер событий](#event-emitter)~~
-6. ~~[Маршрутизатор](#router)~~
-7. ~~[SSR](#ssr)~~
+2. ~~[Состояние компонента](#component-state)~~
+3. ~~[Статические свойства](#static-properties)~~
+4. ~~[Служебные методы](#service-methods)~~
+5. ~~[Циклы](#cycles)~~
+6. ~~[Эмиттер событий](#event-emitter)~~
+7. ~~[Маршрутизатор](#router)~~
+8. ~~[SSR](#ssr)~~
 
 <br>
 <hr>

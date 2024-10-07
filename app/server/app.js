@@ -17,7 +17,7 @@ const urlencodedParser = express.urlencoded({ extended: false })
 // define directory for static files and ignore index.html file
 app.use(express.static(__dirname + '/public', { index: false }))
 
-// get an array of bot names from an external file
+// define an array of bot names that will receive the rendered content
 const listBots = [
   'Yandex', 'YaDirectFetcher', 'Google', 'Yahoo', 'Mail.RU_Bot', 'bingbot', 'Accoona', 'Lighthouse',
   'ia_archiver', 'Ask Jeeves', 'OmniExplorer_Bot', 'W3C_Validator', 'WebAlta', 'Ezooms', 'Tourlentabot', 'MJ12bot',
