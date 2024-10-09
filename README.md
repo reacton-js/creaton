@@ -272,6 +272,25 @@ The embedded component should return its class, and the contents of its  &lt;scr
 </script>
 ```
 
+Regardless of the component type, when using the backquote character «&grave;» in HTML markup, it must be escaped with the backslash character «&bsol;», as shown below:
+
+```js
+// return the HTML markup of the component
+static template() {
+  return `
+    <h1>\`Hello\`, ${ this.message }!</h1>
+    
+    <style>
+      h1 {
+        color: ${ this.color };
+      }
+    </style>
+  `
+}
+```
+
+This is due to the fact that the HTML markup of any component is always placed inside a [template string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). For single-file and embedded components, this is done at the level of converting them into a regular component class.
+
 <br>
 
 For quick access to the component, it is enough to add an identifier to the element that connects the component to the document, as shown below:
