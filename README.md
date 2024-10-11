@@ -48,7 +48,7 @@ class WHello {
 3. [Cycles](#cycles)
 4. [Mixins](#mixins)
 5. [Static properties](#static-properties)
-6. ~~[Service methods](#service-methods)~~
+6. ~~[Special methods](#special-methods)~~
 7. ~~[Emitter](#emitter)~~
 8. ~~[Router](#router)~~
 9. ~~[SSR](#ssr)~~
@@ -367,13 +367,13 @@ class WHello {
 
 <br>
 
-The service property *$state* is used to access the state object. Using this property, you can get or assign a new value to the state, as shown below:
+The special property *$state* is used to access the state object. Using this property, you can get or assign a new value to the state, as shown below:
 
 ```
 hello.$state.message = 'Web Components'
 ```
 
-To update the component content based on the new state, the service method *$update()* is used, as shown below:
+To update the component content based on the new state, the special method *$update()* is used, as shown below:
 
 ```
 hello.$update()
@@ -611,7 +611,7 @@ In the example below, the mixin's *printName()* method is used by the Hello and 
 
 <br>
 
-**name** is a static property used, for example, when an anonymous class is passed to the Ctn function, as shown below:
+**name** – this static property used, for example, when an anonymous class is passed to the Ctn function, as shown below:
 
 ```js
 // pass the anonymous class of the Hello component to the Ctn function
@@ -632,9 +632,9 @@ Ctn(class {
 
 <br>
 
-**mode** is a static property responsible for adding a [Shadow DOM](https://javascript.info/shadow-dom) to the component. It can contain two values: "open" or "closed". In the latter case, when the component is private, it is impossible to access the properties of its state object and methods for selecting elements from its contents from the console.
+**mode** – this static property responsible for adding a [Shadow DOM](https://javascript.info/shadow-dom) to the component. It can contain two values: "open" or "closed". In the latter case, when the component is closed, it is impossible to access the properties of its state object, methods for selecting elements and updating the content from the console.
 
-Access to the properties of the state object and any service methods is possible only from the internal methods of the component, for example:
+Access to the properties of the state object, methods for selecting and updating the content of the component, in closed components is possible only from static methods, for example:
 
 ```js
 class WHello {
@@ -665,7 +665,7 @@ class WHello {
 
 <br>
 
-**extends** is a static property responsible for creating [customized components](https://javascript.info/custom-elements#customized-built-in-elements), i.e. those that are embedded in standard HTML elements, for example:
+**extends** – this static property responsible for creating [customized components](https://javascript.info/custom-elements#customized-built-in-elements), i.e. those that are embedded in standard HTML elements, for example:
 
 ```html
 <body>
@@ -699,11 +699,11 @@ class WHello {
 
 <br>
 
-**serializable** is a static property responsible for [serializing](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/serializable) the Shadow DOM of the component using the [getHTML()](https://developer.mozilla.org/en-US/docs/Web/API/Element/getHTML) method. By default, it has the value "false".
+**serializable** – this static property responsible for [serializing](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/serializable) the Shadow DOM of the component using the [getHTML()](https://developer.mozilla.org/en-US/docs/Web/API/Element/getHTML) method. By default, it has the value "false".
 
 <br>
 
-**template** is a static method returns the future HTML content of the component:
+**template()** – this static method returns the future HTML content of the component:
 
 ```js
 // return the HTML markup of the component
@@ -716,7 +716,7 @@ static template() {
 
 <br>
 
-**startConnect** is a static method is executed at the very beginning of connecting the component to the document, before generating the HTML content of the component and calling the static *connected()* method, but after creating the component state object.
+**startConnect()** – this static method is executed at the very beginning of connecting the component to the document, before generating the HTML content of the component and calling the static *connected()* method, but after creating the component state object.
 
 In it, you can initialize the properties of the state object with the existing values:
 
@@ -760,7 +760,7 @@ class WHello {
 
 <br>
 
-**connected** is a static method is executed at the very end of connecting the component to the document, after generating the HTML content of the component and calling the static *startConnect()* method.
+**connected()** – this static method is executed at the very end of connecting the component to the document, after generating the HTML content of the component and calling the static *startConnect()* method.
 
 In it, you can add event handlers to the internal elements of the component:
 
@@ -791,13 +791,13 @@ class WHello {
 
 <br>
 
-**disconnected** is a static method is executed when a component is removed from a document.
+**disconnected()** – this static method is executed when a component is removed from a document.
 
-**adopted** is a static method is executed when the component is moved to a new document.
+**adopted()** – this static method is executed when the component is moved to a new document.
 
-**changed** is a static method is executed when one of the monitored attributes is changed.
+**changed()** – this static method is executed when one of the monitored attributes is changed.
 
-**attributes** is a static array contains the names of the monitored attributes, for example:
+**attributes** – this static array contains the names of the monitored attributes, for example:
 
 ```html
 <body>

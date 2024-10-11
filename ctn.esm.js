@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.0
+* Creaton v3.0.1
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -169,7 +169,7 @@ async function _ctn(...args) {
         return _ctn.entities(...args);
       }
       $tag(...args) {
-        return _ctn.tag.call(this, ...args);
+        return tag.call(this, ...args);
       }
     }, extend ? {
       extends: extend
@@ -212,10 +212,7 @@ function updateAttr(oldNode, newNode) {
     }
   });
 }
-_ctn.entities = function (str, ...args) {
-  return (args.length ? [...regEntities, ...args] : regEntities).reduce((prev, item) => prev.replace(...item), str);
-};
-_ctn.tag = function (str, ...vals) {
+function tag(str, ...vals) {
   let result = '';
   for (var i = 0; i < str.length; i++) {
     result += str.raw[i];
@@ -231,6 +228,9 @@ _ctn.tag = function (str, ...vals) {
     }
   }
   return result;
+}
+_ctn.entities = function (str, ...args) {
+  return (args.length ? [...regEntities, ...args] : regEntities).reduce((prev, item) => prev.replace(...item), str);
 };
 _ctn.event = function (elem, name, detail = null) {
   if (new.target) {
@@ -320,6 +320,6 @@ function renderCallback(inNode, outNode, slots, clean) {
 }
 export const Entities = _ctn.entities;
 export const Event = _ctn.event;
-export const Render = _ctn.render;
 export const Router = _ctn.router;
+export const Render = _ctn.render;
 export default _ctn;
