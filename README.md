@@ -886,7 +886,7 @@ In the example below, the **id** property does not exist in the component state 
 
 <br>
 
-All special properties and methods start with the dollar symbol «$» followed by the name of the method or property.
+All special methods and properties start with the dollar symbol «$» followed by the name of the method or property.
 
 **\$update()** – this special method is performed to update the contents of the component after its state has changed:
 
