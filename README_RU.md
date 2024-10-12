@@ -1025,7 +1025,7 @@ class WHello {
 Специальные методы: *\$event()*, *\$router()* и *\$render()*, будут рассмотрены в следующих разделах. Как и для метода *\$entities()*, для них так же имеются свои именованные импорты:
 
 ```js
-import Ctn, { Event, Router, Render } from "./ctn.esm.js"
+import Ctn, { Tag, Event, Router, Render } from "./ctn.esm.js"
 ```
 
 *Функция Ctn всегда импортируется по умолчанию.*

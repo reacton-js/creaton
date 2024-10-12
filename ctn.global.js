@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.1
+* Creaton v3.0.2
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -168,11 +168,11 @@ var Ctn = function () {
             return this[funUpdate]();
           }
         }
+        $tag(...args) {
+          return _ctn.tag.call(this, ...args);
+        }
         $entities(...args) {
           return _ctn.entities(...args);
-        }
-        $tag(...args) {
-          return tag.call(this, ...args);
         }
       }, extend ? {
         extends: extend
@@ -215,7 +215,7 @@ var Ctn = function () {
       }
     });
   }
-  function tag(str, ...vals) {
+  _ctn.tag = function (str, ...vals) {
     let result = '';
     for (var i = 0; i < str.length; i++) {
       result += str.raw[i];
@@ -231,7 +231,7 @@ var Ctn = function () {
       }
     }
     return result;
-  }
+  };
   _ctn.entities = function (str, ...args) {
     return (args.length ? [...regEntities, ...args] : regEntities).reduce((prev, item) => prev.replace(...item), str);
   };
