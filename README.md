@@ -48,7 +48,7 @@ class WHello {
 3. [Cycles](#cycles)
 4. [Mixins](#mixins)
 5. [Static properties](#static-properties)
-6. ~~[Special methods](#special-methods)~~
+6. [Special methods](#special-methods)
 7. ~~[Emitter](#emitter)~~
 8. ~~[Router](#router)~~
 9. ~~[SSR](#ssr)~~
@@ -870,6 +870,255 @@ In the example below, the **id** property does not exist in the component state 
       static template() {
         return `
           <h1>Hello, the component with the ID ${ this.id }!</h1>
+        `
+      }
+    }
+
+    // pass the class of the Hello component to the Ctn function
+    Ctn(WHello)
+  </script>
+</body>
+```
+
+<br>
+<br>
+<h2 id="special-methods">Special methods</h2>
+
+<br>
+
+All special properties and methods start with the dollar symbol «$» followed by the name of the method or property.
+
+**\$update()** – this special method is performed to update the contents of the component after its state has changed:
+
+```
+hello.$state.message = 'Web Components'
+hello.$update()
+```
+
+*This method updates the contents of private components only if it is called from static methods of the component class. For all other component types, it returns the number of milliseconds it took for the component's contents to be updated.*
+
+<br>
+
+**\$()** – this special method selects an element from the component content by the specified selector, for example, to add an event handler to the element:
+
+```js
+// it is performed at the end of connecting the component to the document
+static connected() {
+  // get an element using the sampling method
+  const elem = this.$('h1')
+
+  // add an event handler to the element
+  elem.addEventListener('click', e => console.log(e.target))
+}
+```
+
+*This method fetches the contents of private components only if it is called from static methods of the component class.*
+
+<br>
+
+**\$$()** – this special method selects all elements from the component content by the specified selector, for example, to add event handlers to the elements when iterating through them in a loop:
+
+```js
+// it is performed at the end of connecting the component to the document
+static connected() {
+  // get all elements using the sampling method
+  const elems = this.$$('h1')
+
+  // iterate through a collection of elements in a loop
+  for (const elem of elems) {
+    // add an event handler to the element
+    elem.addEventListener('click', e => console.log(e.target))
+  }
+}
+```
+
+*This method fetches the contents of private components only if it is called from static methods of the component class.*
+
+<br>
+
+**\$entities()** – this special method neutralizes a string containing HTML content obtained from unreliable sources. By default, the ampersand character «&amp;» is escaped, characters less than «&lt;» and more than «&gt;», double «&quot;» and single quotes «&#39;», for example:
+
+```js
+class WHello {
+  // it is performed at the beginning of connecting the component to the document
+  static async startConnect() {
+    // getting HTML content from a conditional server
+    const html = await new Promise(ok => setTimeout(() => ok('<script>dangerous code<\/script>'), 1000))
+
+    // initialization of a state object property with neutralized HTML content
+    this.message = this.$entities(html)
+  }
+
+  // return the HTML markup of the component
+  static template() {
+    return this.message
+  }
+}
+```
+
+In addition to the above characters, you can escape any characters by passing an array in the second and subsequent arguments of the form: [regular expression, replacement string], for example:
+
+```js
+this.$entities(html, [/\(/g, '&lpar;'], [/\)/g, '&rpar;'])
+```
+
+*This method is available as a property of the Ctn function, as shown below:*
+
+```js
+Ctn.entities(html)
+```
+
+*or [named import](https://javascript.info/import-export#import) when using the modular version of the framework:*
+
+```html
+<body>
+  <!-- connect Hello component to the document -->
+  <w-hello></w-hello>
+
+  <script type="module">
+    import Ctn, { Entities } from "./ctn.esm.js"
+
+    class WHello {
+      // return the HTML markup of the component
+      static template() {
+        return `
+          ${ Entities('<script>dangerous code<\/script>') }
+        `
+      }
+    }
+
+    // pass the class of the Hello component to the Ctn function
+    Ctn(WHello)
+  </script>
+</body>
+```
+
+<br>
+
+**\$tag()** – this special tagged function, which automatically adds the [join()](https://javascript.info/array-methods#split-and-join) method to all arrays and can call methods of the state object when they are specified in HTML markup without parentheses "()", for example:
+
+```js
+class WHello {
+  // initializing the properties of a state object
+  rgb = ['Red', 'Green', 'Blue']
+  message = 'Creaton'
+
+  // define the method of the state object
+  printStr(str) {
+    return this.message
+  }
+
+  // return the HTML markup of the component
+  static template() {
+    return this.$tag`
+      <h1>Hello, ${ this.printStr }!</h1>
+      <ul>
+        ${ this.rgb.map(col => `<li>${ col }</li>`) }
+      </ul>
+    `
+  }
+}
+```
+
+<br>
+
+The special methods: *\$event()*, *\$router()* and *\$render()* will be discussed in the following sections. As with the *\$entities()* method, they also have their own named imports:
+
+```js
+import Ctn, { Event, Router, Render } from "./ctn.esm.js"
+```
+
+*The Ctn function is always imported by default.*
+
+<br>
+
+**\$state** – this special property refers to the [proxy](https://javascript.info/proxy) of the component's data object. This means that if the required property is not found in the state object, the search occurs in the component itself.
+
+In the example below, the **id** property does not exist in the component state object. Therefore, it is requested from the component itself:
+
+```html
+<body>
+  <!-- connect Hello component to the document -->
+  <w-hello id="hello"></w-hello>
+
+  <script src="ctn.global.js"></script>
+
+  <script>
+    class WHello {
+      // return the HTML markup of the component
+      static template() {
+        return `
+          <h1>Hello, component with ID ${ this.id }!</h1>
+        `
+      }
+    }
+
+    // pass the class of the Hello component to the Ctn function
+    Ctn(WHello)
+  </script>
+</body>
+```
+
+<br>
+
+**\$host** – this special property refers to the element that connects the component to the document, i.e. the component element. This can be useful if properties with the same name are present in both the state object and the component..
+
+The proxy of the state object initially looks for a property in the state object itself, which means that to get the property of the same name from the component element, you must use the special property *$host*, as shown below:
+
+```html
+<body>
+  <!-- connect Hello component to the document -->
+  <w-hello id="hello"></w-hello>
+
+  <script src="ctn.global.js"></script>
+
+  <script>
+    class WHello {
+      // initializing the property of a state object
+      id = 'Creaton'
+
+      // return the HTML markup of the component
+      static template() {
+        return `
+          <h1>Hello, the ID property with the value ${ this.id }!</h1>
+          <h2>Hello, component with ID ${ this.$host.id }!</h2>
+        `
+      }
+    }
+
+    // pass the class of the Hello component to the Ctn function
+    Ctn(WHello)
+  </script>
+</body>
+```
+
+<br>
+
+**\$shadow** – this special property refers to the [Shadow DOM](https://javascript.info/shadow-dom) of the component:
+
+```
+hello.$shadow
+```
+
+*For closed components and components without a Shadow DOM, this property returns null.*
+
+<br>
+
+**\$data** – this special property refers to the component's [dataset](https://javascript.info/dom-attributes-and-properties#non-standard-attributes-dataset) object, which is used to access [custom attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes), for example:
+
+```html
+<body>
+  <!-- connect Hello component to the document -->
+  <w-hello data-message="Creaton"></w-hello>
+
+  <script src="ctn.global.js"></script>
+
+  <script>
+    class WHello {
+      // return the HTML markup of the component
+      static template() {
+        return `
+          <h1>Hello, ${ this.$data.message }!</h1>
         `
       }
     }
