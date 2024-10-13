@@ -49,7 +49,7 @@ class WHello {
 4. [Mixins](#mixins)
 5. [Static properties](#static-properties)
 6. [Special methods](#special-methods)
-7. ~~[Emitter](#emitter)~~
+7. [Event Emitter](#event-emitter)
 8. ~~[Router](#router)~~
 9. ~~[SSR](#ssr)~~
 
@@ -1125,6 +1125,127 @@ hello.$shadow
 
     // pass the class of the Hello component to the Ctn function
     Ctn(WHello)
+  </script>
+</body>
+```
+
+<br>
+<br>
+<h2 id="event-emitter">Event Emitter</h2>
+
+<br>
+
+To create [custom events](https://javascript.info/dispatch-events#custom-events), a special *$event()* method is used, which is available as a property of the Ctn function. If the method is called as a constructor, it returns a new emitter object that will generate and track user events, for example:
+
+```js
+const emit = new Ctn.event()
+```
+
+An ordinary [fragment of a document](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment) acts as an emitter. You can create as many new emitters as you want, and each emitter can generate and track as many new user events as you want.
+
+When the *$event()* method is called as a regular function, it receives an emitter in the first argument, the name of the user event is passed in the second, and any data can be passed in the third argument:
+
+```js
+this.$event(emit, 'new-array', ['Orange', 'Violet'])
+```
+
+This data will then be available in the custom event handler as the **detail** property of the [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event) object, as shown below:
+
+```js
+emit.addEventListener('new-array', event => {
+  this.rgb = event.detail
+  this.$update()
+})
+```
+
+*In the [webpack](https://webpack.js.org/) build system, the emitter can be exported from a separate module, for example, from a file Events.js:*
+
+```js
+import { Event } from 'creaton-js'
+export const Emit = new Event()
+```
+
+*for the subsequent import of the emitter in the files of the components that will use it:*
+
+
+```js
+import { Emit } from './Events'
+```
+
+<br>
+
+In the example below, a "click" event handler is added to each button from the Hello component, inside which the corresponding user event of the emitter object is triggered.
+
+To track user events, the emitter is assigned the appropriate handlers in the Colors component. In the last handler, through the **detail** property of the Event object, a new array is assigned to the state property:
+
+```html
+<body>
+  <!-- connect Hello component to the document -->
+  <w-hello></w-hello>
+
+   <!-- connect Colors component to the document -->
+  <w-colors></w-colors>
+
+  <script src="ctn.global.js"></script>
+
+  <script>
+    // create a new emitter object
+    const emit = new Ctn.event()
+
+    class WHello {
+      // return the HTML markup of the component
+      static template() {
+        return `
+          <button id="reverse">Reverse an array</button>
+          <button id="new-array">New array</button>
+        `
+      }
+
+      // it is performed at the end of connecting the component to the document
+      static connected() {
+        // add an event handler to the "Reverse an array" button
+        this.$('#reverse').addEventListener('click', () => {
+          this.$event(emit, 'reverse')
+        })
+
+        // add an event handler to the "New array" button
+        this.$('#new-array').addEventListener('click', () => {
+          this.$event(emit, 'new-array', ['Orange', 'Violet'])
+        })
+      }
+    }
+
+    class WColors {
+      // initializing the property of a state object
+      rgb = ['Red', 'Green', 'Blue']
+
+      // return the HTML markup of the component
+      static template() {
+        return `
+          <ul>
+            ${ this.rgb.reduce((str, col) => str += `<li>${ col }</li>`, '') }
+          </ul>
+        `
+      }
+
+      // it is performed at the end of connecting the component to the document
+      static connected() {
+        // add a "reverse" event handler to the emitter
+        emit.addEventListener('reverse', () => {
+          this.rgb.reverse() // reverse an array
+          this.$update() // update component
+        })
+
+        // add a "new-array" event handler to the emitter
+        emit.addEventListener('new-array', event => {
+          this.rgb = event.detail // assign a new array to the property
+          this.$update() // update component
+        })
+      }
+    }
+
+    // pass the Hello and Colors component classes to the Ctn function
+    Ctn(WHello, WColors)
   </script>
 </body>
 ```
