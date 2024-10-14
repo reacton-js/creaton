@@ -1135,7 +1135,9 @@ hello.$shadow
 
 <br>
 
-To enable components to interact with each other and exchange data, [custom events](https://javascript.info/dispatch-events#custom-events) are used. To create custom events, a special *$event()* method is used, which is available as a property of the Ctn function. If the method is called as a constructor, it returns a new emitter object that will generate and track user events, for example:
+To enable components to interact with each other and exchange data, [custom events](https://javascript.info/dispatch-events#custom-events) are used. To create custom events, a special *$event()* method is used, which is available as a property of the Ctn function.
+
+If the method is called as a constructor, it returns a new emitter object that will generate and track user events, for example:
 
 ```js
 const emit = new Ctn.event()
