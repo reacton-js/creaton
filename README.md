@@ -50,7 +50,7 @@ class WHello {
 5. [Static properties](#static-properties)
 6. [Special methods](#special-methods)
 7. [Event Emitter](#event-emitter)
-8. ~~[Router](#router)~~
+8. [Router](#router)
 9. ~~[SSR](#ssr)~~
 
 <br>
@@ -1207,11 +1207,13 @@ To track user events, the emitter is assigned the appropriate handlers in the Co
       static connected() {
         // add an event handler to the "Reverse an array" button
         this.$('#reverse').addEventListener('click', () => {
+          // initiate the "reverse" event
           this.$event(emit, 'reverse')
         })
 
         // add an event handler to the "New array" button
         this.$('#new-array').addEventListener('click', () => {
+          // initiate the "new-array" event
           this.$event(emit, 'new-array', ['Orange', 'Violet'])
         })
       }
@@ -1251,6 +1253,315 @@ To track user events, the emitter is assigned the appropriate handlers in the Co
   </script>
 </body>
 ```
+
+<br>
+<br>
+<h2 id="router">Router</h2>
+
+<br>
+
+The [router](https://expressjs.com/en/guide/routing.html) is based on user events. To create route events, a special method *$router()* is used, which is available as a property of the Ctn function.
+
+If the method is called as a constructor, it returns a new emitter object with the redefined [addEventListener()](https://javascript.info/introduction-browser-events#addeventlistener) method, which will generate and track route events, for example:
+
+```js
+const emitRouter = new Ctn.router()
+```
+
+When the *$router()* method is called as a regular function, it receives an emitter in the first argument, the name of the route event is passed in the second, and any data can be passed in the third argument:
+
+```js
+this.$router(emitRouter, '/about', ['Orange', 'Violet'])
+```
+
+In a real application, the name of the route event is not specified directly, as in the example above, but is taken from the value of the **href** attribute of the link that was clicked, for example:
+
+```js
+this.$router(emitRouter, event.target.href, ['Orange', 'Violet'])
+```
+
+<br>
+
+The user data passed in the last argument of the *$router()* method will be available in the route event handler as the **detail** property of the [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event) object, as shown below:
+
+```js
+emitRouter.addEventListener('/about', event => {
+  const arr = event.detail
+  ...
+})
+```
+
+The initial slash «/» in the name of the route event is optional:
+
+```js
+emitRouter.addEventListener('about', event => {
+  const arr = event.detail
+  ...
+})
+```
+
+The rest of the name of the route event, except for the initial slash, must completely match the value of the **href** attribute of the link, after clicking on which the handler corresponding to this value will be triggered:
+
+```html
+<a href="/about">About</a>
+```
+
+<br>
+
+The difference between user-defined and route events is that the string specified in the route event handler is converted to a [regular expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp) and can contain [special](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#using_special_characters) regular expression characters, as shown below:
+
+```js
+emitRouter.addEventListener('/abou\\w', event => {
+  ...
+})
+```
+
+In order not to have to use the backslash character twice in a regular string to escape special characters of regular expressions, you can use the tagged function [raw()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/raw) of the built-in [String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) object by enclosing the name of the route event in a [template string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), for example:
+
+
+```js
+emitRouter.addEventListener(String.raw`/abou\w`, event => {
+  ...
+})
+```
+
+or so:
+
+```js
+const raw = String.raw
+emitRouter.addEventListener(raw`/abou\w`, event => {
+  ...
+})
+```
+
+<br>
+
+In addition to the **detail** property, the Event object has an additional params property to get [route parameters](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes#route_parameters), as shown below:
+
+```js
+emitRouter.addEventListener('/categories/:catId/products/:prodId', event => {
+  const catId = event.params["catId"]
+  const prodId = event.params["prodId"]
+  ...
+})
+```
+
+This handler will be executed for all links of the form:
+
+```html
+<a href="/categories/5/products/7">Product</a>
+```
+
+then **catId** will have the value 5 and **prodId** will have the value 7.
+
+<br>
+
+<br>
+
+To support query parameters, the Event object has an additional **search** property, which is a short reference to the [searchParams](https://javascript.info/url#searchparams) property of the built-in [URL](https://javascript.info/url) class, for example:
+
+```js
+const raw = String.raw
+emitRouter.addEventListener(raw`/categories\?catId=\d&prodId=\d`, event => {
+  const catId = event.search.get("catId")
+  const prodId = event.search.get("prodId")
+  ...
+})
+```
+
+This handler will be executed for all links of the form:
+
+```html
+<a href="/categories?catId=5&prodId=7">Product</a>
+```
+
+then **catId** will have the value 5 and **prodId** will have the value 7.
+
+<br>
+
+The last addition property of the Event object is called **url**, which is an object of the built-in [URL](https://javascript.info/url) class and helps parse the request into parts:
+
+```js
+emitRouter.addEventListener('/about', event => {
+  const hostname = event.url.hostname
+  const origin = event.url.origin
+  ...
+})
+```
+
+<br>
+
+Below is an example of creating a simple router with three components for pages:
+
+```html
+<body>
+   <!-- connect Menu component to the document -->
+  <w-menu></w-menu>
+
+   <!-- connect Content component to the document -->
+  <w-content></w-content>
+
+  <script src="ctn.global.js"></script>
+
+  <script>
+    class WHome {
+      // return the HTML markup of the component
+      static template() {
+        return `<h1>Home</h1>`
+      }
+    }
+    class WAbout {
+      // return the HTML markup of the component
+      static template() {
+        return `<h1>About</h1>`
+      }
+    }
+    class WContacts {
+      // return the HTML markup of the component
+      static template() {
+        return `<h1>Contacts</h1>`
+      }
+    }
+
+    // create a new emitter object for the router
+    const emitRouter = new Ctn.router()
+
+    class WMenu {
+      // it is performed at the end of connecting the component to the document
+      static connected() {
+        // add a "click" event handler for the NAV element
+        this.$('nav').addEventListener('click', event => {
+          event.preventDefault() // undo the default action
+          // initiate an event for the "href" value of the current link
+          this.$router(emitRouter, event.target.href)
+        })
+      }
+    
+      // return the HTML markup of the component
+      static template() {
+        return `
+          <nav>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/contacts">Contacts</a>
+          </nav>
+        `
+      }
+    }
+
+    class WContent {
+      // initializing the property of a state object
+      page = ''
+
+      // it is performed at the end of connecting the component to the document
+      static connected() {
+        // add an event handler to the emitter with an optional route parameter
+        emitRouter.addEventListener(`(:page)?`, event => {
+          // assign a page component name to the property
+          this.page = `w-${event.params.page || 'home'}` 
+          this.$update() // update component
+        })
+        
+        // initiate an event for the "href" value of the current page
+        this.$router(emitRouter, location.href)
+      }
+
+      // return the HTML markup of the component
+      static template() {
+        // if the property contains the page name
+        if (this.page) {
+          return `<${this.page} />`
+        }
+      }
+    }
+
+    // pass component classes to the Ctn function
+    Ctn(WHome, WAbout, WContacts, WMenu, WContent)
+  </script>
+</body>
+```
+
+To handle the routes of these pages, the router emitter is assigned a handler with an optional route parameter in the Content component:
+
+```js
+// add an event handler to the emitter with an optional route parameter
+emitRouter.addEventListener(`(:page)?`, event => {
+  // assign a page component name to the property
+  this.page = `w-${event.params.page || 'home'}` 
+  this.$update() // update component
+})
+```
+
+In order for this handler to fire immediately when opening the application and connect the page component corresponding to the route, at the end of the *connected()* static method, an event is triggered for the address of the current route from the **href** property of the [location](https://developer.mozilla.org/en-US/docs/Web/API/Location) object:
+
+```js
+// initiate an event for the "href" value of the current page
+this.$router(emitRouter, location.href)
+```
+
+The rest of the pages components are loaded when you click on the corresponding link in the Menu component:
+
+```js
+// add a "click" event handler for the NAV element
+this.$('nav').addEventListener('click', event => {
+  event.preventDefault() // undo the default action
+  // initiate an event for the "href" value of the current link
+  this.$router(emitRouter, event.target.href)
+})
+```
+
+To prevent a page component with an undefined name from being created when the application is opened, a conditional check is used on the value of the **page** property of the Content component's state object:
+
+```js
+// return the HTML markup of the component
+static template() {
+  // if the property contains the page name
+  if (this.page) {
+    return `<${this.page} />`
+  }
+}
+```
+
+This example uses a self-closing tag for the component element to be connected:
+
+```js
+`<${this.page} />`
+```
+
+If the plug-in component contained [slots](https://javascript.info/slots-composition) into which some HTML content would be passed, then it would be necessary to use the opening and closing tags of the component element:
+
+```js
+// return the HTML markup of the component
+static template() {
+  // if the property contains the page name
+  if (this.page) {
+    return `
+      <${this.page}>
+        <div>Some HTML content</div>
+      </${this.page}>
+    `
+  }
+}
+```
+
+*When the static template() method returns nothing, a component with empty HTML content is created.*
+
+You can only pass HTML content to slots for components that have Shadow DOM. This means that when updating a component, HTML content passed from a component without [Shadow DOM](https://javascript.info/shadow-dom) is simply ignored and no changes are made to it.
+
+To pass data to any components, you can use [custom attributes](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes), for example:
+
+```js
+// return the HTML markup of the component
+static template() {
+  // if the property contains the page name
+  if (this.page) {
+    // pass the color value through the custom "data-color" attribute
+    return `<${this.page} data-color="${this.color}" />`
+  }
+}
+```
+
+*Unlike HTML content, the attributes of any component's element are always updated.*
 
 <br>
 <br>

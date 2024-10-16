@@ -7,20 +7,13 @@ export default class WContent {
   page = ''
 
   static connected() {
-    emitRouter.addEventListener(`/`, event => {
-      this.page = 'w-home'
-      this.$update()
-    })
-    emitRouter.addEventListener(`/about`, event => {
-      this.page = 'w-about'
-      this.$update()
-    })
-    emitRouter.addEventListener(`/contacts`, event => {
-      this.page = 'w-contacts'
+    // add an event handler to the emitter with an optional route parameter
+    emitRouter.addEventListener(`(:page)?`, event => {
+      this.page = `w-${event.params.page || 'home'}` 
       this.$update()
     })
     
-    // start router for current page
+    // initiate an event for the "href" value of the current page
     this.$router(emitRouter, location.href)
   }
 

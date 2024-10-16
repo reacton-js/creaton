@@ -6,7 +6,7 @@ export default class WHeader {
 
   static template() {
     return `
-      <nav is="w-router"></nav>
+      <w-menu></w-menu>
       <h1>${ this.message } is <slot name="abbr"></slot></h1>
       <img src="img/banner.jpg" alt="banner">
 

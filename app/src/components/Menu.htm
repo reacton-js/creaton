@@ -1,0 +1,28 @@
+<nav>
+  <a href="/">Home</a>
+  <a href="/about">About</a>
+  <a href="/contacts">Contacts</a>
+</nav>
+
+<style>
+  a {
+    text-decoration: none; 
+    padding-right: 3px;
+  }
+</style>
+
+<script>
+  import { emitRouter } from '../helpers'
+
+  exports = class WMenu {
+    static mode = 'open'
+
+    static connected() {
+      this.$('nav').addEventListener('click', event => {
+        event.preventDefault()
+        // initiate an event for the "href" value of the current link
+        this.$router(emitRouter, event.target.href)
+      })
+    }
+  }
+</script>

@@ -50,7 +50,7 @@ class WHello {
 5. [Статические свойства](#static-properties)
 6. [Специальные методы](#special-methods)
 7. [Эмиттер событий](#event-emitter)
-8. ~~[Маршрутизатор](#router)~~
+8. [Маршрутизатор](#router)
 9. ~~[SSR](#ssr)~~
 
 <br>
@@ -1207,11 +1207,13 @@ import { Emit } from './Events'
       static connected() {
         // добавить обработчик события кнопке "Обратить массив"
         this.$('#reverse').addEventListener('click', () => {
+          // инициировать событие "reverse"
           this.$event(emit, 'reverse')
         })
 
         // добавить обработчик события кнопке "Новый массив"
         this.$('#new-array').addEventListener('click', () => {
+          // инициировать событие "new-array"
           this.$event(emit, 'new-array', ['Оранжевый', 'Фиолетовый'])
         })
       }
@@ -1251,6 +1253,315 @@ import { Emit } from './Events'
   </script>
 </body>
 ```
+
+<br>
+<br>
+<h2 id="router">Маршрутизатор</h2>
+
+<br>
+
+В основе [маршрутизатора](https://expressjs.com/ru/starter/basic-routing.html) лежат пользовательские события. Для создания маршрутных событий, используется специальный метод *$router()*, который доступен в качестве свойства функции Ctn.
+
+Если метод вызывается как конструктор, то он возвращает новый объект эмиттера с переопределённым методом [addEventListener()](https://learn.javascript.ru/introduction-browser-events#addeventlistener), который будет генерировать и отслеживать маршрутные события, например:
+
+```js
+const emitRouter = new Ctn.router()
+```
+
+Когда метод *$router()* вызывается как обычная функция, то в первом аргументе он получает эмиттер, во втором передаётся название маршрутного события, а в третьем аргументе можно передавать любые данные:
+
+```js
+this.$router(emitRouter, '/about', ['Оранжевый', 'Фиолетовый'])
+```
+
+В реальном приложении, название маршрутного события указывается не непосредственно, как в примере выше, а берётся из значения атрибута  **href** ссылки, по которой был произведён клик, например:
+
+```js
+this.$router(emitRouter, event.target.href, ['Оранжевый', 'Фиолетовый'])
+```
+
+<br>
+
+Передаваемые в последнем аргументе метода *$router()* пользовательские данные, будут доступны в обработчике маршрутного события, в качестве свойства **detail** объекта события [Event](https://developer.mozilla.org/ru/docs/Web/API/Event), как показано ниже:
+
+```js
+emitRouter.addEventListener('/about', event => {
+  const arr = event.detail
+  ...
+})
+```
+
+Начальный слэш «/» в названии маршрутного события не является обязательным:
+
+```js
+emitRouter.addEventListener('about', event => {
+  const arr = event.detail
+  ...
+})
+```
+
+Вся остальная часть названия маршрутного события, кроме начального слэша, должна до конца совпадать со значением атрибута **href** ссылки, после нажатия на которую, сработает соответствующий этому значению обработчик:
+
+```html
+<a href="/about">О нас</a>
+```
+
+<br>
+
+Разница между пользовательскими и маршрутными событиями в том, что строка указанная в обработчике маршрутного события преобразуется в [регулярное выражение](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/RegExp) и может содержать [специальные](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/RegExp#%D0%B7%D0%BD%D0%B0%D1%87%D0%B5%D0%BD%D0%B8%D0%B5_%D1%81%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D1%85_%D1%81%D0%B8%D0%BC%D0%B2%D0%BE%D0%BB%D0%BE%D0%B2_%D0%B2_%D1%80%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D1%85_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F%D1%85) символы регулярных выражений, как показано ниже:
+
+```js
+emitRouter.addEventListener('/abou\\w', event => {
+  ...
+})
+```
+
+Чтобы не приходилось дважды использовать символ обратного слэша в обычной строке для экранирования специальных символов регулярных выражений, можно воспользоваться теговой функцией [raw()](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String/raw) встроенного объекта [String](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String), заключив название маршрутного события в [шаблонную строку](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Template_literals), например:
+
+
+```js
+emitRouter.addEventListener(String.raw`/abou\w`, event => {
+  ...
+})
+```
+
+или так:
+
+```js
+const raw = String.raw
+emitRouter.addEventListener(raw`/abou\w`, event => {
+  ...
+})
+```
+
+<br>
+
+Кроме свойства **detail**, объект события Event имеет дополнительное свойство **params**, для получения [параметров маршрутов](https://developer.mozilla.org/ru/docs/Learn/Server-side/Express_Nodejs/routes#%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D1%8B_%D0%BC%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82%D0%BE%D0%B2), как показано ниже:
+
+```js
+emitRouter.addEventListener('/categories/:catId/products/:prodId', event => {
+  const catId = event.params["catId"]
+  const prodId = event.params["prodId"]
+  ...
+})
+```
+
+Этот обработчик будет выполняться для всех ссылок вида:
+
+```html
+<a href="/categories/5/products/7">Продукт</a>
+```
+
+тогда **catId** будет иметь значение 5, а **prodId** значение 7.
+
+<br>
+
+<br>
+
+Для поддержки параметров запросов, объект события Event имеет дополнительное свойство **search**, которое является короткой ссылкой на свойство [searchParams](https://learn.javascript.ru/url#searchparams) встроенного класса [URL](https://learn.javascript.ru/url), например:
+
+```js
+const raw = String.raw
+emitRouter.addEventListener(raw`/categories\?catId=\d&prodId=\d`, event => {
+  const catId = event.search.get("catId")
+  const prodId = event.search.get("prodId")
+  ...
+})
+```
+
+Этот обработчик будет выполняться для всех ссылок вида:
+
+```html
+<a href="/categories?catId=5&prodId=7">Продукт</a>
+```
+
+тогда **catId** будет иметь значение 5, а **prodId** значение 7.
+
+<br>
+
+Последнее дополнительное свойство объекта события Event называется  **url**, оно является объектом встроенного класса [URL](https://learn.javascript.ru/url) и помогает разобрать запрос на составляющие:
+
+```js
+emitRouter.addEventListener('/about', event => {
+  const hostname = event.url.hostname
+  const origin = event.url.origin
+  ...
+})
+```
+
+<br>
+
+Ниже показан пример создания простого маршрутизатора для трёх компонентов страниц:
+
+```html
+<body>
+  <!-- подключить компонент Menu к документу -->
+  <w-menu></w-menu>
+
+  <!-- подключить компонент Content к документу -->
+  <w-content></w-content>
+
+  <script src="ctn.global.js"></script>
+
+  <script>
+    class WHome {
+      // вернуть HTML-разметку компонента
+      static template() {
+        return `<h1>Главная</h1>`
+      }
+    }
+    class WAbout {
+      // вернуть HTML-разметку компонента
+      static template() {
+        return `<h1>О нас</h1>`
+      }
+    }
+    class WContacts {
+      // вернуть HTML-разметку компонента
+      static template() {
+        return `<h1>Контакты</h1>`
+      }
+    }
+
+    // создать новый объект эмиттера для маршрутизатора
+    const emitRouter = new Ctn.router()
+
+    class WMenu {
+      // выполняется в конце подключения компонента к документу
+      static connected() {
+        // добавить обработчик события "click" для элемента NAV
+        this.$('nav').addEventListener('click', event => {
+          event.preventDefault() // отменить действие по умолчанию
+          // инициировать событие для значения "href" текущей ссылки
+          this.$router(emitRouter, event.target.href)
+        })
+      }
+    
+      // вернуть HTML-разметку компонента
+      static template() {
+        return `
+          <nav>
+            <a href="/">Главная</a>
+            <a href="/about">О нас</a>
+            <a href="/contacts">Контакты</a>
+          </nav>
+        `
+      }
+    }
+
+    class WContent {
+      // инициализация свойства объекта состояния
+      page = ''
+
+      // выполняется в конце подключения компонента к документу
+      static connected() {
+        // добавить эмиттеру обработчик события с необязательным параметром маршрута
+        emitRouter.addEventListener(`(:page)?`, event => {
+          // присвоить свойству название компонента страницы
+          this.page = `w-${event.params.page || 'home'}` 
+          this.$update() // обновить компонент
+        })
+        
+        // инициировать событие для значения "href" текущей страницы
+        this.$router(emitRouter, location.href)
+      }
+
+      // вернуть HTML-разметку компонента
+      static template() {
+        // если свойство содержит название страницы
+        if (this.page) {
+          return `<${this.page} />`
+        }
+      }
+    }
+
+    // передать классы компонентов функции Ctn
+    Ctn(WHome, WAbout, WContacts, WMenu, WContent)
+  </script>
+</body>
+```
+
+Для обработки маршрутов этих страниц, эмиттеру маршрутизатора назначается обработчик с необязательным параметром маршрута в компоненте Content:
+
+```js
+// добавить эмиттеру обработчик события с необязательным параметром маршрута
+emitRouter.addEventListener(`(:page)?`, event => {
+  // присвоить свойству название компонента страницы
+  this.page = `w-${event.params.page || 'home'}` 
+  this.$update() // обновить компонент
+})
+```
+
+Для того, чтобы этот обработчик срабатывал сразу при открытии приложения и подключал соответствующий маршруту компонент страницы, в конце статического метода *connected()*, инициируется событие для адреса текущего маршрута из свойства **href** объекта [location](https://developer.mozilla.org/ru/docs/Web/API/Location):
+
+```js
+// инициировать событие для значения "href" текущей страницы
+this.$router(emitRouter, location.href)
+```
+
+Остальные компоненты страниц загружаются при клике по соответствующей им ссылке в компоненте Menu:
+
+```js
+// добавить обработчик события "click" для элемента NAV
+this.$('nav').addEventListener('click', event => {
+  event.preventDefault() // отменить действие по умолчанию
+  // инициировать событие для значения "href" текущей ссылки
+  this.$router(emitRouter, event.target.href)
+})
+```
+
+Чтобы при открытии приложения не создавался компонент страницы с неопределённым названием, используется условная проверка на значение свойства **page** объекта состояния компонента Content:
+
+```js
+// вернуть HTML-разметку компонента
+static template() {
+  // если свойство содержит название страницы
+  if (this.page) {
+    return `<${this.page} />`
+  }
+}
+```
+
+В этом примере используется самозакрывающийся тег для подключаемого элемента компонента:
+
+```js
+`<${this.page} />`
+```
+
+Если бы подключаемый компонент содержал [слоты](https://learn.javascript.ru/slots-composition), в которое передавалось бы какое-нибудь HTML-содержимое, то необходимо было бы использовать открывающий и закрывающий теги элемента компонента:
+
+```js
+// вернуть HTML-разметку компонента
+static template() {
+  // если свойство содержит название страницы
+  if (this.page) {
+    return `
+      <${this.page}>
+        <div>Какое-то HTML-содержимое</div>
+      </${this.page}>
+    `
+  }
+}
+```
+
+*Когда статический метод template() ничего не возвращает, то создаётся компонент с пустым HTML-содержимым.*
+
+Передавать HTML-содержимое в слоты можно только для компонентов имеющих [Теневой DOM](https://learn.javascript.ru/shadow-dom). Это означает, что при обновлении компонента, HTML-содержимое передаваемое с компоненты без Теневого DOM, просто игнорируется и никакие изменения в него не вносятся.
+
+Чтобы передавать данные в любые компоненты, можно воспользоваться  [пользовательскими атрибутами](https://developer.mozilla.org/ru/docs/Learn/HTML/Howto/Use_data_attributes), например:
+
+```js
+// вернуть HTML-разметку компонента
+static template() {
+  // если свойство содержит название страницы
+  if (this.page) {
+    // передать через пользовательский атрибут "data-color" значение цвета
+    return `<${this.page} data-color="${this.color}" />`
+  }
+}
+```
+
+*В отличие от HTML-содержимого, атрибуты элемента любого компонента обновляются всегда.*
 
 <br>
 <br>

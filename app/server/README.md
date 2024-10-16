@@ -15,9 +15,3 @@ node app
 ```
 node app test
 ```
-
-### Hash
-
-```
-node genhash <login> <password>
-```
