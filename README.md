@@ -1354,10 +1354,6 @@ This handler will be executed for all links of the form:
 
 then **catId** will have the value 5 and **prodId** will have the value 7.
 
-<br>
-
-<br>
-
 To support query parameters, the Event object has an additional **search** property, which is a short reference to the [searchParams](https://javascript.info/url#searchparams) property of the built-in [URL](https://javascript.info/url) class, for example:
 
 ```js
@@ -1561,7 +1557,7 @@ static template() {
 }
 ```
 
-*Unlike HTML content, the attributes of any component's element are always updated.*
+Unlike HTML content, the attributes of any component's element are always updated.
 
 <br>
 <br>

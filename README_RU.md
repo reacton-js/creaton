@@ -1354,10 +1354,6 @@ emitRouter.addEventListener('/categories/:catId/products/:prodId', event => {
 
 тогда **catId** будет иметь значение 5, а **prodId** значение 7.
 
-<br>
-
-<br>
-
 Для поддержки параметров запросов, объект события Event имеет дополнительное свойство **search**, которое является короткой ссылкой на свойство [searchParams](https://learn.javascript.ru/url#searchparams) встроенного класса [URL](https://learn.javascript.ru/url), например:
 
 ```js
@@ -1561,7 +1557,7 @@ static template() {
 }
 ```
 
-*В отличие от HTML-содержимого, атрибуты элемента любого компонента обновляются всегда.*
+В отличие от HTML-содержимого, атрибуты элемента любого компонента всегда обновляются.
 
 <br>
 <br>
