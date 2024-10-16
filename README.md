@@ -1336,7 +1336,7 @@ emitRouter.addEventListener(raw`/abou\w`, event => {
 
 <br>
 
-In addition to the **detail** property, the Event object has an additional params property to get [route parameters](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes#route_parameters), as shown below:
+In addition to the **detail** property, the Event object has an additional **params** property to get [route parameters](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes#route_parameters), as shown below:
 
 ```js
 emitRouter.addEventListener('/categories/:catId/products/:prodId', event => {
