@@ -51,7 +51,7 @@ class WHello {
 6. [Special methods](#special-methods)
 7. [Event Emitter](#event-emitter)
 8. [Router](#router)
-9. ~~[SSR](#ssr)~~
+9. [Server-side rendering](#server-rendering)
 
 <br>
 <hr>
@@ -1100,7 +1100,7 @@ The proxy of the state object initially looks for a property in the state object
 hello.$shadow
 ```
 
-*For closed components and components without a Shadow DOM, this property returns null.*
+*For closed components and components without a Shadow DOM, this property returns "null".*
 
 <br>
 
@@ -1373,8 +1373,6 @@ This handler will be executed for all links of the form:
 
 then **catId** will have the value 5 and **prodId** will have the value 7.
 
-<br>
-
 The last addition property of the Event object is called **url**, which is an object of the built-in [URL](https://javascript.info/url) class and helps parse the request into parts:
 
 ```js
@@ -1558,6 +1556,302 @@ static template() {
 ```
 
 Unlike HTML content, the attributes of any component's element are always updated.
+
+<br>
+<br>
+<h2 id="server-rendering">Server-side rendering</h2>
+
+<br>
+
+SSR (Server Side Rendering) is a development technique in which the content of a web page is rendered on the server and not in the client's browser. To render the contents of web pages, the *render()* method is used, which is available as a property of the Ctn function. This method works both on the server side and in the client's browser.
+
+In the example below, this method outputs the contents of the entire page to the browser console:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- connect Hello component to the document -->
+  <w-hello>
+    <!-- HTML content transferred to the slot -->
+    <span>Advanced Web Components</span>
+  </w-hello>
+
+  <script src="ctn.global.js"></script>
+
+  <script>
+    class WHello {
+      // initializing the properties of a state object
+      message = 'Creaton'
+      color = 'orange'
+
+      static mode = 'open' // add Shadow DOM
+
+      // return the HTML markup of the component
+      static template() {
+        return `
+          <h1>${ this.message } – это <slot></slot></h1>
+          
+          <style>
+            h1 {
+              color: ${ this.color };
+            }
+          </style>
+        `
+      }
+    }
+
+    // pass the class of the Hello component to the Ctn function
+    Ctn(WHello)
+
+    // output the HTML content of the page to the browser console
+    Ctn.render().then(html => console.log(html))
+  </script>
+</body>
+</html>
+```
+
+*This method is also available as a named import when using the modular version of the framework:*
+
+```js
+import { Render } from "./ctn.esm.js"
+```
+
+The method returns a [promise](https://javascript.info/promise-basics), which is resolved after the HTML content of all used components for the current application route is available:
+
+```js
+Ctn.render().then(html => console.log(html))
+```
+
+*Components of other pages that do not correspond to the current route, if the application uses a router, or components that do not participate in the formation of content when opening the application, will not be taken into account in the promise, otherwise this promise would never have been resolved.*
+
+<br>
+
+To display content in the browser console not for the entire document, but only starting from a specific element, you must pass an object with the **parent** parameter to the method, the value of which will be the element from which the output begins.
+
+In the example below, the contents of the document are displayed starting with the BODY element:
+
+```js
+Ctn.render({ parent: document.body }).then(html => console.log(html))
+```
+
+By default, the method outputs the cleaned HTML content of the document, i.e. the one in which the tags STYLE, SCRIPT and TEMPLATE have been removed. In order for the method to output the full HTML content, it is necessary to pass it an object with the **clean** parameter and the value "false", as shown below:
+
+```js
+Ctn.render({ clean: false }).then(html => console.log(html))
+```
+
+In all the examples above, the content transferred to the [slot](https://javascript.info/slots-composition) was output without the SLOT tags themselves. In order for the transmitted content to be displayed inside these tags, i.e. in full accordance with the structure of the location of this content in the component, the method must pass an object with the **slots** parameter and the value "true", for example:
+
+```js
+Ctn.render({ slots: true }).then(html => console.log(html))
+```
+
+All three parameters can be passed simultaneously:
+
+```js
+Ctn.render({
+  parent: document.body,
+  clean: false,
+  slots: true
+}).then(html => console.log(html))
+```
+
+<br>
+
+The project of the finished application is located at this [link](https://github.com/reacton-js/creaton/tree/main/app). To install all dependencies, including dependencies for the server, use the command:
+
+```
+npm i
+```
+
+To run the application in development mode, use the command:
+
+```
+npm start
+```
+
+and for the final build, with all the minimization of the application in production mode, the command:
+
+```
+npm run build
+```
+
+<br>
+
+This is a regular project using the [Gulp](https://gulpjs.com/) task manager and the [Webpack](https://webpack.js.org/) module builder. The server code is located in the [app.js](https://github.com/reacton-js/creaton/blob/main/app/server/app.js) file, and the server itself is written using the [Express](https://expressjs.com/) framework.
+
+The server file is a typical application on the Express framework:
+
+```js
+const express = require('express')
+const jsdom = require('jsdom')
+const { JSDOM } = require('jsdom')
+const fs = require("fs")
+const port = process.env.PORT || 3000
+
+// connect database file
+let DB = JSON.parse(fs.readFileSync(__dirname + '/db.json').toString())
+
+// create an Express application object
+const app = express()
+
+// create a parser for application/x-www-form-urlencoded data
+const urlencodedParser = express.urlencoded({ extended: false })
+
+// define directory for static files and ignore index.html file
+app.use(express.static(__dirname + '/public', { index: false }))
+
+// define an array of bot names that will receive the rendered content
+const listBots = [
+  'Yandex', 'YaDirectFetcher', 'Google', 'Yahoo', 'Mail.RU_Bot', 'bingbot', 'Accoona', 'Lighthouse',
+  'ia_archiver', 'Ask Jeeves', 'OmniExplorer_Bot', 'W3C_Validator', 'WebAlta', 'Ezooms', 'Tourlentabot', 'MJ12bot',
+  'AhrefsBot', 'SearchBot', 'SiteStatus', 'Nigma.ru', 'Baiduspider', 'Statsbot', 'SISTRIX', 'AcoonBot', 'findlinks',
+  'proximic', 'OpenindexSpider', 'statdom.ru', 'Exabot', 'Spider', 'SeznamBot', 'oBot', 'C-T bot', 'Updownerbot',
+  'Snoopy', 'heritrix', 'Yeti', 'DomainVader', 'DCPbot', 'PaperLiBot', 'StackRambler', 'msnbot'
+]
+
+// loads only scripts and ignores all other resources
+class CustomResourceLoader extends jsdom.ResourceLoader {
+  fetch(url, options) {
+    return regJSFile.test(url) ? super.fetch(url, options) : null
+  }
+}
+
+// define the bot agent string to test
+const testAgent = process.argv[2] === 'test' ? 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' : ''
+
+// define a regular expression to search for bot names in a string
+const regBots = new RegExp(`(${listBots.join(')|(')})`, 'i')
+
+// search for script file extensions
+const regJSFile = /\.m?js$/
+
+// favicon request
+app.get('/favicon.ico', (req, res) => res.sendStatus(204))
+
+// database request
+app.get('/db', (req, res) => res.send(DB[req.query.page]))
+
+// all other requests
+app.use(async (req, res) => {
+  // if the request comes from a bot
+  if (regBots.test(testAgent || req.get('User-Agent'))) {
+    // define a new JSDOM object with parameters
+    const dom = await JSDOM.fromFile('index.html', {
+      url: req.protocol + '://' + req.get('host') + req.originalUrl, // determine the full URL
+      resources: new CustomResourceLoader(), // loading only scripts
+      runScripts: 'dangerously' // allow page scripts to execute
+    })
+
+    // return the rendered HTML content of the page
+    dom.window.onload = async () => res.send(await dom.window._$CtnRender_())
+  }
+  // otherwise, if the request comes from a user
+  else {
+    // return the main page file of the application
+    res.sendFile(__dirname + '/index.html')
+  }
+})
+
+// start the server
+app.listen(port, () => console.log(`The server is running at http://localhost:${port}/`))
+```
+
+<br>
+
+In order for the *render()* method to work on the server, [jsdom](https://github.com/jsdom/jsdom) is used – this is an implementation of Web standards in JavaScript.
+
+Regular users do not need to give the rendered page content. It is only necessary for search bots and other automatic accounting systems for HTML content analysis. The list of these systems is in the array, which can be supplemented with additional names:
+
+```js
+// define an array of bot names that will receive the rendered content
+const listBots = [
+  'Yandex', 'YaDirectFetcher', 'Google', 'Yahoo', 'Mail.RU_Bot', 'bingbot', 'Accoona', 'Lighthouse',
+  'ia_archiver', 'Ask Jeeves', 'OmniExplorer_Bot', 'W3C_Validator', 'WebAlta', 'Ezooms', 'Tourlentabot', 'MJ12bot',
+  'AhrefsBot', 'SearchBot', 'SiteStatus', 'Nigma.ru', 'Baiduspider', 'Statsbot', 'SISTRIX', 'AcoonBot', 'findlinks',
+  'proximic', 'OpenindexSpider', 'statdom.ru', 'Exabot', 'Spider', 'SeznamBot', 'oBot', 'C-T bot', 'Updownerbot',
+  'Snoopy', 'heritrix', 'Yeti', 'DomainVader', 'DCPbot', 'PaperLiBot', 'StackRambler', 'msnbot'
+]
+```
+
+If any of these names are present in the request header, the server will return the rendered HTML content:
+
+```js
+// if the request comes from a bot
+if (regBots.test(testAgent || req.get('User-Agent'))) {
+  // define a new JSDOM object with parameters
+  const dom = await JSDOM.fromFile('index.html', {
+    url: req.protocol + '://' + req.get('host') + req.originalUrl, // determine the full URL
+    resources: new CustomResourceLoader(), // loading only scripts
+    runScripts: 'dangerously' // allow page scripts to execute
+  })
+
+  // return the rendered HTML content of the page
+  dom.window.onload = async () => res.send(await dom.window._$CtnRender_())
+}
+```
+
+For all other requests, the server will return the file *index.html*, which is the main file of the application:
+
+```js
+// otherwise, if the request comes from a user
+else {
+  // return the main page file of the application
+  res.sendFile(__dirname + '/index.html')
+}
+```
+
+<br>
+
+Rendering is performed using the *\_$CtnRender\_()* function of the global [window](https://github.com/jsdom/jsdom?tab=readme-ov-file#basic-usage) object, as shown below:
+
+```js
+// return the rendered HTML content of the page
+dom.window.onload = async () => res.send(await dom.window._$CtnRender_())
+```
+
+This function is assigned to an object in the [index.js](https://github.com/reacton-js/creaton/blob/main/app/src/index.js) file, which is the main file of the entire application:
+
+```js
+// add the Render method as a property of the window object
+window._$CtnRender_ = Render
+```
+
+<br>
+
+Rendering does not support [dynamic imports](https://javascript.info/modules-dynamic-imports)  instead, you must use regular module [import and export](https://javascript.info/import-export) statements. Additionally, rendering does not support the global fetch() method. You must use the built-in [XMLHttpRequest](https://javascript.info/xmlhttprequest) object instead.
+
+*The XMLHttpRequest object can be wrapped in a function and then called this function instead of writing the request code for this object manually each time, as shown in the file [helpers.js](https://github.com/reacton-js/creaton/blob/main/app/src/helpers.js), for example:*
+
+```js
+export const httpRequest = (url, method = 'GET', type = 'json') => {
+  const xhr = new XMLHttpRequest()
+  xhr.open(method, url)
+  xhr.responseType = type
+  xhr.send()
+  return new Promise(ok => xhr.onload = () => ok(xhr.response))
+}
+```
+
+<br>
+
+After installing all the dependencies of the application from the [package.json](https://github.com/reacton-js/creaton/blob/main/app/package.json) file, to start the server in normal mode, you need to open the console from the */server* directory, and enter the following command in it:
+
+```
+node app
+```
+
+and to see how the server renders the content for search engines, you need to enter the command:
+
+```
+node app test
+```
 
 <br>
 <br>

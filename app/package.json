@@ -30,7 +30,7 @@
     "webpack-stream": "^7.0.0"
   },
   "dependencies": {
-    "creaton-js": "^3.2.8",
+    "creaton-js": "^3.2.9",
     "express": "^4.21.0",
     "jsdom": "^25.0.1"
   }

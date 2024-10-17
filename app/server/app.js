@@ -61,11 +61,6 @@ app.use(async (req, res) => {
     // return the rendered HTML content of the page
     dom.window.onload = async () => res.send(await dom.window._$CtnRender_())
   }
-  // otherwise, if an administrative page is requested
-  else if (req.path === '/admin') {
-    // return to the application admin page
-    res.sendFile(__dirname + '/admin.html')
-  }
   // otherwise, if the request comes from a user
   else {
     // return the main page file of the application

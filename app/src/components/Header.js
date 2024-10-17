@@ -7,7 +7,7 @@ export default class WHeader {
   static template() {
     return `
       <w-menu></w-menu>
-      <h1>${ this.message } is <slot name="abbr"></slot></h1>
+      <h1>${ this.message } is <slot></slot></h1>
       <img src="img/banner.jpg" alt="banner">
 
       <style>
