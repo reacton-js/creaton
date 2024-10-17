@@ -1797,7 +1797,7 @@ if (regBots.test(testAgent || req.get('User-Agent'))) {
 }
 ```
 
-For all other requests, the server will return the file *index.html*, which is the main file of the application:
+For all other requests, the server will return the *index.html* file, which is the only *html* file in this single page application:
 
 ```js
 // otherwise, if the request comes from a user
