@@ -373,7 +373,7 @@ The special property *$state* is used to access the state object. Using this pro
 hello.$state.message = 'Web Components'
 ```
 
-To update the component content based on the new state, the special method *$update()* is used, as shown below:
+To update the component content based on the new state, the special method *$update()* is used, for example:
 
 ```
 hello.$update()
@@ -1032,7 +1032,7 @@ import Ctn, { Tag, Event, Router, Render } from "./ctn.esm.js"
 
 <br>
 
-**\$state** – this special property refers to the [proxy](https://javascript.info/proxy) of the component's data object. This means that if the required property is not found in the state object, the search occurs in the component itself.
+**\$state** – this special property refers to the [proxy](https://javascript.info/proxy) of the component's state object. This means that if the required property is not found in the state object, the search occurs in the component itself.
 
 In the example below, the **id** property does not exist in the component state object. Therefore, it is requested from the component itself:
 
@@ -1555,7 +1555,7 @@ static template() {
 }
 ```
 
-Unlike HTML content, the attributes of any component's element are always updated.
+*Unlike HTML content, the attributes of any component's element are always updated.*
 
 <br>
 <br>
@@ -1825,7 +1825,7 @@ window._$CtnRender_ = Render
 
 <br>
 
-Rendering does not support [dynamic imports](https://javascript.info/modules-dynamic-imports)  instead, you must use regular module [import and export](https://javascript.info/import-export) statements. Additionally, rendering does not support the global fetch() method. You must use the built-in [XMLHttpRequest](https://javascript.info/xmlhttprequest) object instead.
+Rendering does not support [dynamic imports](https://javascript.info/modules-dynamic-imports)  instead, you must use regular module [import and export](https://javascript.info/import-export) statements. Additionally, rendering does not support the global [fetch()](https://javascript.info/fetch) method. You must use the built-in [XMLHttpRequest](https://javascript.info/xmlhttprequest) object instead.
 
 *The XMLHttpRequest object can be wrapped in a function and then called this function instead of writing the request code for this object manually each time, as shown in the file [helpers.js](https://github.com/reacton-js/creaton/blob/main/app/src/helpers.js), for example:*
 
