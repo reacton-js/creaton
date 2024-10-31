@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.2
+* Creaton v3.0.3
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -102,7 +102,9 @@ async function _ctn(...args) {
         if (typeof arg.startConnect === 'function') {
           await arg.startConnect.call(this[getState]);
         }
-        this[getRoot].innerHTML = arg.template.call(this[getState]) || '';
+        if (typeof arg.template === 'function') {
+          this[getRoot].innerHTML = arg.template.call(this[getState]) || '';
+        }
         if (typeof arg.connected === 'function') {
           arg.connected.call(this[getState]);
         }
