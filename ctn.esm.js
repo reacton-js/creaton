@@ -1,23 +1,22 @@
 /**
-* Creaton v3.0.3
+* Creaton v3.0.5
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
 const regUpName = /[A-Z]/g;
 const regParams = /:(\w+)/g;
 const regFile = /\.\w+$/;
+const SERVICE = new WeakMap();
 const newDocument = new DOMParser().parseFromString('', 'text/html');
 const regEntities = [[/&/g, '&amp;'], [/</g, '&lt;'], [/>/g, '&gt;'], [/"/g, '&quot;'], [/'/g, '&#39;']];
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const getNameKebab = (char, pos) => (pos > 0 ? '-' : '') + char;
 const loadEvent = new DocumentFragment();
 const rootStorage = new Set();
-const getRoot = Symbol();
-const retRoot = Symbol();
-const getState = Symbol();
-const getTemp = Symbol();
-const funUpdate = Symbol();
 const propRouter = Symbol();
+const funUpdate = Symbol();
+const retRoot = Symbol();
+const hasRoot = Symbol();
 const isLight = Symbol();
 async function _ctn(...args) {
   for (let arg of args) {
@@ -48,6 +47,7 @@ async function _ctn(...args) {
           mode,
           serializable
         }) : this;
+        const temp = new DOMParser().parseFromString('', 'text/html').body;
         const state = new Proxy(new arg(), {
           get: (target, prop) => {
             if (prop === retRoot) {
@@ -84,29 +84,29 @@ async function _ctn(...args) {
               }
             })
           },
-          [getRoot]: {
-            value: root
-          },
-          [getState]: {
-            value: state
-          },
-          [getTemp]: {
-            value: new DOMParser().parseFromString('', 'text/html').body
-          },
           [isLight]: {
             value: root === this
           }
         });
+        SERVICE.set(this, {
+          root,
+          temp,
+          state
+        });
       }
       async connectedCallback() {
+        const {
+          root,
+          state
+        } = SERVICE.get(this);
         if (typeof arg.startConnect === 'function') {
-          await arg.startConnect.call(this[getState]);
+          await arg.startConnect.call(state);
         }
         if (typeof arg.template === 'function') {
-          this[getRoot].innerHTML = arg.template.call(this[getState]) || '';
+          root.innerHTML = arg.template.call(state) || '';
         }
         if (typeof arg.connected === 'function') {
-          arg.connected.call(this[getState]);
+          arg.connected.call(state);
         }
         setTimeout(() => {
           rootStorage.delete(this);
@@ -117,18 +117,18 @@ async function _ctn(...args) {
       }
       disconnectedCallback() {
         if (typeof arg.disconnected === 'function') {
-          arg.disconnected.call(this[getState]);
+          arg.disconnected.call(SERVICE.get(this).state);
         }
       }
       adoptedCallback() {
         if (typeof arg.adopted === 'function') {
-          arg.adopted.call(this[getState]);
+          arg.adopted.call(SERVICE.get(this).state);
         }
       }
       attributeChangedCallback(name, oldValue, newValue) {
         if (typeof arg.changed === 'function') {
           if (oldValue !== null) {
-            arg.changed.call(this[getState], name, oldValue, newValue);
+            arg.changed.call(SERVICE.get(this).state, name, oldValue, newValue);
           }
         }
       }
@@ -140,13 +140,18 @@ async function _ctn(...args) {
       [funUpdate]() {
         const start = performance.now();
         if (typeof arg.template === 'function') {
-          this[getTemp].innerHTML = arg.template.call(this[getState]) || '';
-          const oldChilds = this[getRoot].childNodes,
-            newChilds = this[getTemp].childNodes;
+          const {
+            root,
+            temp,
+            state
+          } = SERVICE.get(this.$host);
+          temp.innerHTML = arg.template.call(state) || '';
+          const oldChilds = root.childNodes,
+            newChilds = temp.childNodes;
           for (var i = 0; i < oldChilds.length || i < newChilds.length; i++) {
-            updateDOM(this[getRoot], oldChilds[i], newChilds[i], i) || i--;
+            updateDOM(root, oldChilds[i], newChilds[i], i) || i--;
           }
-          this[getTemp].innerHTML = '';
+          temp.innerHTML = '';
         }
         return performance.now() - start + ' ms';
       }
@@ -155,6 +160,9 @@ async function _ctn(...args) {
       }
       get $router() {
         return _ctn.router;
+      }
+      get [hasRoot]() {
+        return true;
       }
       $(sel) {
         return (this[retRoot] || this.$shadow || this).querySelector(sel);
@@ -301,12 +309,14 @@ function renderCallback(inNode, outNode, slots, clean) {
   let cloneNode;
   if (inNode.nodeName === 'SLOT' && !slots) {
     cloneNode = new DocumentFragment();
-  } else if (inNode[getRoot]) {
+  } else if (inNode[hasRoot]) {
     cloneNode = newDocument.createElement(inNode.nodeName);
     for (var attr of inNode.attributes) {
       cloneNode.setAttribute(attr.name, attr.value);
     }
-    inNode = inNode[getRoot];
+    if (!inNode[isLight]) {
+      inNode = SERVICE.get(inNode).root;
+    }
   } else {
     cloneNode = inNode.cloneNode(false);
   }
@@ -322,7 +332,7 @@ function renderCallback(inNode, outNode, slots, clean) {
 }
 export default _ctn;
 export const Tag = _ctn.tag;
-export const Entities = _ctn.entities;
 export const Event = _ctn.event;
 export const Router = _ctn.router;
 export const Render = _ctn.render;
+export const Entities = _ctn.entities;
