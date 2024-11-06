@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.5
+* Creaton v3.0.6
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -14,7 +14,6 @@ const getNameKebab = (char, pos) => (pos > 0 ? '-' : '') + char;
 const loadEvent = new DocumentFragment();
 const rootStorage = new Set();
 const propRouter = Symbol();
-const funUpdate = Symbol();
 const retRoot = Symbol();
 const hasRoot = Symbol();
 const isLight = Symbol();
@@ -137,24 +136,6 @@ async function _ctn(...args) {
           return arg.attributes;
         }
       }
-      [funUpdate]() {
-        const start = performance.now();
-        if (typeof arg.template === 'function') {
-          const {
-            root,
-            temp,
-            state
-          } = SERVICE.get(this.$host);
-          temp.innerHTML = arg.template.call(state) || '';
-          const oldChilds = root.childNodes,
-            newChilds = temp.childNodes;
-          for (var i = 0; i < oldChilds.length || i < newChilds.length; i++) {
-            updateDOM(root, oldChilds[i], newChilds[i], i) || i--;
-          }
-          temp.innerHTML = '';
-        }
-        return performance.now() - start + ' ms';
-      }
       get $event() {
         return _ctn.event;
       }
@@ -172,7 +153,7 @@ async function _ctn(...args) {
       }
       $update() {
         if (mode !== 'closed' || this[retRoot]) {
-          return this[funUpdate]();
+          return getUpdate.call(this, arg);
         }
       }
       $tag(...args) {
@@ -185,6 +166,24 @@ async function _ctn(...args) {
       extends: extend
     } : null);
   }
+}
+function getUpdate(arg) {
+  const start = performance.now();
+  if (typeof arg.template === 'function') {
+    const {
+      root,
+      temp,
+      state
+    } = SERVICE.get(this.$host);
+    temp.innerHTML = arg.template.call(state) || '';
+    const oldChilds = root.childNodes,
+      newChilds = temp.childNodes;
+    for (var i = 0; i < oldChilds.length || i < newChilds.length; i++) {
+      updateDOM(root, oldChilds[i], newChilds[i], i) || i--;
+    }
+    temp.innerHTML = '';
+  }
+  return performance.now() - start + ' ms';
 }
 function updateDOM($parent, oldNode, newNode, index = 0) {
   if (!oldNode) {
