@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.6
+* Creaton v3.0.7
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -14,7 +14,7 @@ const getNameKebab = (char, pos) => (pos > 0 ? '-' : '') + char;
 const loadEvent = new DocumentFragment();
 const rootStorage = new Set();
 const propRouter = Symbol();
-const retRoot = Symbol();
+const getRoot = Symbol();
 const hasRoot = Symbol();
 const isLight = Symbol();
 async function _ctn(...args) {
@@ -49,7 +49,7 @@ async function _ctn(...args) {
         const temp = new DOMParser().parseFromString('', 'text/html').body;
         const state = new Proxy(new arg(), {
           get: (target, prop) => {
-            if (prop === retRoot) {
+            if (prop === getRoot) {
               return root;
             } else if (prop in target) {
               return target[prop];
@@ -146,13 +146,13 @@ async function _ctn(...args) {
         return true;
       }
       $(sel) {
-        return (this[retRoot] || this.$shadow || this).querySelector(sel);
+        return (this[getRoot] || this.$shadow || this).querySelector(sel);
       }
       $$(sel) {
-        return (this[retRoot] || this.$shadow || this).querySelectorAll(sel);
+        return (this[getRoot] || this.$shadow || this).querySelectorAll(sel);
       }
       $update() {
-        if (mode !== 'closed' || this[retRoot]) {
+        if (mode !== 'closed' || this[getRoot]) {
           return getUpdate.call(this, arg);
         }
       }
