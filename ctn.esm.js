@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.7
+* Creaton v3.0.8
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -178,7 +178,8 @@ function getUpdate(arg) {
     temp.innerHTML = arg.template.call(state) || '';
     const oldChilds = root.childNodes,
       newChilds = temp.childNodes;
-    for (var i = 0; i < oldChilds.length || i < newChilds.length; i++) {
+    let i = 0;
+    for (; i < oldChilds.length || i < newChilds.length; i++) {
       updateDOM(root, oldChilds[i], newChilds[i], i) || i--;
     }
     temp.innerHTML = '';
@@ -201,7 +202,8 @@ function updateDOM($parent, oldNode, newNode, index = 0) {
     if (!oldNode[isLight]) {
       const oldChilds = oldNode.childNodes,
         newChilds = newNode.childNodes;
-      for (var i = 0; i < oldChilds.length || i < newChilds.length; i++) {
+      let i = 0;
+      for (; i < oldChilds.length || i < newChilds.length; i++) {
         updateDOM($parent.childNodes[index], oldChilds[i], newChilds[i], i) || i--;
       }
     }
@@ -222,8 +224,9 @@ function updateAttr(oldNode, newNode) {
   });
 }
 _ctn.tag = function (str, ...vals) {
-  let result = '';
-  for (var i = 0; i < str.length; i++) {
+  let i = 0,
+    result = '';
+  for (; i < str.length; i++) {
     result += str.raw[i];
     if (i < vals.length) {
       if (Array.isArray(vals[i])) {
@@ -310,7 +313,8 @@ function renderCallback(inNode, outNode, slots, clean) {
     cloneNode = new DocumentFragment();
   } else if (inNode[hasRoot]) {
     cloneNode = newDocument.createElement(inNode.nodeName);
-    for (var attr of inNode.attributes) {
+    let attr;
+    for (attr of inNode.attributes) {
       cloneNode.setAttribute(attr.name, attr.value);
     }
     if (!inNode[isLight]) {
@@ -323,7 +327,8 @@ function renderCallback(inNode, outNode, slots, clean) {
     flatten: false
   }) : (inNode.content || inNode).childNodes;
   if (childs) {
-    for (var i = 0; i < childs.length; i++) {
+    let i = 0;
+    for (; i < childs.length; i++) {
       renderCallback(childs[i], cloneNode.content || cloneNode, slots, clean);
     }
   }

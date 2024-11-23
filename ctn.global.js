@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.7
+* Creaton v3.0.8
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -181,7 +181,8 @@ var Ctn = function () {
       temp.innerHTML = arg.template.call(state) || '';
       const oldChilds = root.childNodes,
         newChilds = temp.childNodes;
-      for (var i = 0; i < oldChilds.length || i < newChilds.length; i++) {
+      let i = 0;
+      for (; i < oldChilds.length || i < newChilds.length; i++) {
         updateDOM(root, oldChilds[i], newChilds[i], i) || i--;
       }
       temp.innerHTML = '';
@@ -204,7 +205,8 @@ var Ctn = function () {
       if (!oldNode[isLight]) {
         const oldChilds = oldNode.childNodes,
           newChilds = newNode.childNodes;
-        for (var i = 0; i < oldChilds.length || i < newChilds.length; i++) {
+        let i = 0;
+        for (; i < oldChilds.length || i < newChilds.length; i++) {
           updateDOM($parent.childNodes[index], oldChilds[i], newChilds[i], i) || i--;
         }
       }
@@ -225,8 +227,9 @@ var Ctn = function () {
     });
   }
   _ctn.tag = function (str, ...vals) {
-    let result = '';
-    for (var i = 0; i < str.length; i++) {
+    let i = 0,
+      result = '';
+    for (; i < str.length; i++) {
       result += str.raw[i];
       if (i < vals.length) {
         if (Array.isArray(vals[i])) {
@@ -313,7 +316,8 @@ var Ctn = function () {
       cloneNode = new DocumentFragment();
     } else if (inNode[hasRoot]) {
       cloneNode = newDocument.createElement(inNode.nodeName);
-      for (var attr of inNode.attributes) {
+      let attr;
+      for (attr of inNode.attributes) {
         cloneNode.setAttribute(attr.name, attr.value);
       }
       if (!inNode[isLight]) {
@@ -326,7 +330,8 @@ var Ctn = function () {
       flatten: false
     }) : (inNode.content || inNode).childNodes;
     if (childs) {
-      for (var i = 0; i < childs.length; i++) {
+      let i = 0;
+      for (; i < childs.length; i++) {
         renderCallback(childs[i], cloneNode.content || cloneNode, slots, clean);
       }
     }

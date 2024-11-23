@@ -1,10 +1,9 @@
 import { emitRouter } from '../helpers'
 
 export default class WContent {
-  static mode = 'open'
-  static extends = 'main'
-
   page = ''
+  
+  static mode = 'open'
 
   static connected() {
     // add an event handler to the emitter with an optional route parameter

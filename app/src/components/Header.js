@@ -1,8 +1,7 @@
 export default class WHeader {
-  static mode = 'open'
-  static extends = 'header'
-
   message = 'Creaton'
+  
+  static mode = 'open'
 
   static template() {
     return `
