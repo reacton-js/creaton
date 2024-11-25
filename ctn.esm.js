@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.8
+* Creaton v3.0.9
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -51,6 +51,8 @@ async function _ctn(...args) {
           get: (target, prop) => {
             if (prop === getRoot) {
               return root;
+            } else if (prop === '$state') {
+              return state;
             } else if (prop in target) {
               return target[prop];
             }
@@ -68,20 +70,10 @@ async function _ctn(...args) {
             value: this.dataset
           },
           $state: {
-            value: new Proxy(state, {
-              get: (target, prop) => {
-                if (mode !== 'closed') {
-                  return target[prop];
-                }
-              },
-              set: (target, prop, value) => {
-                if (mode === 'closed') {
-                  throw new Error('cannot change the state of a closed component');
-                }
-                target[prop] = value;
-                return true;
-              }
-            })
+            value: mode !== 'closed' ? new Proxy(state, {
+              get: (target, prop) => target[prop],
+              set: (target, prop, value) => (target[prop] = value, true)
+            }) : undefined
           },
           [isLight]: {
             value: root === this
