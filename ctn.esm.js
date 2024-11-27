@@ -1,5 +1,5 @@
 /**
-* Creaton v3.0.9
+* Creaton v3.0.10
 * (c) 2022-2024 | github.com/reacton-js
 * Released under the MIT License.
 **/
@@ -17,6 +17,10 @@ const propRouter = Symbol();
 const getRoot = Symbol();
 const hasRoot = Symbol();
 const isLight = Symbol();
+const stateHooks = {
+  get: (target, prop) => target[prop],
+  set: (target, prop, value) => (target[prop] = value, true)
+};
 async function _ctn(...args) {
   for (let arg of args) {
     if (arg instanceof HTMLTemplateElement) {
@@ -70,10 +74,7 @@ async function _ctn(...args) {
             value: this.dataset
           },
           $state: {
-            value: mode !== 'closed' ? new Proxy(state, {
-              get: (target, prop) => target[prop],
-              set: (target, prop, value) => (target[prop] = value, true)
-            }) : undefined
+            value: mode !== 'closed' ? new Proxy(state, stateHooks) : undefined
           },
           [isLight]: {
             value: root === this
