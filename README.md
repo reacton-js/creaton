@@ -348,7 +348,7 @@ The methods of a component are not a state. They are designed to perform actions
 
 ```js
 class WHello {
-  // initializing the properties of a state object
+  // initializing the property of a state object
   message = 'Creaton'
 
   // define the method of the state object
@@ -387,7 +387,7 @@ In the example below, the handler for the &lt;h1&gt; element will still work aft
 
 ```js
 class WHello {
-  // initializing the properties of a state object
+  // initializing the property of a state object
   message = 'Creaton'
 
   /* this method is performed after connecting the component to the document
@@ -417,7 +417,7 @@ When using the *map()* method, you must add the *join()* method with an empty st
 
 ```js
 class WHello {
-  // initializing the properties of a state object
+  // initializing the property of a state object
   rgb = ['Red', 'Green', 'Blue']
 
   // return the HTML markup of the component
@@ -435,7 +435,7 @@ When using the *reduce()* method, you do not need to add the *join()* method at 
 
 ```js
 class WHello {
-  // initializing the properties of a state object
+  // initializing the property of a state object
   rgb = ['Red', 'Green', 'Blue']
 
   // return the HTML markup of the component
@@ -485,7 +485,7 @@ By default, all embedded and single-file components use this function to create 
 
 <script>
   exports = class WHello {
-    // initializing the properties of a state object
+    // initializing the property of a state object
     rgb = ['Red', 'Green', 'Blue']
 
     // define the method of the state object
@@ -502,7 +502,7 @@ To output objects, the [Object.keys()](https://developer.mozilla.org/en-US/docs/
 
 ```js
 class WHello {
-  // initializing the properties of a state object
+  // initializing the property of a state object
   user = {
     name: 'John',
     age: 36
@@ -574,7 +574,7 @@ In the example below, the mixin's *printName()* method is used by the Hello and 
 
     // extend the Hello component class from the Mixin class
     class WHello extends Mixin {
-      // initializing the properties of a state object
+      // initializing the property of a state object
       userName = 'Anna'
 
       // return the HTML markup of the component
@@ -587,7 +587,7 @@ In the example below, the mixin's *printName()* method is used by the Hello and 
 
     // extend the Goodbye component class from the Mixin class
     class WGoodbye extends Mixin {
-      // initializing the properties of a state object
+      // initializing the property of a state object
       userName = 'John'
 
       // return the HTML markup of the component
@@ -618,7 +618,7 @@ In the example below, the mixin's *printName()* method is used by the Hello and 
 Ctn(class {
   static name = 'w-hello' // name of the component
   
-  // initializing the properties of a state object
+  // initializing the property of a state object
   message = 'Creaton'
 
   // return the HTML markup of the component
@@ -649,7 +649,7 @@ class WHello {
     elem.addEventListener('click', e => console.log(e.target))
   }
 
-  // initializing the properties of a state object
+  // initializing the property of a state object
   message = 'Creaton'
 
   // return the HTML markup of the component
@@ -678,7 +678,7 @@ class WHello {
     class WHello {
       static extends = 'header' // the name of the embedded element
 
-      // initializing the properties of a state object
+      // initializing the property of a state object
       message = 'Creaton'
 
       // return the HTML markup of the component
@@ -775,7 +775,7 @@ class WHello {
     elem.addEventListener('click', e => console.log(e.target))
   }
 
-  // initializing the properties of a state object
+  // initializing the property of a state object
   message = 'Creaton'
 
   // return the HTML markup of the component
