@@ -1555,7 +1555,7 @@ static template() {
 }
 ```
 
-*Unlike HTML content, the attributes of any component's element are always updated.*
+*Unlike HTML content, the attributes of any component's element are updated always.*
 
 <br>
 <br>
